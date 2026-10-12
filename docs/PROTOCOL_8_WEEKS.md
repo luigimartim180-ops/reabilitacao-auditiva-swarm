@@ -38,6 +38,17 @@ Resultado esperado: TV com volume menor e menos "como é?" já no primeiro dia.
 | Semanas 4–6 | acompanha novela sem legenda |
 | Semana 8 | SNR loss cai ≥ 2–3 dB na reavaliação |
 
+## Acompanhamento e medições
+
+O protocolo carrega três checkpoints auditáveis (`protocol.followup`): o que medir,
+quando, o alvo e a decisão quando o alvo não é atingido.
+
+| Semana | Checkpoint | O que medir | Alvo | Se não atingir |
+|---|---|---|---|---|
+| 1 | linha de base | HHIE-S, QuickSIN-like, aparelho e streaming verificados | linha de base registrada antes de treinar | completar a linha de base antes da rotina diária |
+| 4 | intermediária | adesão, HHIE-S, QuickSIN-like | adesão ≥ 80% e HHIE-S sem piora | adesão < 80% → simplificar, não intensificar; sem progresso mensurável → nova audiometria e revisão do aparelho |
+| 8 | final | HHIE-S, QuickSIN-like, audiometria completa | SNR loss −≥ 2–3 dB e HHIE-S melhor | sem ganho mensurável após 8 semanas com adesão ≥ 80% → audiometria completa, revisão do aparelho e avaliação de implante |
+
 ## Sinais de alerta (procurar médico antes de continuar)
 
 - Mudança súbita de audição em um ouvido.

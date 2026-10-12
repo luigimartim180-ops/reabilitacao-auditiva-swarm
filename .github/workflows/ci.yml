@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Testes e verificacao de sintaxe
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Configurar Node (paridade Python-JS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias de desenvolvimento
+        run: python -m pip install --upgrade pip && pip install -r requirements-dev.txt
+
+      - name: Rodar testes
+        run: python -m pytest tests/ -q
+
+      - name: Verificar sintaxe do app (JS)
+        run: |
+          node --check app/protocol.js
+          python3 -c "import re; h=open('app/index.html',encoding='utf-8').read(); m=re.findall(r'<script>\n(.*?)\n</script>', h, re.S); open('/tmp/_app.js','w',encoding='utf-8').write(m[0])"
+          node --check /tmp/_app.js
+
+      - name: Gerar protocolo de exemplo (smoke test)
+        run: |
+          python -m swarm.cli examples/profile.json --json > /tmp/protocol.json
+          python3 -c "import json; d=json.load(open('/tmp/protocol.json')); assert len(d['agents'])==5; assert len(d['plan'])==8; print('protocolo OK:', len(d['references']), 'referencias')"

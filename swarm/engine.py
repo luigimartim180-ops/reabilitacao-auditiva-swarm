@@ -632,6 +632,59 @@ def _plan_weeks(profile: Profile, dosage: dict[str, Any]) -> list[dict[str, Any]
     ]
 
 
+def _followup_schedule(profile: Profile) -> list[dict[str, Any]]:
+    """Measurement and decision checkpoints.
+
+    A rehabilitation plan that is never measured cannot be audited, so the
+    schedule is part of the protocol: what to measure, when, the target and the
+    decision to take when the target is missed.
+    """
+    return [
+        {
+            "week": 1,
+            "checkpoint": "baseline",
+            "measures": [
+                "HHIE-S questionnaire (0-40)",
+                "QuickSIN-like SNR loss estimate",
+                "hearing-aid program and TV streaming verified",
+            ],
+            "target": "baseline recorded before training starts",
+            "action_if_not_met": "complete the baseline before starting the daily routine",
+            "refs": _refs("hhie_s_screening", "quicksin_norms", "tv_streaming_2024"),
+        },
+        {
+            "week": 4,
+            "checkpoint": "interim",
+            "measures": [
+                "adherence (sessions completed / sessions planned)",
+                "HHIE-S questionnaire",
+                "repeat QuickSIN-like SNR loss estimate",
+            ],
+            "target": "adherence >= 80% and no worsening of the HHIE-S score",
+            "action_if_not_met": (
+                "if adherence < 80%, simplify the routine instead of intensifying it; "
+                "if there is no measurable progress, book a new audiometry and review the device"
+            ),
+            "refs": _refs("humes_dosage_2014", "hhie_s_screening", "zheng_rehab_meta_2024"),
+        },
+        {
+            "week": 8,
+            "checkpoint": "final",
+            "measures": [
+                "HHIE-S questionnaire",
+                "QuickSIN-like SNR loss estimate",
+                "full audiometry review",
+            ],
+            "target": "SNR loss reduced by >= 2-3 dB and HHIE-S improved",
+            "action_if_not_met": (
+                "no measurable gain after 8 weeks at >= 80% adherence -> full audiometry, "
+                "device review and implant assessment"
+            ),
+            "refs": _refs("hhie_s_screening", "quicksin_norms", "zheng_rehab_meta_2024"),
+        },
+    ]
+
+
 def _progress_markers() -> list[dict[str, str]]:
     return [
         {"when": "day 1", "marker": "TV volume lower and fewer requests to repeat"},
@@ -671,6 +724,9 @@ def build_protocol(profile: Profile) -> dict[str, Any]:
     plan = _plan_weeks(profile, dosage)
     for week in plan:
         references.extend(week.get("refs", []))
+    followup = _followup_schedule(profile)
+    for step in followup:
+        references.extend(step.get("refs", []))
     references = sorted(set(references))
 
     protocol = {
@@ -684,6 +740,7 @@ def build_protocol(profile: Profile) -> dict[str, Any]:
         },
         "agents": agents,
         "plan": plan,
+        "followup": followup,
         "progress_markers": _progress_markers(),
         "references": references,
         "evidence": {key: EVIDENCE[key] for key in references},

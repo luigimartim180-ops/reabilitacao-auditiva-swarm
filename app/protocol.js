@@ -264,6 +264,14 @@
     ];
   }
 
+  function followupSchedule(p) {
+    return [
+      { week: 1, checkpoint: "baseline", measures: ["HHIE-S questionnaire (0-40)", "QuickSIN-like SNR loss estimate", "hearing-aid program and TV streaming verified"], target: "baseline recorded before training starts", action_if_not_met: "complete the baseline before starting the daily routine", refs: ["hhie_s_screening", "quicksin_norms", "tv_streaming_2024"] },
+      { week: 4, checkpoint: "interim", measures: ["adherence (sessions completed / sessions planned)", "HHIE-S questionnaire", "repeat QuickSIN-like SNR loss estimate"], target: "adherence >= 80% and no worsening of the HHIE-S score", action_if_not_met: "if adherence < 80%, simplify the routine instead of intensifying it; if there is no measurable progress, book a new audiometry and review the device", refs: ["humes_dosage_2014", "hhie_s_screening", "zheng_rehab_meta_2024"] },
+      { week: 8, checkpoint: "final", measures: ["HHIE-S questionnaire", "QuickSIN-like SNR loss estimate", "full audiometry review"], target: "SNR loss reduced by >= 2-3 dB and HHIE-S improved", action_if_not_met: "no measurable gain after 8 weeks at >= 80% adherence -> full audiometry, device review and implant assessment", refs: ["hhie_s_screening", "quicksin_norms", "zheng_rehab_meta_2024"] }
+    ];
+  }
+
   function progressMarkers() {
     return [
       { when: "day 1", marker: "TV volume lower and fewer requests to repeat" },
@@ -280,6 +288,8 @@
     agents.forEach(a => (a.refs || []).forEach(r => refs.add(r)));
     const plan = planWeeks(p, d);
     plan.forEach(w => (w.refs || []).forEach(r => refs.add(r)));
+    const followup = followupSchedule(p);
+    followup.forEach(s => (s.refs || []).forEach(r => refs.add(r)));
     return {
       profile_summary: {
         hearing_aid: p.hearing_aid,
@@ -291,6 +301,7 @@
       },
       agents: agents,
       plan: plan,
+      followup: followup,
       progress_markers: progressMarkers(),
       references: Array.from(refs).sort()
     };

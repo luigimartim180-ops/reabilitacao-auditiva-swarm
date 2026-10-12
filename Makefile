@@ -1,7 +1,9 @@
-.PHONY: test serve demo check clean browse
+.PHONY: test serve demo check clean browse ci
 
 test:
 	python3 -m pytest tests/ -q
+
+ci: test check
 
 check:
 	node --check app/protocol.js

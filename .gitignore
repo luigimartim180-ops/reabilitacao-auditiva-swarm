@@ -1,10 +1,30 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
 .pytest_cache/
-.tmp_src/
-.agent_tmp/
+.mypy_cache/
+.ruff_cache/
+
+# Ambientes virtuais
 venv/
 .venv/
+env/
 
+# Ferramentas locais / temporarios
+.tmp_src/
+.agent_tmp/
+.agents_tmp/
+*.tmp
+*.log
+
+# Navegador de arquivos gerado (build local)
 browse.html
 app/browse.html
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

@@ -121,3 +121,39 @@ def test_ototoxic_adds_medication_review_action():
 def test_calibration_questions_cover_profile_fields():
     ids = {q["id"] for q in calibration_questions()}
     assert {"hearing_aid", "top_complaints", "living"} <= ids
+
+
+def test_followup_schedule_has_three_checkpoints():
+    protocol = build_protocol(profile())
+    followup = protocol["followup"]
+    assert [s["week"] for s in followup] == [1, 4, 8]
+    assert [s["checkpoint"] for s in followup] == ["baseline", "interim", "final"]
+
+
+def test_followup_steps_are_actionable_and_referenced():
+    protocol = build_protocol(profile())
+    for step in protocol["followup"]:
+        assert step["measures"], "every checkpoint must list what to measure"
+        assert step["target"], "every checkpoint must state a target"
+        assert step["action_if_not_met"], "every checkpoint must state the fallback"
+        for ref in step["refs"]:
+            assert ref in EVIDENCE
+
+
+def test_followup_references_are_merged_into_protocol_references():
+    protocol = build_protocol(profile())
+    followup_refs = {r for step in protocol["followup"] for r in step["refs"]}
+    assert followup_refs <= set(protocol["references"])
+
+
+def test_followup_week8_target_mentions_measurable_gain():
+    protocol = build_protocol(profile())
+    final = protocol["followup"][-1]
+    assert "2-3 dB" in final["target"]
+
+
+def test_progress_markers_cover_day1_to_week8():
+    protocol = build_protocol(profile())
+    whens = [m["when"] for m in protocol["progress_markers"]]
+    assert whens[0] == "day 1"
+    assert "week 8" in whens

@@ -76,4 +76,5 @@ def test_js_mirror_matches_python_engine(profile):
     js = _js_protocol(profile)
     assert js["agents"] == py["agents"]
     assert js["plan"] == py["plan"]
+    assert js["followup"] == py["followup"]
     assert js["references"] == py["references"]
