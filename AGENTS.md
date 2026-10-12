@@ -35,8 +35,9 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (27 testes)
+make test     # pytest (32 testes)
 make check    # node --check no protocol.js e no script inline do index.html
+make ci       # test + check (o mesmo que a CI roda)
 make serve    # app em http://localhost:12000
 make demo     # protocolo a partir de examples/profile.json
 ```

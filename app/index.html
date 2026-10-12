@@ -620,6 +620,11 @@ const FOCUS_PT = {
   "consolidation": "consolidação",
   "final re-test and maintenance": "reavaliação final e manutenção"
 };
+const CHECKPOINT_PT = {
+  baseline: "linha de base",
+  interim: "reavaliação intermediária",
+  final: "reavaliação final"
+};
 
 function renderProfileForm() {
   const box = document.getElementById("profileForm");
@@ -786,6 +791,18 @@ document.getElementById("buildProtocol").addEventListener("click", () => {
   ph += "</tbody></table>";
   planCard.innerHTML = ph;
   out.appendChild(planCard);
+
+  const followCard = document.createElement("div");
+  followCard.className = "card";
+  let fh = "<h2>Acompanhamento e medições</h2><p style='color:var(--muted);margin:0 0 10px'>O que medir, quando, o alvo e o que fazer se o alvo não for atingido.</p>";
+  (protocol.followup || []).forEach(s => {
+    fh += "<div class='kv'><div><strong>Semana " + s.week + " — " + (CHECKPOINT_PT[s.checkpoint] || s.checkpoint) + "</strong>";
+    fh += "<br><span style='color:var(--muted)'>medir: " + s.measures.join("; ") + "</span>";
+    fh += "<br><span style='color:var(--accent);font-size:0.85rem'>alvo: " + s.target + "</span>";
+    fh += "<br><span style='color:var(--muted);font-size:0.85rem'>se não atingir: " + s.action_if_not_met + "</span></div></div>";
+  });
+  followCard.innerHTML = fh;
+  out.appendChild(followCard);
 
   const refCard = document.createElement("div");
   refCard.className = "card";

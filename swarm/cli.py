@@ -51,6 +51,16 @@ def render_text(protocol: dict) -> str:
             lines.append(f"  - {act}")
 
     lines.append("")
+    lines.append("ACOMPANHAMENTO E MEDICOES")
+    lines.append("-" * 60)
+    for step in protocol.get("followup", []):
+        lines.append(f"Semana {step['week']} ({step['checkpoint']})")
+        for measure in step["measures"]:
+            lines.append(f"  - medir: {measure}")
+        lines.append(f"  alvo: {step['target']}")
+        lines.append(f"  se nao atingir: {step['action_if_not_met']}")
+
+    lines.append("")
     lines.append("REFERENCIAS")
     lines.append("-" * 60)
     for key in protocol["references"]:
