@@ -51,6 +51,12 @@ N2+N3 (3–4), N3 (5–6), N3+N4 (7–8). O nível de cada semana vem do motor
 (`content.training_ladder`), não de uma lista fixa no app. Ver
 [docs/SENTENCES_V5.md](SENTENCES_V5.md).
 
+O **texto corrido** sobe em paralelo e é o que treina o áudio que não para:
+D1 nota curta (~20 s) nas semanas 1–2, D2 notícia (~30 s) nas 3–4, D3
+reportagem (~45 s) nas 5–6 e D4 entrevista (~60 s) nas 7–8. Ele pode subir ou
+descer um degrau à mão, e o áudio toca uma vez só. Ver
+[docs/CONNECTED_SPEECH_V6.md](CONNECTED_SPEECH_V6.md).
+
 ## Dose e teto
 
 - 1 sessão de ~6 min por dia de treino, 2–3 dias por semana.

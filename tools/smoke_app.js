@@ -219,7 +219,25 @@ async function assessmentFlow(dom) {
     await sleep(520);
   }
   await sleep(120);
-  check("gap phase appears after the real-life block", Boolean(dom.window.document.querySelector("#gapArea")));
+  check("running-speech block appears after the long sentences", Boolean(dom.window.document.querySelector("#runningArea")));
+  const rsStart = dom.window.document.querySelector("#btnStartRunning");
+  check("running-speech block can be started", Boolean(rsStart));
+  if (rsStart) rsStart.click();
+  await sleep(40);
+  const rsPlay = dom.window.document.querySelector("#btnPlayRunning");
+  check("running speech offers a single listen", Boolean(rsPlay));
+  if (rsPlay) rsPlay.click();
+  await sleep(300);
+  check("running speech asks before offering any replay", Boolean(dom.window.document.querySelector("#runningOptions")) &&
+    !dom.window.document.querySelector("#btnRepeatRunning"));
+  for (let q = 0; q < 4; q++) {
+    const opts = dom.window.document.querySelectorAll("#runningOptions button");
+    if (!opts.length) throw new Error("no running-speech options at question " + q);
+    opts[0].click();
+    await sleep(120);
+  }
+  await sleep(150);
+  check("gap phase appears after the running-speech block", Boolean(dom.window.document.querySelector("#gapArea")));
 
   // 2 practice + 16 test trials
   for (let trial = 0; trial < 18; trial++) {
@@ -248,6 +266,12 @@ async function assessmentFlow(dom) {
     rl && String(rl.percent));
   check("real-life is marked non-adaptive", rl && rl.adaptive === false);
   check("real-life keeps the four item ids", rl && rl.items.length === 4, rl && rl.items.join(","));
+  const rs = s && s.runningSpeech && s.runningSpeech[0];
+  check("running-speech comprehension stored", s && s.runningSpeech && s.runningSpeech.length === 1);
+  check("running speech is scored in percent", rs && typeof rs.percent === "number" && rs.percent >= 0 && rs.percent <= 100, rs && String(rs.percent));
+  check("running speech uses set 1 at baseline", rs && String(rs.set) === "1", rs && String(rs.set));
+  check("running speech has no replay in the assessment", rs && rs.replays === 0);
+  check("running speech records genre and tier", rs && rs.genre && rs.tier === "D2", rs && (rs.genre + "/" + rs.tier));
   click(dom, '[data-tab="vida"]');
   await sleep(60);
   const rlSummary = dom.window.document.querySelector("#realLifeSummary");
@@ -330,6 +354,10 @@ async function reportFlow(dom) {
       JSON.stringify(pkg.realLifeStats || null));
     check("real-life outcome is exported apart from the threshold",
       Array.isArray(pkg.outcomes && pkg.outcomes.real_life_comprehension) && pkg.outcomes.real_life_comprehension.length === 1);
+    check("running-speech stats are exported", Array.isArray(pkg.runningStats) && pkg.runningStats.length === 1,
+      JSON.stringify(pkg.runningStats || null));
+    check("running speech has its own outcome key",
+      Array.isArray(pkg.outcomes && pkg.outcomes.running_speech) && pkg.outcomes.running_speech.length === 1);
     check("package has sessions", pkg.sessions.length === 1);
     check("package storage mode", typeof pkg.storageMode === "string");
     check("package has v1.1 extras", Boolean(pkg.mods && pkg.outcomes && pkg.safety && pkg.protocol && typeof pkg.protocol.minutesPerDay === "number"));
@@ -697,13 +725,68 @@ async function realLifeSkipFlow() {
   check("real-life block offers a way out", Boolean(skip));
   if (skip) skip.click();
   await sleep(80);
-  check("skipping real life moves on to the gap test", Boolean(dom.window.document.querySelector("#gapArea")));
+  check("skipping real life moves on to the running-speech block", Boolean(dom.window.document.querySelector("#btnStartRunning")));
+  const skipRun = dom.window.document.querySelector("#btnSkipRunning");
+  check("running-speech block can be skipped", Boolean(skipRun));
+  if (skipRun) skipRun.click();
+  await sleep(80);
+  check("skipping running speech moves on to the gap test", Boolean(dom.window.document.querySelector("#gapArea")));
   const s = state(dom);
   const rl = s && s.realLife && s.realLife[0];
   check("skipping is recorded, not hidden", rl && rl.skipped === true, rl && JSON.stringify({ k: rl.skipped, n: rl.scored }));
   check("a skipped block has no percent score", rl && rl.percent === null, rl && String(rl.percent));
   check("week 4 uses the second real-life set", rl && String(rl.set) === "2", rl && String(rl.set));
+  const rsk = s && s.runningSpeech && s.runningSpeech[0];
+  check("a skipped running block is recorded as skipped", rsk && rsk.skipped === true, rsk && JSON.stringify({ k: rsk.skipped }));
+  check("skipped running block has no percent", rsk && rsk.percent === null, rsk && String(rsk.percent));
   check("skipping does not fake a speech threshold", s && s.speechTests.length === 1 && s.gapTests.length === 0);
+  dom.window.close();
+}
+
+async function discourseFlow() {
+  const now = new Date().toISOString();
+  const seed = {
+    version: 4,
+    week: 3,
+    baselineDone: true,
+    sessions: [],
+    hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 22, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
+    createdAt: now,
+  };
+  const dom = makeDom(seed);
+  await sleep(160);
+  click(dom, '[data-tab="treino"]');
+  await sleep(60);
+  const card = dom.window.document.querySelector("#discourseCard");
+  check("the running-text card exists in the training tab", Boolean(card));
+  check("the running-text card explains that the audio does not stop", Boolean(card && card.textContent.includes("não para")));
+  check("the running-text level follows the week", Boolean(card && card.textContent.includes("D2")), card && card.textContent.slice(0, 50));
+  dom.window.document.querySelector("#btnStartDiscourse").click();
+  await sleep(40);
+  dom.window.document.querySelector("#btnPlayDiscourse").click();
+  await sleep(260);
+  check("the questions only show after the text ends", Boolean(dom.window.document.querySelector("#discourseOptions")));
+  const repeatOff = !dom.window.document.querySelector("#btnRepeatDiscourse");
+  check("no replay by default", repeatOff);
+  for (let q = 0; q < 4; q++) {
+    const opts = dom.window.document.querySelectorAll("#discourseOptions button");
+    if (!opts.length) throw new Error("no discourse options at question " + q);
+    opts[0].click();
+    await sleep(700);
+  }
+  const done = dom.window.document.querySelector("#discourseCard").textContent;
+  check("the running text ends with a score", done.includes("Texto corrido concluído"), done.slice(0, 80));
+  const s = state(dom);
+  const rec = s && s.discourse && s.discourse[0];
+  check("running-text training is saved", Boolean(rec), JSON.stringify(rec));
+  check("running-text record keeps replays and percent", Boolean(rec && typeof rec.percent === "number" && typeof rec.replays === "number"));
+  check("running-text record is marked non-adaptive", Boolean(rec && rec.adaptive === false));
+
+  click(dom, "#btnDiscourseClose");
+  await sleep(40);
+  click(dom, "#btnDiscourseHarder");
+  await sleep(40);
+  check("the level can be raised by hand", state(dom).discourseLevel === "D3", state(dom).discourseLevel);
   dom.window.close();
 }
 
@@ -776,6 +859,7 @@ async function demoFlow() {
   await weekAdvanceFlow();
   await week4AssessmentFlow();
   await realLifeSkipFlow();
+  await discourseFlow();
   await demoFlow();
 
   const failed = results.filter((r) => !r.ok);

@@ -232,7 +232,7 @@
     <p class="lead">Treino de fala em ruído e resolução temporal, em português do Brasil, para uso domiciliar acompanhado. <strong>Não é exame clínico e não é dispositivo médico.</strong></p>
     <div class="row">
       <span class="badge">SWARM v4</span>
-      <span class="badge">v5 · build 2026-10-29</span>
+      <span class="badge">v6 · build 2026-10-29</span>
       <span class="badge" id="storageBadge">armazenamento</span>
       <span class="badge" id="saveStatus">ainda não salvo</span>
       <span class="badge" id="voiceBadge">voz</span>
@@ -336,7 +336,7 @@
 
     <div class="card">
       <h2>Escolha o momento</h2>
-      <p class="muted">A linha de base é obrigatória antes do treino. A avaliação tem quatro partes: HHIE-S, fala em ruído, um bloco <strong>opcional</strong> de compreensão de vida real (frases longas, % de acerto, exploratório) e o gap. Semana 4 e semana 8 usam formas de frase não treinadas. O seguimento é cerca de 30 dias após a semana 8.</p>
+      <p class="muted">A linha de base é obrigatória antes do treino. A avaliação tem quatro partes: HHIE-S, fala em ruído, um bloco <strong>opcional</strong> de compreensão (frases longas e texto corrido, em % de acerto, exploratório) e o gap. No texto corrido o áudio não para e não repete — é a condição da TV e do YouTube. Semana 4 e semana 8 usam formas de frase não treinadas. O seguimento é cerca de 30 dias após a semana 8.</p>
       <div id="assessmentButtons" class="grid2"></div>
     </div>
 
@@ -368,10 +368,12 @@
         <button id="btnTestAudio" class="small">Testar áudio e ruído</button>
       </div>
       <button id="btnStartSession" class="ok big">Começar sessão (8 itens + fechamento)</button>
-      <p class="small muted">O app limita o treino a 10 minutos por dia e 2–3 dias por semana. O limite é de tolerabilidade; a dose testada em pesquisa foi 2–3 sessões por semana por 5–15 semanas.</p>
+      <p class="small muted">O bloco de <strong>texto corrido</strong> fica logo abaixo da sessão, quando ela terminar: um áudio que não para e quatro perguntas. O app limita o treino a 10 minutos por dia e 2–3 dias por semana. O limite é de tolerabilidade; a dose testada em pesquisa foi 2–3 sessões por semana por 5–15 semanas.</p>
     </div>
 
     <div id="trainingArea"></div>
+
+    <div id="discourseCard"></div>
 
     <div class="card">
       <h2>Sessões recentes</h2>
@@ -448,6 +450,18 @@
     </div>
 
     <div class="card">
+      <h2>Treino com áudio real (TV, YouTube, rádio)</h2>
+      <p>O app usa voz sintética: mais lenta e mais limpa que um repórter. Para o áudio de verdade, a rotina é esta, três vezes por semana:</p>
+      <ol class="small">
+        <li>Escolha um trecho de <strong>1 a 2 minutos</strong> do programa dele (telejornal, entrevista, esporte).</li>
+        <li>Assista <strong>uma vez, sem pausar e sem legenda</strong>. É assim que o áudio chega.</li>
+        <li>Depois, faça três perguntas: <em>qual era o assunto</em>, <em>um detalhe</em> e <em>o que acontece depois</em>.</li>
+        <li>Anote no diário da semana: conseguiu / conseguiu em parte / não conseguiu.</li>
+      </ol>
+      <p class="small muted">Se ele pedir para repetir, deixe repetir <strong>uma vez</strong> e anote. O número de pedidos de repetição é o melhor sinal de progresso fora do app — e é justamente o que o teste de texto corrido treina.</p>
+    </div>
+
+    <div class="card">
       <h2>Transferência para formas não treinadas</h2>
       <p>A avaliação de fala em ruído usa formas de frase que nunca aparecem no treino. Uma mudança nessas formas é uma pista de transferência — <strong>possível, não garantida</strong>. O app não chama isso de melhora na vida real.</p>
       <div id="transferSummary"></div>
@@ -458,7 +472,7 @@
   <section id="tab-relatorio" class="tab-panel hidden">
     <div class="card">
       <h2>Indicadores de desempenho</h2>
-      <p class="muted">Não é “prova de melhora fisiológica”. Desfecho funcional primário: HHIE-S. Tarefa treinada: fala em ruído relativa. Compreensão de vida real: bloco exploratório em % de acerto, com frases longas. Temporal: gap. Transferência: formas não treinadas, exploratória.</p>
+      <p class="muted">Não é “prova de melhora fisiológica”. Desfecho funcional primário: HHIE-S. Tarefa treinada: fala em ruído relativa. Compreensão de vida real: exploratória, em % (frases longas). Fala corrida: texto contínuo, sem repetir, também exploratório. Temporal: gap. Transferência: formas não treinadas, exploratória.</p>
       <div id="outcomesTable"></div>
       <h3>Mudanças desde a linha de base</h3>
       <div id="changesTable"></div>
@@ -572,7 +586,7 @@
 
   <p class="foot" id="foot"></p>
 </main>
-<script src="protocol.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="protocol.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

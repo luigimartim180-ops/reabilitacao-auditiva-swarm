@@ -372,15 +372,40 @@
         { level: "functional", measure: "HHIE-S (0-40)", role: "primary", statement: "self-perceived hearing handicap; a validated screening questionnaire, not an audiogram", refs: ["hhie_s_screening", "hhie_s_administration"] },
         { level: "task", measure: "closed-set speech-in-noise threshold (relative dB)", role: "secondary", statement: "on-task performance; not QuickSIN and not a calibrated audiogram", refs: ["quicksin_measure_2004", "humes_specificity_2014"] },
         { level: "ecological", measure: "compreensao de vida real: 4 frases longas fixas, % de acerto", role: "exploratory", statement: "fixed (not adaptive) realistic sentences scored as percent correct; it exercises hearing, memory and attention together, so a change is not a measurement of hearing alone and not proof of real-world benefit", refs: ["ecosin_2020", "syntactic_complexity_aging"] },
+        { level: "running_speech", measure: "compreensao de fala corrida: 1 texto + 4 perguntas, % de acerto", role: "exploratory", statement: "continuous everyday passage read once, no replay, then four questions; it is the closest the app gets to TV or YouTube, and it measures hearing, memory and attention together", refs: ["continuous_speech_training_2025", "connected_speech_memory_1995"] },
         { level: "transfer", measure: "untrained sentence forms in noise", role: "exploratory", statement: "transfer is limited and uncertain; a change on a new form is not proof of real-world benefit", refs: ["transfer_limits_2020"] },
         { level: "temporal", measure: "gap-detection threshold (ms)", role: "task-specific", statement: "training improves the trained gap task; transfer to speech is not established", refs: ["gap_training_2013"] }
       ],
       schedule: [
-        { timepoint: "baseline", week: 0, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "gap_detection"], note: "record before training; 2 practice trials per test are not scored; keep the device volume fixed", refs: ["hhie_s_administration", "quicksin_measure_2004"] },
-        { timepoint: "week_4", week: 4, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "gap_detection", "transfer_form"], note: "use an untrained speech form and the same device volume", refs: ["humes_dosage_2014", "transfer_limits_2020"] },
-        { timepoint: "week_8", week: 8, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "gap_detection", "transfer_form"], note: "use the third untrained form and the first real-life set again; forms are not formally equated", refs: ["hhie_s_administration", "transfer_limits_2020"] },
-        { timepoint: "retention_30d", week: 12, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension"], note: "about 30 days after the final assessment; repeat the baseline form and the second real-life set for comparability", refs: ["humes_dosage_2014", "transfer_limits_2020"] }
+        { timepoint: "baseline", week: 0, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "running_speech", "gap_detection"], note: "record before training; 2 practice trials per test are not scored; keep the device volume fixed", refs: ["hhie_s_administration", "quicksin_measure_2004"] },
+        { timepoint: "week_4", week: 4, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "running_speech", "gap_detection", "transfer_form"], note: "use an untrained speech form and the same device volume", refs: ["humes_dosage_2014", "transfer_limits_2020"] },
+        { timepoint: "week_8", week: 8, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "running_speech", "gap_detection", "transfer_form"], note: "use the third untrained form, the first real-life set and the first running-speech passage again; forms are not formally equated", refs: ["hhie_s_administration", "transfer_limits_2020"] },
+        { timepoint: "retention_30d", week: 12, tests: ["hhie_s", "speech_in_noise", "real_life_comprehension", "running_speech"], note: "about 30 days after the final assessment; repeat the baseline form, the second real-life set and the second passage for comparability", refs: ["humes_dosage_2014", "transfer_limits_2020"] }
       ],
+      running_speech: {
+        method: "1 continuous everyday passage (about 30 s at test) read once at a fixed noise level, followed by 4 questions: main idea, detail, order and inference",
+        design: "fixed and non-adaptive; there is no replay button in the assessment, so it never enters the speech staircase",
+        passages_per_test: 1,
+        questions_per_passage: 4,
+        tier_at_test: "D2",
+        snr_db_relative: 10,
+        scored: "percent correct (0-100); one question is 25 percentage points",
+        sets: {
+          "1": "baseline and week 8 (passage d03)",
+          "2": "week 4 and the 30-day retention (passage d04)"
+        },
+        reserved_material: "the two assessment passages never appear in training, so the measure stays unseen",
+        training_ladder: "D1 (3 sentences) to D4 (8-11 sentences, about 60 s); one tier every two weeks, and the participant can move one step by hand",
+        replay: "training may allow one replay, which is counted; the assessment never offers one",
+        not_valid_as: ["speech-in-noise threshold", "auditory-only measure", "prediction of real TV comprehension"],
+        limits: [
+          "the whole passage is remembered and interpreted, not only heard; a low score can be memory or attention, not just audibility",
+          "one passage with four questions is a coarse measure",
+          "the synthetic voice is slower and cleaner than broadcast speech, so a good score here does not prove that YouTube is understood",
+          "the two assessment passages are not equated for difficulty"
+        ],
+        refs: ["continuous_speech_training_2025", "connected_speech_memory_1995", "fast_speech_aging_2001", "working_memory_sin_2008"]
+      },
       real_life_comprehension: {
         method: "4 fixed long everyday passages read once at a fixed noise level, each followed by one 4-alternative question about meaning, order or what the person has to do",
         design: "fixed and non-adaptive, so it never enters the speech staircase and cannot change the SNR estimate",
@@ -460,7 +485,7 @@
         "not a medical device; no diagnosis or prescription",
         "transfer is possible, not guaranteed"
       ],
-      refs: ["hhie_s_screening", "hhie_s_administration", "hhie_s_pt_br", "quicksin_measure_2004", "humes_specificity_2014", "gap_training_2013", "transfer_limits_2020", "ecosin_2020", "real_world_sentences_2022", "ecological_validity_tradeoff_2025", "syntactic_complexity_aging"]
+      refs: ["hhie_s_screening", "hhie_s_administration", "hhie_s_pt_br", "quicksin_measure_2004", "humes_specificity_2014", "gap_training_2013", "transfer_limits_2020", "ecosin_2020", "real_world_sentences_2022", "ecological_validity_tradeoff_2025", "syntactic_complexity_aging", "continuous_speech_training_2025", "connected_speech_memory_1995", "fast_speech_aging_2001", "working_memory_sin_2008"]
     };
   }
 
@@ -473,6 +498,8 @@
         test_forms: { A: 12, B: 12, C: 12 },
         training_items: 41,
         real_life_items: 8,
+        discourse_passages: 10,
+        discourse_questions: 40,
         tiers: {
           N1: { max_words: 10, what: "frase curta e previsivel", why: "aquecimento e confianca; o piso da escada" },
           N2: { max_words: 14, what: "frase media do dia a dia, com um detalhe ou uma negacao", why: "passo seguinte sem salto brusco" },
@@ -490,8 +517,14 @@
         { weeks: [5, 6], tiers: ["N3"], focus: "frases longas do dia a dia, ainda sem relato" },
         { weeks: [7, 8], tiers: ["N3", "N4"], focus: "relato curto, com pergunta de sentido" }
       ],
+      discourse_ladder: [
+        { weeks: [1, 2], tier: "D1", focus: "nota curta, tres frases, um assunto so" },
+        { weeks: [3, 4], tier: "D2", focus: "noticia de cerca de 30 s, quatro ou cinco frases" },
+        { weeks: [5, 6], tier: "D3", focus: "reportagem de cerca de 45 s, com numeros e ordem" },
+        { weeks: [7, 8], tier: "D4", focus: "entrevista de cerca de 60 s, com fala relatada" }
+      ],
       plan: "each training session draws 8 items from the tiers of the current week (plus 1 practice warm-up); the real-life block uses fixed long passages",
-      refs: ["ecosin_2020", "syntactic_complexity_aging", "humes_specificity_2014", "transfer_limits_2020"]
+      refs: ["ecosin_2020", "syntactic_complexity_aging", "humes_specificity_2014", "transfer_limits_2020", "continuous_speech_training_2025"]
     };
   }
 

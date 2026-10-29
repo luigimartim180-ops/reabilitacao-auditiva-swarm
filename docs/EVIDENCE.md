@@ -1,7 +1,7 @@
 # Base de evidências
 
 Toda recomendação do motor aponta para uma chave deste registro (`swarm/evidence.py`,
-**36 entradas**). Graus: **A** meta-análise/RCT · **B** RCT pequeno, estudo controlado ou
+**40 entradas**). Graus: **A** meta-análise/RCT · **B** RCT pequeno, estudo controlado ou
 revisão sistemática · **C** observacional/mecanístico · **D** consenso/diretriz.
 
 O registro guarda `claim`, `effect`, `citation`, `url` e `grade`. `build_protocol`
@@ -63,6 +63,10 @@ alto, em vez de virar texto plausível.
 | `real_world_sentences_2022` | frases do dia a dia embutidas em ruídos reais mantêm a tarefa longe de teto e de piso; o material e o ambiente mudam muito a dificuldade | B | https://doi.org/10.3389/fnins.2022.789565 |
 | `ecological_validity_tradeoff_2025` | em usuários de implante coclear, audiometria e questionário não concordam em todas as condições: existe tensão entre precisão e validade ecológica (**não é estudo de aparelho auditivo**) | B | https://doi.org/10.3390/audiolres15050142 |
 | `syntactic_complexity_aging` | complexidade sintática e esforço de escuta reduzem o relato de materiais verbais em idosos; a tarefa consome memória de trabalho | C | https://pubmed.ncbi.nlm.nih.gov/19927677/ |
+| `continuous_speech_training_2025` | treinar com fala contínua natural + pergunta de compreensão, com carga de memória variável, melhora fala-em-ruído em idosos (1 sessão, cruzado; maior ganho em menor memória de trabalho e maior perda) | B | https://doi.org/10.1038/s41539-025-00306-5 |
+| `connected_speech_memory_1995` | lembrar fala no ruído piora com idade e perda auditiva; contexto ajuda e consome recursos — texto corrido mede memória e atenção junto com audição | C | https://doi.org/10.1121/1.412282 |
+| `fast_speech_aging_2001` | idosos perdem mais reconhecimento que jovens conforme a velocidade da fala aumenta, sobretudo com menos pistas linguísticas — daí a fala "corrida" da TV ser mais difícil | C | https://doi.org/10.1044/1092-4388(2001/056) |
+| `working_memory_sin_2008` | em 20 estudos, memória de trabalho (reading span) prediz fala-em-ruído de forma consistente mas secundária à perda auditiva; escore de texto não é limiar | B | https://doi.org/10.1080/14992020802301142 |
 
 ## Limites, cognição e medicamentos
 

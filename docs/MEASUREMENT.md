@@ -12,6 +12,7 @@ divergirem.
 | Funcional | HHIE-S (0–40) | **primário** | handicap auditivo percebido, autorrelato | audiograma, sensibilidade auditiva |
 | Tarefa | fala em ruído (dB relativo) | secundário | desempenho na tarefa treinada | QuickSIN, SNR loss clínico, dB HL |
 | Ecológico | compreensão de vida real (% de acerto) | exploratório | 4 frases longas fixas, audição + memória + atenção | limiar auditivo, prova de transferência |
+| Fala corrida | texto contínuo + 4 perguntas (% de acerto) | exploratório | o que a TV e o YouTube exigem: áudio que não para | limiar, previsão de compreensão na TV |
 | Transferência | formas A/B/C não treinadas | exploratório | pista de generalização | prova de melhora na vida real |
 | Temporal | gap (ms) | específico da tarefa | resolução temporal treinada | preditor de fala no ruído |
 
@@ -120,6 +121,22 @@ vida real.
   ecológica e perde precisão (`ecological_validity_tradeoff_2025`). Com 4 itens,
   um item vale 25 pontos percentuais.
 
+## 4c. Fala corrida (texto contínuo)
+
+- 1 texto do dia a dia (telejornal, entrevista, jornal ou esporte), lido **uma
+  vez**, do começo ao fim, no mesmo ruído relativo de **+10 dB**.
+- Depois do áudio, 4 perguntas: ideia principal, detalhe, ordem e inferência.
+- **Não existe botão de repetir** na avaliação. No treino, uma repetição pode
+  ser liberada por um interruptor (desligado por padrão) e é contada.
+- Pontuação: **% de acerto**; uma pergunta vale 25 pontos percentuais.
+- Textos de medida (`d03` na linha de base/semana 8, `d04` na semana 4/retenção)
+  **nunca** aparecem no treino.
+- Escada de treino: D1 (3 frases, ~20 s) → D4 (8 frases, ~60 s), uma faixa a
+  cada duas semanas, com botão para subir ou descer um degrau.
+- Por que é exploratório: o escore mistura audição, memória de trabalho e
+  atenção (`connected_speech_memory_1995`, `working_memory_sin_2008`), e a voz
+  sintética é mais lenta e mais limpa que a fala de TV.
+
 ## 5. Formas e agenda
 
 - Formas A, B e C: frases diferentes, nunca usadas no treino.
@@ -128,7 +145,8 @@ vida real.
   diferença de dificuldade, não de audição.
 - Agenda: linha de base, semana 4, semana 8 e retenção cerca de 30 dias após a avaliação
   final (semana 12 do plano).
-- O bloco de vida real entra nos quatro momentos, como parte opcional da bateria.
+- Os blocos de vida real e de fala corrida entram nos quatro momentos, como parte
+  opcional da bateria.
 
 ## 6. O que os números não podem dizer
 

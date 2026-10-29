@@ -56,7 +56,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
 | 13 | Sem exportação/versionamento dos dados | Pacote `audioswarm.v1.1` com schema, limites, contexto, medidas, sessões, aderência, `mods`, `gapStats`, segurança e plano determinístico; exportação em arquivo + cópia; importação por arquivo. |
 | 14 | Sem testes da matemática de medição | `tests/test_measurement.py` (12 testes) + paridade JS↔Python (5 casos de fala, 7 de gap, 3 de SNR, 4 de HHIE-S). |
 | 15 | CI extraía script inline que não existia mais | `make check` e CI agora validam `app/protocol.js` e `app/app.js`; o HTML é checado para IDs duplicados e scripts. |
-| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **111/111**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana e o bloco de vida real (inclusive o caminho de pular). |
+| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **136/136**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
 
 ## O que foi implementado
 
@@ -65,7 +65,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
 - `swarm/engine.py`: `measurement`, `training`, `limits`, quatro checkpoints
   (1/4/8/12), treino de gap na semana 5, texto de dose corrigido, sinais de parada e
   precauções.
-- `swarm/evidence.py`: 36 entradas, incluindo HHIE-S, adaptação brasileira, QuickSIN,
+- `swarm/evidence.py`: 40 entradas, incluindo HHIE-S, adaptação brasileira, QuickSIN,
   Humes (dose e especificidade), Kishon-Rabin, Bieber & Gordon-Salant, ACHIEVE,
   streaming e segurança.
 - `app/protocol.js`: espelho do motor **e** da medição; paridade verificada.
@@ -74,7 +74,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
   diagnóstico, acessibilidade e voz com watchdog.
 - `app/index.html`: shell pt-BR com 7 abas, botões grandes, alto contraste e letra
   ampliável.
-- `tests/`: 99 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
+- `tests/`: 106 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
   campos do pacote, 10 itens do HHIE-S).
 
 ## Rodada de correções (26/10)
@@ -227,6 +227,32 @@ O que este adendo **não** afirma: que o % de vida real mede audição, que prev
 desempenho fora de casa, ou que um item (25 p.p.) seja efeito. A medida principal segue
 sendo o HHIE-S.
 
+## Adendo v6 — o áudio que não para
+
+O participante foi melhor nas frases e continuou não entendendo entrevista,
+telejornal e programa de esportes, porque "o áudio é corrido e não para". A
+leitura correta: frase longa treina decifrar frase, não treina segurar o fio de
+um texto.
+
+O que mudou (detalhes em [CONNECTED_SPEECH_V6.md](CONNECTED_SPEECH_V6.md)):
+
+1. banco de **10 textos corridos e 40 perguntas** (telejornal, entrevista, jornal,
+   esporte), de 37 a 141 palavras, em quatro níveis D1–D4;
+2. **o áudio toca uma vez** e as perguntas aparecem depois; a avaliação não tem
+   botão de repetir, e o treino só libera uma repetição por interruptor, contada;
+3. dois textos (`d03`, `d04`) ficam **reservados para a medida** e nunca entram
+   no treino;
+4. botão de andar um degrau para cima ou para baixo, com sugestão (não bloqueio)
+   de subir após duas sessões com 3 de 4;
+5. nova medida exploratória na avaliação, com conjunto alternado por momento e
+   relatório próprio (seção 2.5).
+
+O que **não** se afirma: que o app prevê a compreensão da TV (a voz é sintética e
+mais limpa), que o escore é limiar auditivo, ou que uma pergunta (25 p.p.) seja
+efeito. O caminho para o áudio real continua sendo o trecho de 1–2 min do
+programa dele, assistido uma vez, com perguntas escritas pela família e anotado
+no diário.
+
 ## Como verificar
 
 ```bash
@@ -234,10 +260,10 @@ make test                                   # 99 passed
 make check                                  # sintaxe + contratos do HTML
 make demo                                   # protocolo em texto
 python -m swarm.cli examples/profile.json --json > /tmp/p.json
-NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 111/111, requer jsdom
+NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 136/136, requer jsdom
 ```
 
-Estado local desta auditoria: `99 passed`, `make check` exit 0, smoke 111/111. O teste de
+Estado local desta auditoria: `106 passed`, `make check` exit 0, smoke 136/136. O teste de
 smoke é opcional; a CI roda pytest + sintaxe + protocolo de exemplo.
 
 ## Referências principais

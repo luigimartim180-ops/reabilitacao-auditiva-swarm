@@ -376,6 +376,57 @@ EVIDENCE: dict[str, dict[str, Any]] = {
         "url": "https://hign.org/sites/default/files/2020-06/Try_This_General_Assessment_12.pdf",
         "grade": "B",
     },
+    "continuous_speech_training_2025": {
+        "claim": (
+            "Training on natural continuous speech followed by a comprehension "
+            "question, with the memory load varied across trials, improved "
+            "speech-in-noise perception in older adults; the gain was larger in "
+            "participants with more hearing loss or lower auditory working memory. "
+            "The study is short-term (one session, crossover) and does not show that "
+            "the improvement reaches everyday conversation."
+        ),
+        "effect": "about 0.5 dB better SRT right after a session; larger in lower working memory",
+        "citation": "Frei V, Giroud N. Immersive auditory-cognitive training improves speech-in-noise perception in older adults with varying hearing and working memory. npj Sci Learn. 2025;10(1).",
+        "url": "https://doi.org/10.1038/s41539-025-00306-5",
+        "grade": "B",
+    },
+    "connected_speech_memory_1995": {
+        "claim": (
+            "Remembering spoken language is harder for older adults and for listeners "
+            "with hearing loss, and the cost grows when the signal is degraded; "
+            "context helps, but it also consumes resources. A test that asks about a "
+            "whole passage measures memory and attention together with audibility."
+        ),
+        "effect": "recall of speech in noise falls with age and hearing loss",
+        "citation": "Pichora-Fuller MK, Schneider BA, Daneman M. How young and old adults listen to and remember speech in noise. J Acoust Soc Am. 1995;97(1):593-608.",
+        "url": "https://doi.org/10.1121/1.412282",
+        "grade": "C",
+    },
+    "fast_speech_aging_2001": {
+        "claim": (
+            "Older listeners lose more recognition than younger listeners as speech "
+            "rate increases, and the loss is larger when the linguistic cues are "
+            "reduced. This is why running broadcast speech, which is fast and "
+            "unsegmented, is harder than a single slow sentence."
+        ),
+        "effect": "steeper decline with faster speech in older adults",
+        "citation": "Gordon-Salant S, Fitzgibbons PJ. Sources of age-related recognition difficulty for time-compressed speech. J Speech Lang Hear Res. 2001;44(4):709-719.",
+        "url": "https://doi.org/10.1044/1092-4388(2001/056)",
+        "grade": "C",
+    },
+    "working_memory_sin_2008": {
+        "claim": (
+            "Across twenty studies, working memory (especially reading span) is a "
+            "consistent but secondary predictor of speech reception once hearing loss "
+            "is accounted for. Comprehension of long material therefore depends on "
+            "both the ear and the memory, and a passage score cannot be read as a "
+            "hearing threshold."
+        ),
+        "effect": "working memory explains part, not most, of the variance",
+        "citation": "Akeroyd MA. Are individual differences in speech reception related to individual differences in cognitive ability? A survey of twenty experimental studies with normal and hearing-impaired adults. Int J Audiol. 2008;47(Suppl 2):S53-S71.",
+        "url": "https://doi.org/10.1080/14992020802301142",
+        "grade": "B",
+    },
     "ecosin_2020": {
         "claim": (
             "Everyday conversational sentences recorded at natural rate and effort "

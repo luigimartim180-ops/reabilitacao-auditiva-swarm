@@ -171,7 +171,7 @@ def test_measurement_uses_hhie_s_as_primary_outcome():
     measurement = protocol["measurement"]
     assert measurement["primary_outcome"] == "hhie_s"
     levels = [row["level"] for row in measurement["outcome_hierarchy"]]
-    assert levels == ["functional", "task", "ecological", "transfer", "temporal"]
+    assert levels == ["functional", "task", "ecological", "running_speech", "transfer", "temporal"]
     assert measurement["hhie_s"]["items"] == 10
     assert measurement["hhie_s"]["referral"] == ">=10"
 
@@ -281,9 +281,39 @@ def test_weekly_battery_separates_function_from_task():
         "functional": "primary",
         "task": "secondary",
         "ecological": "exploratory",
+        "running_speech": "exploratory",
         "transfer": "exploratory",
         "temporal": "task-specific",
     }
+
+
+def test_running_speech_block_matches_the_no_replay_design():
+    measurement = build_protocol(profile())["measurement"]
+    block = measurement["running_speech"]
+    assert block["passages_per_test"] == 1
+    assert block["questions_per_passage"] == 4
+    assert block["snr_db_relative"] == 10
+    assert "no replay button" in block["design"]
+    assert "never enters the speech staircase" in block["design"]
+    assert "25 percentage points" in block["scored"]
+    assert "never appear in training" in block["reserved_material"]
+    assert "prediction of real TV comprehension" in block["not_valid_as"]
+    limits = " ".join(block["limits"])
+    assert "slower and cleaner than broadcast speech" in limits
+    assert set(block["sets"]) == {"1", "2"}
+    timepoints = {row["timepoint"]: row["tests"] for row in measurement["schedule"]}
+    for tp in ("baseline", "week_4", "week_8", "retention_30d"):
+        assert "running_speech" in timepoints[tp], tp
+
+
+def test_discourse_ladder_starts_short_and_ends_with_a_long_interview():
+    content = build_protocol(profile())["content"]
+    ladder = content["discourse_ladder"]
+    covered = [week for row in ladder for week in row["weeks"]]
+    assert covered == list(range(1, 9))
+    assert [row["tier"] for row in ladder] == ["D1", "D2", "D3", "D4"]
+    assert content["material"]["discourse_passages"] == 10
+    assert content["material"]["discourse_questions"] == 40
 
 
 def test_real_life_block_is_optional_and_exploratory():

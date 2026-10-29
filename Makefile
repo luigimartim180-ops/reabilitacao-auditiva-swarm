@@ -12,7 +12,7 @@ check:
 	node --check app/protocol.js
 	node --check app/app.js
 	python3 -c "import re,sys; h=open('app/index.html').read(); ids=re.findall(r'id=\"([^\"]+)\"', h); dup=sorted({i for i in ids if ids.count(i)>1}); assert not dup, 'duplicate ids: %s' % dup; assert 'protocol.js' in h and 'app.js' in h, 'scripts missing'"
-	python3 -c "import sys; sys.path.insert(0,'.'); from swarm.evidence import EVIDENCE; assert len(EVIDENCE) >= 36; print('evidence entries:', len(EVIDENCE))"
+	python3 -c "import sys; sys.path.insert(0,'.'); from swarm.evidence import EVIDENCE; assert len(EVIDENCE) >= 40; print('evidence entries:', len(EVIDENCE))"
 
 browse:
 	python3 tools/build_browser.py app/browse.html

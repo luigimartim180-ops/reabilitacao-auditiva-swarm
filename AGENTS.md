@@ -34,8 +34,13 @@ pare: adicione uma entrada em `swarm/evidence.py` e um gatilho determinístico n
 - `app/app.js` `ITEMS` — banco de frases (89 itens) com `tier`, `kind`, `domain`; as
   formas A/B/C são medidas repetidas e **não devem ser editadas**. O plano de níveis do
   treino vem do motor (`content.training_ladder`), nunca de lista solta no app.
+- `app/app.js` `DISCOURSE` — 10 textos corridos (telejornal, entrevista, jornal, esporte)
+  em D1–D4, 4 perguntas cada. `d03` e `d04` são **reservados para a avaliação** e não
+  podem entrar no treino (`DISCOURSE_RESERVED`). O áudio toca uma vez; a repetição no
+  treino é opcional e contada.
 - `tests/` — pytest. `docs/` — análise, arquitetura, evidências, protocolo, segurança,
-  medição, material de frases (`SENTENCES_V5.md`) e auditoria do v4.
+  medição, material de frases (`SENTENCES_V5.md`), fala corrida
+  (`CONNECTED_SPEECH_V6.md`) e auditoria do v4.
 
 ## Ordem dos agentes importa
 
@@ -45,10 +50,10 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (99 testes)
+make test     # pytest (106 testes)
 make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
-make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 111 checks
+make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 136 checks
 make serve    # app em http://localhost:12000
 make demo     # protocolo a partir de examples/profile.json
 ```

@@ -4,6 +4,10 @@ Documento de decisão do material de frases. Ele responde à queixa do participa
 ("os testes com uma frase só são muito simples") sem quebrar a régua que já foi
 usada na linha de base.
 
+> **Continuidade (v6).** Este documento trata das **frases**. O passo seguinte,
+> para o áudio que não para (telejornal, entrevista, esporte), está em
+> [CONNECTED_SPEECH_V6.md](CONNECTED_SPEECH_V6.md).
+
 ## O problema, medido
 
 Antes desta versão o banco tinha 60 itens e o treino usava as mesmas frases

@@ -350,3 +350,73 @@ def test_item_bank_keeps_the_simple_items_and_adds_longer_ones():
     assert bank.count('split: "train"') >= 30
     # the original short items must still be there
     assert 'id: "p1"' in bank and 'id: "p2"' in bank
+
+
+def _discourse_bank():
+    import json
+    import subprocess
+
+    start = JS.index("const DISCOURSE = [")
+    end = JS.index("\n];", start) + len("\n];")
+    script = JS[start:end] + ";process.stdout.write(JSON.stringify(DISCOURSE));"
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
+    return json.loads(out.stdout)
+
+
+def test_discourse_bank_is_continuous_speech_in_four_tiers():
+    bank = _discourse_bank()
+    assert len(bank) == 10
+    tiers = [p["tier"] for p in bank]
+    assert set(tiers) == {"D1", "D2", "D3", "D4"}
+    genres = {p["genre"] for p in bank}
+    assert {"telejornal", "entrevista", "esporte"} <= genres
+    for passage in bank:
+        assert len(passage["questions"]) == 4, passage["id"]
+        for q in passage["questions"]:
+            assert len(q["options"]) == 4, passage["id"]
+            assert len(set(q["options"])) == 4, passage["id"]
+            assert q["options"][0], passage["id"]
+        words = len(passage["text"].split())
+        assert len(passage["text"].split(".")) >= 4, passage["id"]
+        assert words >= 30, passage["id"]
+    by_tier = {}
+    for passage in bank:
+        by_tier.setdefault(passage["tier"], []).append(len(passage["text"].split()))
+    assert max(by_tier["D1"]) < min(by_tier["D2"])
+    assert max(by_tier["D2"]) < min(by_tier["D3"])
+    assert max(by_tier["D3"]) < min(by_tier["D4"])
+
+
+def test_assessment_passages_never_enter_training():
+    assert 'const DISCOURSE_RESERVED = ["d03", "d04"]' in JS
+    assert 'DISCOURSE_SET_PASSAGE = { "1": "d03", "2": "d04" }' in JS
+    pool = JS.split("function discoursePassageOfTier")[1].split("function ")[0]
+    assert "DISCOURSE_RESERVED.indexOf(d.id) < 0" in pool
+
+
+def test_running_speech_has_no_replay_but_training_can_count_one():
+    running = JS.split("function renderRunningTest")[1].split("function playRunning")[0]
+    assert "btnRepeatRunning" not in running
+    assert "não existe botão de repetir" in running
+    training = JS.split("function renderDiscourse")[1].split("function playDiscourse")[0]
+    assert "chkDiscourseRepeat" in training
+    assert "btnRepeatDiscourse" in training
+    assert "replays" in JS
+
+
+def test_running_text_level_can_be_moved_by_hand():
+    assert "function shiftDiscourseLevel" in JS
+    assert "btnDiscourseHarder" in JS and "btnDiscourseEasier" in JS
+    assert 'state.discourseLevel = next' in JS
+    assert 'discourseLevel: "auto"' in JS
+
+
+def test_running_speech_is_persisted_exported_and_reported():
+    assert "runningSpeech: []" in JS
+    assert '"runningSpeech"' in JS.split("forEach(k => {")[0].split("]")[-2]
+    assert "running_speech: state.runningSpeech" in JS
+    assert "runningStats" in JS and "discourseStats" in JS
+    report = JS.split("function generateReport")[1]
+    assert "2.5 Fala corrida" in report
+    assert "2.6 Temporal" in report
+    assert "2.7 Vida real" in report

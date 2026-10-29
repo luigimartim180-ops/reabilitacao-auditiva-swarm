@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "5.0.0";
+const APP_VERSION = "6.0.0";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
@@ -229,6 +229,21 @@ const ITEMS = [
   { id: "r08", split: "R", set: "2", tier: "N3", kind: "literal", domain: "saude", text: "O filho lembrou que a consulta de cardiologia é no hospital novo e que o estacionamento fica na rua de trás.", q: "Onde fica o estacionamento?", options: ["Na rua de trás", "No subsolo do hospital", "Na praça", "Em frente ao posto"] },
 ];
 
+/* ---- DISCURSO: texto corrido (telejornal, entrevista, esporte) ---- */
+/* A primeira alternativa é a resposta certa; o app embaralha na hora.  */
+const DISCOURSE = [
+  { id: "d01", tier: "D1", genre: "telejornal", domain: "saude", text: "Bom dia. A prefeitura informou que a vacinação contra a gripe começa na segunda-feira em todas as unidades de saúde. Idosos acima de sessenta anos podem ir sem agendamento, das oito da manhã às quatro da tarde.", questions: [{"kind": "main", "q": "O que começa na segunda-feira?", "options": ["A vacinação contra a gripe", "A entrega de remédios", "A reforma do posto", "O horário de verão"]}, {"kind": "detail", "q": "Quem pode ir sem agendamento?", "options": ["Idosos acima de sessenta anos", "Somente crianças", "Quem tem plano de saúde", "Apenas gestantes"]}, {"kind": "detail", "q": "Até que horas o posto atende?", "options": ["Até as quatro da tarde", "Até o meio-dia", "Até as seis da noite", "Até as oito da manhã"]}, {"kind": "negative", "q": "O que NÃO é preciso para se vacinar?", "options": ["Agendar hora", "Ter mais de sessenta anos", "Ir a uma unidade de saúde", "Ir durante o dia"]}] },
+  { id: "d02", tier: "D1", genre: "esporte", domain: "esporte", text: "O São Paulo venceu o Corinthians por dois a um ontem à noite, no Morumbi. O primeiro gol saiu de pênalti, aos vinte minutos do primeiro tempo. O técnico disse que o time folga hoje e volta a treinar amanhã de manhã.", questions: [{"kind": "main", "q": "Qual foi o resultado do jogo?", "options": ["São Paulo 2 a 1 Corinthians", "São Paulo 1 a 2 Corinthians", "Empate em dois a dois", "São Paulo 3 a 0 Corinthians"]}, {"kind": "detail", "q": "Como saiu o primeiro gol?", "options": ["De pênalti", "De cabeça", "De falta", "De contra-ataque"]}, {"kind": "order", "q": "Quando o time volta a treinar?", "options": ["Amanhã de manhã", "Hoje à tarde", "Hoje à noite", "Só na semana que vem"]}, {"kind": "detail", "q": "Onde foi o jogo?", "options": ["No Morumbi", "No Pacaembu", "Na Neo Química Arena", "No Maracanã"]}] },
+  { id: "d03", tier: "D2", genre: "telejornal", domain: "cidade", text: "A chuva forte da madrugada deixou três ruas do bairro alagadas e derrubou uma árvore na avenida principal. Os bombeiros foram chamados por volta das duas da manhã e retiraram a árvore antes das seis. A Defesa Civil pediu que os moradores evitem sair de carro hoje. As aulas na escola municipal foram suspensas e voltam amanhã. A previsão é de mais chuva no fim da tarde.", questions: [{"kind": "main", "q": "O que a notícia conta?", "options": ["O estrago da chuva da madrugada", "A festa do bairro", "A obra da avenida", "A volta às aulas"]}, {"kind": "detail", "q": "Quem tirou a árvore da avenida?", "options": ["Os bombeiros", "Os moradores", "A escola", "A prefeitura"]}, {"kind": "detail", "q": "O que foi suspenso por causa da chuva?", "options": ["As aulas na escola municipal", "A coleta de lixo", "O comércio da avenida", "O ônibus do centro"]}, {"kind": "infer", "q": "O que a Defesa Civil pediu?", "options": ["Evitar sair de carro", "Ficar na escola", "Ir para a avenida", "Ligar para os bombeiros"]}] },
+  { id: "d04", tier: "D2", genre: "entrevista", domain: "transporte", text: "O repórter perguntou ao motorista de ônibus como estava o trânsito naquela manhã. Ele respondeu que saiu da garagem às cinco e meia e que, por causa de um acidente na marginal, levou quarenta minutos a mais no trajeto. Contou também que muita gente desceu e foi a pé. No fim da entrevista, pediu paciência aos passageiros e disse que o horário de pico deve melhorar depois das nove.", questions: [{"kind": "main", "q": "Sobre o que o motorista falou?", "options": ["Sobre o trânsito daquela manhã", "Sobre a compra de ônibus novos", "Sobre a greve da empresa", "Sobre a escola dos filhos"]}, {"kind": "detail", "q": "O que causou o atraso?", "options": ["Um acidente na marginal", "Uma obra na garagem", "A chuva", "Um ônibus quebrado"]}, {"kind": "detail", "q": "Quantos minutos a mais ele levou?", "options": ["Quarenta minutos", "Quinze minutos", "Uma hora", "Cinco minutos"]}, {"kind": "infer", "q": "O que ele pediu aos passageiros?", "options": ["Paciência", "Dinheiro para a passagem", "Que descessem antes", "Que reclamassem na empresa"]}] },
+  { id: "d05", tier: "D2", genre: "jornal", domain: "dinheiro", text: "A conta de luz vai ficar mais cara no mês que vem. A companhia explicou que o aumento é de sete por cento e que vale para todas as casas do estado. Quem tem renda baixa pode pedir a tarifa social na agência, levando documentos e o número da conta. O pedido também pode ser feito pelo telefone. A companhia avisou que quem não pedir continua pagando o valor normal.", questions: [{"kind": "main", "q": "O que vai acontecer com a conta de luz?", "options": ["Vai ficar mais cara", "Vai ficar mais barata", "Vai acabar", "Vai mudar de nome"]}, {"kind": "detail", "q": "Qual é o aumento?", "options": ["Sete por cento", "Dois por cento", "Vinte por cento", "Cinquenta por cento"]}, {"kind": "action", "q": "O que a pessoa de renda baixa pode pedir?", "options": ["A tarifa social", "Um medidor novo", "A conta em dobro", "A mudança de endereço"]}, {"kind": "infer", "q": "O que acontece com quem não pedir?", "options": ["Continua pagando o valor normal", "Ganha desconto automático", "Perde a luz no mesmo dia", "Paga metade"]}] },
+  { id: "d06", tier: "D2", genre: "esporte", domain: "esporte", text: "No fim de semana, o time do bairro ganhou o campeonato amador. A final foi decidida nos pênaltis, depois de um empate sem gols no tempo normal. O goleiro pegou duas cobranças e virou o nome mais falado da festa. O treinador, que comanda o time há dez anos, disse que essa foi a primeira taça dele. A comemoração vai ser no salão da igreja no sábado.", questions: [{"kind": "main", "q": "O que o time do bairro ganhou?", "options": ["O campeonato amador", "A copa estadual", "Um jogo amistoso", "A taça do ano passado"]}, {"kind": "detail", "q": "Como a final foi decidida?", "options": ["Nos pênaltis", "No primeiro tempo", "Com um gol de falta", "Por desistência do outro time"]}, {"kind": "detail", "q": "Quem foi o nome mais falado da festa?", "options": ["O goleiro", "O treinador", "O árbitro", "O presidente do clube"]}, {"kind": "detail", "q": "Onde vai ser a comemoração?", "options": ["No salão da igreja", "No estádio do bairro", "Na casa do goleiro", "Na prefeitura"]}] },
+  { id: "d07", tier: "D3", genre: "telejornal", domain: "cidade", text: "As obras da nova estação de metrô começaram em março e devem durar dois anos. A previsão inicial era de dezoito meses, mas a empresa pediu mais seis por causa do terreno. Durante as obras, duas faixas da avenida ficam fechadas e os ônibus mudaram de ponto. A prefeitura prometeu um desvio sinalizado e disse que vai acompanhar o barulho à noite. Moradores reclamaram do movimento de caminhões desde as cinco da manhã. A empresa prometeu instalar painéis para diminuir o barulho e pediu que os motoristas usem a rua de trás enquanto a obra durar. A estação deve atender cerca de trinta mil passageiros por dia quando abrir.", questions: [{"kind": "main", "q": "Sobre o que é a notícia?", "options": ["As obras da nova estação de metrô", "A greve dos motoristas", "O aumento das passagens", "A festa do bairro"]}, {"kind": "detail", "q": "Quantos meses a mais a empresa pediu?", "options": ["Seis meses", "Dois meses", "Dezoito meses", "Dois anos"]}, {"kind": "order", "q": "O que mudou por causa das obras?", "options": ["Os ônibus mudaram de ponto", "Os trens pararam de circular", "A escola foi fechada", "O comércio fechou"]}, {"kind": "infer", "q": "Do que os moradores reclamaram?", "options": ["Do barulho dos caminhões de madrugada", "Da falta de ônibus", "Do preço da passagem", "Da demora do metrô"]}] },
+  { id: "d08", tier: "D3", genre: "entrevista", domain: "saude", text: "A repórter entrevistou a enfermeira responsável pelo posto de saúde do bairro. Ela explicou que a procura por exames de audição aumentou depois da campanha na rádio. Contou que o atendimento é feito de segunda a sexta, com senha distribuída a partir das sete da manhã. Disse também que o exame demora cerca de quarenta minutos e que o resultado sai na hora. Sobre os aparelhos, avisou que a entrega depende da fila e do laudo do médico. Sobre o horário de almoço, explicou que o posto fecha entre meio-dia e uma da tarde. No fim, pediu que os pacientes levem um documento com foto e o cartão do posto.", questions: [{"kind": "main", "q": "Quem foi entrevistada?", "options": ["A enfermeira do posto de saúde", "A médica do hospital", "A secretária da escola", "A motorista do ônibus"]}, {"kind": "detail", "q": "A partir de que horas a senha é distribuída?", "options": ["Das sete da manhã", "Das oito da noite", "Do meio-dia", "Das cinco da tarde"]}, {"kind": "detail", "q": "Quanto tempo demora o exame?", "options": ["Cerca de quarenta minutos", "Cerca de duas horas", "Cinco minutos", "O dia inteiro"]}, {"kind": "action", "q": "O que o paciente deve levar?", "options": ["Documento com foto e cartão do posto", "Só o pedido do médico", "O aparelho antigo", "A receita dos óculos"]}] },
+  { id: "d09", tier: "D4", genre: "telejornal", domain: "cidade", text: "O temporal que atingiu a capital na noite de ontem provocou estragos em várias regiões. Na zona norte, a água subiu em três avenidas movimentadas e deixou carros parados por mais de duas horas. Os bombeiros atenderam quarenta e duas chamadas, a maioria para retirar galhos de cima dos fios de eletricidade. Cerca de oito mil casas ficaram sem luz, e a companhia informou que o serviço foi restabelecido em boa parte dos bairros durante a madrugada. Três escolas cancelaram as aulas da manhã e avisaram as famílias por mensagem. O aeroporto funcionou com atrasos, mas nenhum voo foi cancelado. A previsão para hoje é de chuva fraca pela manhã e tempo firme à tarde. A Defesa Civil pediu que quem mora em área de risco procure abrigo e ligue para o número de emergência se ouvir estalos no telhado.", questions: [{"kind": "main", "q": "O que a reportagem trata?", "options": ["Os estragos do temporal na capital", "A inauguração de um parque", "A greve dos bombeiros", "A previsão do feriado"]}, {"kind": "detail", "q": "Quantas chamadas os bombeiros atenderam?", "options": ["Quarenta e duas", "Vinte e duas", "Oito mil", "Três"]}, {"kind": "order", "q": "O que as escolas fizeram?", "options": ["Cancelaram as aulas da manhã", "Fecharam por uma semana", "Mudaram o horário da tarde", "Receberam as famílias no ginásio"]}, {"kind": "action", "q": "O que a Defesa Civil pediu a quem mora em área de risco?", "options": ["Procurar abrigo e ligar se ouvir estalos", "Sair de carro da cidade", "Esperar o temporal na rua", "Ligar apenas para a escola"]}] },
+  { id: "d10", tier: "D4", genre: "entrevista", domain: "esporte", text: "O repórter conversou com o técnico do time depois da vitória de ontem. O treinador começou dizendo que o resultado foi justo e que o time correu mais no segundo tempo. Explicou que trocou dois jogadores no intervalo porque precisava de velocidade pelas laterais. Sobre o atacante que saiu machucado, avisou que o exame será feito hoje e que só depois saberá se ele joga no domingo. Contou que o grupo treina de manhã nos três dias seguintes e folga na quinta. Perguntado sobre o próximo adversário, respondeu que prefere pensar jogo a jogo e que a tabela não muda nada no vestiário. Sobre a arbitragem, preferiu não comentar. Disse também que o grupo está confiante e que o time volta ao estádio no domingo, às quatro da tarde. No fim, agradeceu a torcida que encheu o estádio mesmo com chuva.", questions: [{"kind": "main", "q": "Sobre o que o técnico falou?", "options": ["Sobre a vitória e o próximo jogo", "Sobre a compra de jogadores", "Sobre a reforma do estádio", "Sobre as férias do grupo"]}, {"kind": "detail", "q": "Por que ele trocou dois jogadores no intervalo?", "options": ["Porque precisava de velocidade pelas laterais", "Porque estavam machucados", "Porque o árbitro pediu", "Porque a torcida vaiou"]}, {"kind": "detail", "q": "Quando o time folga?", "options": ["Na quinta", "No domingo", "Na segunda", "Na sexta"]}, {"kind": "infer", "q": "O que ele disse sobre a torcida?", "options": ["Agradeceu, porque encheu o estádio mesmo com chuva", "Pediu que não fosse ao jogo", "Disse que atrapalhou o time", "Não falou da torcida"]}] },
+];
+
 /* Tradução dos 10 itens do HHIE-S (Ventry & Weinstein 1983), em pt-BR.
    O app rotula como instrumento de triagem; não é uma versão validada
    formalmente em português brasileiro nesta implementação. */
@@ -338,6 +353,9 @@ const DEFAULT_STATE = {
   hhie: [],
   speechTests: [],
   realLife: [],
+  discourse: [],
+  runningSpeech: [],
+  discourseLevel: "auto",
   gapTests: [],
   diary: {},
   diaryViewWeek: null,
@@ -347,7 +365,7 @@ const DEFAULT_STATE = {
   events: [],
   paused: false,
   ui: { large: false, contrast: false },
-  settings: { voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 },
+  settings: { voiceIndex: null, noise: "rosa", level: 1, rate: 0.9, discourseRepeat: false },
   dose: { date: "", seconds: 0 },
   recentItems: [],
   legacyObjectives: []
@@ -366,9 +384,10 @@ function migrateState(raw) {
   out.profile = Object.assign(deepCopy(DEFAULT_PROFILE), raw.profile || {});
   out.context = Object.assign(deepCopy(DEFAULT_CONTEXT), raw.context || {});
   out.ui = Object.assign({ large: false, contrast: false }, raw.ui || {});
-  out.settings = Object.assign({ voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 }, raw.settings || {});
+  out.settings = Object.assign({ voiceIndex: null, noise: "rosa", level: 1, rate: 0.9, discourseRepeat: false }, raw.settings || {});
+  if (!["auto", "D1", "D2", "D3", "D4"].includes(out.discourseLevel)) out.discourseLevel = "auto";
   out.dose = Object.assign({ date: "", seconds: 0 }, raw.dose || {});
-  ["sessions", "hhie", "speechTests", "realLife", "gapTests", "events", "recentItems", "legacyObjectives"].forEach(k => {
+  ["sessions", "hhie", "speechTests", "realLife", "discourse", "runningSpeech", "gapTests", "events", "recentItems", "legacyObjectives"].forEach(k => {
     if (!Array.isArray(out[k])) out[k] = [];
   });
   ["diary", "tv", "partner", "music"].forEach(k => {
@@ -1267,7 +1286,7 @@ function setTab(name) {
   Audio.stopNoise();
   if (name === "inicio") renderHome();
   if (name === "avaliacao") { renderAssessmentButtons(); renderAssessmentHistory(); renderAssessment(); }
-  if (name === "treino") { renderTrainingConfig(); renderTrainingHistory(); renderTraining(); }
+  if (name === "treino") { renderTrainingConfig(); renderTrainingHistory(); renderTraining(); renderDiscourse(); }
   if (name === "vida") renderVida();
   if (name === "relatorio") renderReport();
   if (name === "plano") { renderPlanForms(); }
@@ -1417,6 +1436,9 @@ function startAssessment(tp) {
     hhieAnswers: new Array(10).fill(null),
     speechTest: null,
     realLifeTest: null,
+    realLifeDone: false,
+    runningTest: null,
+    runningDone: false,
     gapTest: null
   };
   setTab("avaliacao");
@@ -1454,7 +1476,7 @@ function renderAssessment() {
   const bar = "<div class='stepbar'>" + steps.map((s, i) => "<span class='" + (i === assessment.step - 1 ? "active" : (i < assessment.step - 1 ? "done" : "")) + "'>" + esc(s) + "</span>").join("") + "</div>";
   if (assessment.step === 1) { area.innerHTML = bar + "<div id='hhieArea'></div>"; renderHHIE(); }
   else if (assessment.step === 2) { area.innerHTML = bar + "<div id='speechArea'></div>"; renderSpeechTest(); }
-  else if (assessment.step === 3) { area.innerHTML = bar + "<div id='realLifeArea'></div>"; renderRealLifeTest(); }
+  else if (assessment.step === 3) { area.innerHTML = bar + "<div id='realLifeArea'></div><div id='runningArea'></div>"; renderComprehensionStep(); }
   else if (assessment.step === 4) { area.innerHTML = bar + "<div id='gapArea'></div>"; renderGapTest(); }
   else { area.innerHTML = bar + "<div id='resultsArea'></div>"; renderAssessmentResults(); }
 }
@@ -1475,8 +1497,14 @@ function renderAssessmentHistory() {
   gap.slice(0, 8).forEach(r => {
     html += "<tr><td>Gap</td><td>" + esc(timepointLabel(r.timepoint)) + "</td><td>" + esc(fmtDay(r.date)) + "</td><td><strong>" + esc(r.thresholdMs) + " ms</strong>" + (r.lowMs == null ? "" : " (" + esc(r.lowMs) + "–" + esc(r.highMs) + ")") + (r.censored ? " · censurado" : "") + "</td></tr>";
   });
+  state.realLife.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8).forEach(r => {
+    html += "<tr><td>Vida real</td><td>" + esc(timepointLabel(r.timepoint)) + "</td><td>" + esc(fmtDay(r.date)) + "</td><td>" + (r.skipped ? "<span class='muted'>pulado</span>" : "<strong>" + esc(r.percent) + "%</strong> (" + esc(r.correct) + "/" + esc(r.scored) + ") · conjunto " + esc(r.set)) + "</td></tr>";
+  });
+  state.runningSpeech.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8).forEach(r => {
+    html += "<tr><td>Fala corrida</td><td>" + esc(timepointLabel(r.timepoint)) + "</td><td>" + esc(fmtDay(r.date)) + "</td><td>" + (r.skipped ? "<span class='muted'>pulado</span>" : "<strong>" + esc(r.percent) + "%</strong> (" + esc(r.correct) + "/" + esc(r.scored) + ") · " + esc(r.tier) + " " + esc(r.genre)) + "</td></tr>";
+  });
   html += "</tbody></table>";
-  if (!hhie.length && !speech.length && !gap.length) html = "<p class='muted'>Nenhuma avaliação registrada ainda.</p>";
+  if (!hhie.length && !speech.length && !gap.length && !state.realLife.length && !state.runningSpeech.length) html = "<p class='muted'>Nenhuma avaliação registrada ainda.</p>";
   box.innerHTML = html;
 }
 
@@ -1787,7 +1815,7 @@ function saveRealLifeResult(skipped) {
 
 function finishRealLife() {
   saveRealLifeResult(false);
-  assessment.step = 4;
+  assessment.realLifeDone = true;
   renderAssessmentHistory();
   renderAssessment();
 }
@@ -1795,8 +1823,443 @@ function finishRealLife() {
 function skipRealLife() {
   if (!confirm("Pular o bloco de vida real? Ele é opcional e não entra no cálculo do limiar.")) return;
   saveRealLifeResult(true);
+  assessment.realLifeDone = true;
+  renderAssessment();
+}
+
+/* ------------------- texto corrido (discurso contínuo) ------------------ */
+/*
+ * O problema que este bloco treina não é a frase difícil: é o áudio que não
+ * para. Uma notícia, uma entrevista e um programa de esporte chegam corridos,
+ * sem pausa e sem botão de repetir. Treinar frase por frase ensina a decifrar
+ * frase; não ensina a segurar o fio do texto. Aqui o texto toca inteiro, uma
+ * vez, e só depois aparecem as perguntas.
+ */
+
+const DISCOURSE_SNR = 10;
+const DISCOURSE_RATE = 1.0;
+const DISCOURSE_TIERS = ["D1", "D2", "D3", "D4"];
+const DISCOURSE_WEEK = { 1: "D1", 2: "D1", 3: "D2", 4: "D2", 5: "D3", 6: "D3", 7: "D4", 8: "D4" };
+const DISCOURSE_LABEL = { D1: "nota curta (~20 s)", D2: "notícia (~30 s)", D3: "reportagem (~45 s)", D4: "entrevista longa (~60 s)" };
+/* Textos reservados para a avaliação: nunca entram no treino, para a medida
+   continuar sendo material que ele não praticou. */
+const DISCOURSE_RESERVED = ["d03", "d04"];
+const DISCOURSE_SET_PASSAGE = { "1": "d03", "2": "d04" };
+
+let discourseRun = null;
+
+function discourseLadder() {
+  const protocol = protocolFor();
+  const ladder = protocol && protocol.content && protocol.content.discourse_ladder;
+  return Array.isArray(ladder) && ladder.length ? ladder : null;
+}
+
+function discourseTierForWeek(week) {
+  const ladder = discourseLadder();
+  if (ladder) {
+    const row = ladder.find(r => (r.weeks || []).indexOf(Number(week)) >= 0);
+    if (row && row.tier) return row.tier;
+  }
+  return DISCOURSE_WEEK[Number(week)] || "D1";
+}
+
+function effectiveDiscourseTier() {
+  return DISCOURSE_TIERS.indexOf(state.discourseLevel) >= 0 ? state.discourseLevel : discourseTierForWeek(state.week);
+}
+
+function shiftDiscourseLevel(dir) {
+  const current = effectiveDiscourseTier();
+  const i = DISCOURSE_TIERS.indexOf(current);
+  const next = DISCOURSE_TIERS[Math.max(0, Math.min(DISCOURSE_TIERS.length - 1, i + dir))];
+  state.discourseLevel = next;
+  save();
+  renderDiscourse();
+  toast("Nível do texto corrido: " + next + " · " + DISCOURSE_LABEL[next]);
+}
+
+function discoursePassageOfTier(tier) {
+  const list = DISCOURSE.filter(d => d.tier === tier && DISCOURSE_RESERVED.indexOf(d.id) < 0);
+  if (list.length) return list;
+  const anyTier = DISCOURSE.filter(d => DISCOURSE_RESERVED.indexOf(d.id) < 0);
+  return anyTier.length ? anyTier : DISCOURSE;
+}
+
+function usedDiscourseIds() {
+  return (state.discourse || []).map(r => r.passageId);
+}
+
+function buildDiscourseRun(passage) {
+  return {
+    phase: "listen",
+    passageId: passage.id,
+    tier: passage.tier,
+    genre: passage.genre,
+    text: passage.text,
+    questions: passage.questions.map(q => ({ kind: q.kind, q: q.q, answer: q.options[0], options: shuffle(q.options.slice()) })),
+    idx: 0,
+    correct: 0,
+    results: [],
+    replays: 0,
+    playing: false
+  };
+}
+
+function newDiscourseRun() {
+  if (doseToday() >= DOSE_CAP_SECONDS) {
+    toast("Limite de tolerabilidade de 10 min/dia atingido. Volte amanhã.");
+    return;
+  }
+  const tier = effectiveDiscourseTier();
+  const pool = discoursePassageOfTier(tier);
+  const used = usedDiscourseIds();
+  const fresh = pool.filter(d => used.indexOf(d.id) < 0);
+  const passage = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length ? fresh.length : pool.length))];
+  discourseRun = buildDiscourseRun(passage);
+  renderDiscourse();
+}
+
+function discourseAccuracyHint() {
+  const runs = (state.discourse || []).slice(-4);
+  if (runs.length < 2) return "";
+  const last = runs.slice(-2);
+  const ok = last.every(r => r.percent >= 75);
+  return ok
+    ? "<p class='small ok'>Duas sessões seguidas com 3 de 4 ou mais. Pode subir um nível quando quiser.</p>"
+    : "<p class='small muted'>Suba de nível quando acertar 3 de 4 em duas sessões seguidas. Se doer a cabeça ou cansar, fique onde está.</p>";
+}
+
+function renderDiscourse() {
+  const box = $("#discourseCard");
+  if (!box) return;
+  const tier = effectiveDiscourseTier();
+  const auto = DISCOURSE_TIERS.indexOf(state.discourseLevel) < 0;
+  const history = (state.discourse || []).slice(-5).reverse();
+
+  const levelRow = "<div class='kv'><span>Nível atual</span><span class='v'>" + esc(tier) + " · " + esc(DISCOURSE_LABEL[tier]) + " · " + (auto ? "automático (semana " + state.week + ")" : "escolhido por você") + "</span></div>" +
+    "<div class='row'><button id='btnDiscourseEasier' class='small'>◀ mais fácil</button><button id='btnDiscourseHarder' class='small'>mais difícil ▶</button></div>" +
+    discourseAccuracyHint();
+
+  const historyHtml = history.length
+    ? "<h3>Textos recentes</h3>" + table(["Quando", "Nível", "Acerto", "Repetições"], history.map(r => [esc(fmtDay(r.date)), esc(r.tier), esc(r.percent) + "% (" + esc(r.correct) + "/" + esc(r.scored) + ")", esc(r.replays || 0)]))
+    : "<p class='small muted'>Nenhum texto corrido ainda.</p>";
+
+  if (!discourseRun) {
+    box.innerHTML = "<div class='card'><div class='row between'><h2>Compreensão de texto corrido</h2><span class='badge ok'>sem parar</span></div>" +
+      "<p>Aqui o áudio <strong>não para</strong>: uma notícia, uma entrevista ou um trecho de programa de esporte, lido de uma vez, do jeito que chega na TV e no YouTube. As perguntas só aparecem <em>depois</em> que o texto termina.</p>" +
+      "<p class='small muted'>É o treino do ponto que mais atrapalha: perder o fio quando o áudio é corrido. Não é teste de audição; a voz é sintética e mais limpa que a TV.</p>" +
+      levelRow +
+      "<button id='btnStartDiscourse' class='primary big'>Ouvir um texto (" + esc(tier) + ", " + esc(DISCOURSE_LABEL[tier].replace(/[()]/g, "")) + ")</button>" +
+      "<label class='small' style='display:block;margin-top:10px'><input type='checkbox' id='chkDiscourseRepeat'" + (state.settings.discourseRepeat ? " checked" : "") + "> permitir uma repetição (modo treino; por padrão não repete)</label>" +
+      historyHtml + "</div>";
+    $("#btnStartDiscourse").addEventListener("click", newDiscourseRun);
+    $("#btnDiscourseEasier").addEventListener("click", () => shiftDiscourseLevel(-1));
+    $("#btnDiscourseHarder").addEventListener("click", () => shiftDiscourseLevel(1));
+    $("#chkDiscourseRepeat").addEventListener("change", ev => {
+      state.settings.discourseRepeat = Boolean(ev.target.checked);
+      save();
+      renderDiscourse();
+    });
+    return;
+  }
+
+  const t = discourseRun;
+
+  if (t.phase === "listen") {
+    box.innerHTML = "<div class='card accent'><div class='row between'><h2>Texto corrido — " + esc(t.tier) + "</h2><span class='badge'>" + esc(t.genre) + "</span></div>" +
+      "<p class='muted'>Áudio corrido, uma vez, com ruído de fundo. As perguntas aparecem quando o texto terminar.</p>" +
+      "<p class='small muted'>Duração aproximada: " + Math.max(10, Math.round(t.text.split(" ").length / 2.5)) + " s · SNR " + DISCOURSE_SNR + " dB relativo</p>" +
+      "<button id='btnPlayDiscourse' class='primary big'>Ouvir o texto</button>" +
+      "<div id='discourseStatus' class='feedback' role='status'></div></div>";
+    $("#btnPlayDiscourse").addEventListener("click", playDiscourse);
+    return;
+  }
+
+  if (t.phase === "questions") {
+    const q = t.questions[t.idx];
+    const canRepeat = Boolean(state.settings.discourseRepeat) && t.replays < 1;
+    box.innerHTML = "<div class='card accent'><div class='row between'><h2>Pergunta " + (t.idx + 1) + " de " + t.questions.length + "</h2><span class='badge'>" + esc(t.tier) + "</span></div>" +
+      "<p class='question'>" + esc(q.q) + "</p>" +
+      "<div id='discourseOptions' class='options'></div>" +
+      (canRepeat ? "<button id='btnRepeatDiscourse' class='small'>Ouvir de novo (conta 1 repetição)</button>" : "") +
+      "<p class='small muted'>Repetições: " + t.replays + "</p></div>";
+    const box2 = $("#discourseOptions");
+    q.options.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.textContent = opt;
+      b.addEventListener("click", () => answerDiscourse(i));
+      box2.appendChild(b);
+    });
+    if (canRepeat) $("#btnRepeatDiscourse").addEventListener("click", playDiscourseAgain);
+    return;
+  }
+
+  const pct = t.results.length ? Math.round(t.correct / t.results.length * 100) : 0;
+  const words = t.text.split(" ").length;
+  box.innerHTML = "<div class='card ok'><h2>Texto corrido concluído</h2>" +
+    "<div class='kv'><span>Acerto</span><span class='v'>" + pct + "% (" + t.correct + "/" + t.results.length + ")</span></div>" +
+    "<div class='kv'><span>Texto</span><span class='v'>" + esc(t.tier) + " · " + esc(t.genre) + " · " + words + " palavras</span></div>" +
+    "<div class='kv'><span>Repetições</span><span class='v'>" + t.replays + "</span></div>" +
+    "<p class='small muted'>Isto é treino de compreensão de texto, não limiar de audição. O que conta aqui é acompanhar o fio do assunto e segurar dois ou três fatos até o fim.</p>" +
+    "<button id='btnDiscourseNext' class='primary big'>Outro texto</button> <button id='btnDiscourseClose' class='big small'>Fechar</button></div>";
+  $("#btnDiscourseNext").addEventListener("click", () => { discourseRun = null; newDiscourseRun(); });
+  $("#btnDiscourseClose").addEventListener("click", () => { discourseRun = null; renderDiscourse(); });
+}
+
+function playDiscourse() {
+  const t = discourseRun;
+  if (!t || t.playing) return;
+  t.playing = true;
+  const status = $("#discourseStatus");
+  if (status) { status.textContent = "Tocando… o texto não para até o fim."; status.className = "feedback"; }
+  const btn = $("#btnPlayDiscourse");
+  if (btn) btn.disabled = true;
+  Audio.stopNoise();
+  Audio.startNoise(TEST_NOISE, TEST_LEVEL);
+  Audio._lastSnr = DISCOURSE_SNR;
+  Audio.setSnr(DISCOURSE_SNR);
+  setTimeout(async () => {
+    const ok = await Voice.speak(t.text, DISCOURSE_RATE);
+    Audio.stopNoise();
+    t.playing = false;
+    if (!ok) {
+      toast("A voz falhou. Abra em janela completa ou use https e tente de novo.");
+      if (btn) btn.disabled = false;
+      if (status) { status.textContent = "A voz não tocou. Tente de novo."; status.className = "feedback err"; }
+      return;
+    }
+    t.phase = "questions";
+    renderDiscourse();
+  }, 600);
+}
+
+function playDiscourseAgain() {
+  const t = discourseRun;
+  if (!t || t.playing) return;
+  if (t.replays >= 1) return;
+  t.replays += 1;
+  t.playing = true;
+  Audio.stopNoise();
+  Audio.startNoise(TEST_NOISE, TEST_LEVEL);
+  Audio._lastSnr = DISCOURSE_SNR;
+  Audio.setSnr(DISCOURSE_SNR);
+  setTimeout(async () => {
+    await Voice.speak(t.text, DISCOURSE_RATE);
+    Audio.stopNoise();
+    t.playing = false;
+    renderDiscourse();
+    toast("Repetição usada. Na vida real não existe esse botão.");
+  }, 400);
+}
+
+function answerDiscourse(idx) {
+  const t = discourseRun;
+  if (!t) return;
+  const q = t.questions[t.idx];
+  const correct = q.options[idx] === q.answer;
+  if (correct) t.correct += 1;
+  t.results.push({ kind: q.kind, correct: correct, answer: q.answer });
+  $$("#discourseOptions button").forEach(b => { b.disabled = true; });
+  const fb = $("#discourseOptions");
+  if (fb) {
+    $$("button", fb).forEach(b => { if (b.textContent === q.answer) b.classList.add("correct"); });
+  }
+  setTimeout(() => {
+    t.idx += 1;
+    if (t.idx >= t.questions.length) {
+      saveDiscourseRun();
+      t.phase = "done";
+    }
+    renderDiscourse();
+  }, 650);
+}
+
+function saveDiscourseRun() {
+  const t = discourseRun;
+  if (!t) return null;
+  const scored = t.results.length;
+  const record = {
+    id: "dc" + Date.now(),
+    date: new Date().toISOString(),
+    week: Number(state.week),
+    tier: t.tier,
+    genre: t.genre,
+    passageId: t.passageId,
+    scored: scored,
+    correct: t.correct,
+    percent: scored ? Math.round(t.correct / scored * 100) : 0,
+    replays: t.replays,
+    snr: DISCOURSE_SNR,
+    adaptive: false,
+    mode: "training"
+  };
+  state.discourse.push(record);
+  /* o texto corrido entra na dose do dia: ~1,2 s por palavra falada */
+  addDose(Math.round(t.text.split(" ").length * 1.2));
+  save();
+  return record;
+}
+
+/* ------------------- texto corrido na avaliação ------------------- */
+
+function runningSet(timepoint) {
+  return realLifeSet(timepoint);
+}
+
+function newRunningTest(timepoint) {
+  const set = runningSet(timepoint);
+  const id = DISCOURSE_SET_PASSAGE[set] || "d03";
+  const passage = DISCOURSE.find(d => d.id === id) || DISCOURSE[0];
+  return {
+    phase: "intro",
+    set: set,
+    passageId: passage.id,
+    tier: passage.tier,
+    genre: passage.genre,
+    text: passage.text,
+    questions: passage.questions.map(q => ({ kind: q.kind, q: q.q, answer: q.options[0], options: shuffle(q.options.slice()) })),
+    idx: 0,
+    correct: 0,
+    results: [],
+    snr: DISCOURSE_SNR,
+    skipped: false
+  };
+}
+
+function renderRunningTest() {
+  const box = $("#runningArea");
+  if (!box) return;
+  if (!assessment.runningTest) assessment.runningTest = newRunningTest(assessment.timepoint);
+  const t = assessment.runningTest;
+
+  if (t.phase === "intro") {
+    box.innerHTML = "<div class='card'><div class='row between'><h2>Compreensão de fala corrida</h2><span class='badge'>opcional</span></div>" +
+      "<p>Um texto corrido de cerca de trinta segundos, como um trecho de telejornal, e quatro perguntas depois. Aqui <strong>não existe botão de repetir</strong>: é assim que a TV e o YouTube funcionam.</p>" +
+      "<p class='small muted'>Exploratório, como o anterior: texto corrido mede audição, memória e atenção juntas. São quatro perguntas, então cada uma vale 25 pontos percentuais. A primeira medida é a referência.</p>" +
+      "<button id='btnStartRunning' class='primary big'>Começar (1 texto + 4 perguntas)</button> " +
+      "<button id='btnSkipRunning' class='ghost big'>Pular este bloco</button></div>";
+    $("#btnStartRunning").addEventListener("click", () => { t.phase = "listen"; renderRunningTest(); });
+    $("#btnSkipRunning").addEventListener("click", () => skipRunning());
+    return;
+  }
+
+  if (t.phase === "listen") {
+    box.innerHTML = "<div class='card accent'><div class='row between'><h2>Fala corrida — ouça uma vez</h2><span class='badge'>" + esc(t.genre) + "</span></div>" +
+      "<p class='muted'>O texto toca do começo ao fim, sem pausa. Depois aparecem quatro perguntas.</p>" +
+      "<button id='btnPlayRunning' class='primary big'>Ouvir o texto</button>" +
+      "<div id='runningStatus' class='feedback' role='status'></div></div>";
+    $("#btnPlayRunning").addEventListener("click", playRunning);
+    return;
+  }
+
+  if (t.phase === "questions") {
+    const q = t.questions[t.idx];
+    box.innerHTML = "<div class='card accent'><div class='row between'><h2>Pergunta " + (t.idx + 1) + " de " + t.questions.length + "</h2><span class='badge'>sem repetir</span></div>" +
+      "<p class='question'>" + esc(q.q) + "</p><div id='runningOptions' class='options'></div></div>";
+    const box2 = $("#runningOptions");
+    q.options.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.textContent = opt;
+      b.addEventListener("click", () => answerRunning(i));
+      box2.appendChild(b);
+    });
+    return;
+  }
+
+  finishRunning();
+}
+
+function playRunning() {
+  const t = assessment.runningTest;
+  if (!t) return;
+  const btn = $("#btnPlayRunning");
+  if (btn) { btn.disabled = true; btn.textContent = "Tocando…"; }
+  Audio.stopNoise();
+  Audio.startNoise(TEST_NOISE, TEST_LEVEL);
+  Audio._lastSnr = t.snr;
+  Audio.setSnr(t.snr);
+  setTimeout(async () => {
+    const ok = await Voice.speak(t.text, DISCOURSE_RATE);
+    Audio.stopNoise();
+    if (!ok) {
+      if (btn) { btn.disabled = false; btn.textContent = "Ouvir o texto"; }
+      toast("A voz falhou. Abra em janela completa e tente de novo.");
+      return;
+    }
+    t.phase = "questions";
+    renderRunningTest();
+  }, 500);
+}
+
+function answerRunning(idx) {
+  const t = assessment.runningTest;
+  if (!t) return;
+  const q = t.questions[t.idx];
+  const correct = q.options[idx] === q.answer;
+  if (correct) t.correct += 1;
+  t.results.push({ kind: q.kind, correct: correct, id: t.passageId });
+  $$("#runningOptions button").forEach(b => { b.disabled = true; });
+  setTimeout(() => {
+    t.idx += 1;
+    if (t.idx >= t.questions.length) { t.phase = "done"; }
+    renderRunningTest();
+  }, 400);
+}
+
+function saveRunningResult(skipped) {
+  const t = assessment.runningTest;
+  if (!t) return null;
+  const scored = t.results.length;
+  const record = {
+    id: "rs" + Date.now(),
+    timepoint: assessment.timepoint,
+    date: new Date().toISOString(),
+    set: t.set,
+    passageId: t.passageId,
+    tier: t.tier,
+    genre: t.genre,
+    scored: scored,
+    correct: t.correct,
+    percent: scored ? Math.round(t.correct / scored * 100) : null,
+    replays: 0,
+    snr: t.snr,
+    adaptive: false,
+    skipped: Boolean(skipped),
+    results: t.results.slice()
+  };
+  state.runningSpeech.push(record);
+  assessment.running = record;
+  save();
+  return record;
+}
+
+function finishRunning() {
+  saveRunningResult(false);
+  assessment.runningDone = true;
+  assessment.step = 4;
+  renderAssessmentHistory();
+  renderAssessment();
+}
+
+function skipRunning() {
+  if (!confirm("Pular o bloco de fala corrida? Ele é opcional e não entra no cálculo do limiar.")) return;
+  saveRunningResult(true);
+  assessment.runningDone = true;
   assessment.step = 4;
   renderAssessment();
+}
+
+function renderComprehensionStep() {
+  const rl = $("#realLifeArea");
+  const rn = $("#runningArea");
+  if (!assessment.realLifeDone) {
+    if (rn) rn.innerHTML = "";
+    renderRealLifeTest();
+    return;
+  }
+  if (rl) rl.innerHTML = "";
+  renderRunningTest();
 }
 
 /* ------------------------------ gap ----------------------------- */
@@ -2871,6 +3334,8 @@ function renderOutcomes(protocol) {
     tps.map(tp => "<td>" + outcomeCell(state.speechTests, tp, r => "<strong>" + esc(r.thresholdDb) + " dB</strong><br><span class='tiny'>" + (r.rangeDb == null ? "sem faixa" : "± " + esc(r.rangeDb)) + (r.censored ? " · censurado" : "") + "</span>") + "</td>").join("") + "</tr>";
   html += "<tr><td><strong>Vida real</strong><br><span class='tiny muted'>exploratório, %</span></td>" +
     tps.map(tp => "<td>" + outcomeCell(state.realLife.filter(r => !r.skipped), tp, r => "<strong>" + esc(r.percent) + "%</strong><br><span class='tiny'>" + esc(r.correct) + "/" + esc(r.scored) + " · conjunto " + esc(r.set) + "</span>") + "</td>").join("") + "</tr>";
+  html += "<tr><td><strong>Fala corrida</strong><br><span class='tiny muted'>exploratório, %</span></td>" +
+    tps.map(tp => "<td>" + outcomeCell(state.runningSpeech.filter(r => !r.skipped), tp, r => "<strong>" + esc(r.percent) + "%</strong><br><span class='tiny'>" + esc(r.correct) + "/" + esc(r.scored) + " · " + esc(r.tier) + "</span>") + "</td>").join("") + "</tr>";
   html += "<tr><td><strong>Gap</strong><br><span class='tiny muted'>temporal, tarefa</span></td>" +
     tps.map(tp => "<td>" + outcomeCell(state.gapTests, tp, r => "<strong>" + esc(r.thresholdMs) + " ms</strong><br><span class='tiny'>" + (r.lowMs == null ? "sem faixa" : esc(r.lowMs) + "–" + esc(r.highMs)) + "</span>") + "</td>").join("") + "</tr>";
   html += "</tbody></table>";
@@ -2894,7 +3359,8 @@ function renderChanges() {
     const s = latestByTimepoint(state.speechTests, tp);
     const g = latestByTimepoint(state.gapTests, tp);
     const rlRow = latestByTimepoint(state.realLife.filter(r => !r.skipped), tp);
-    if (!h && !s && !g && !rlRow) return;
+    const rsRow = latestByTimepoint(state.runningSpeech.filter(r => !r.skipped), tp);
+    if (!h && !s && !g && !rlRow && !rsRow) return;
     let hh = "—";
     if (baseH && h) {
       const d = h.score - baseH.score;
@@ -2918,15 +3384,26 @@ function renderChanges() {
         rr = rl.percent + "% (referência)";
       }
     }
+    const rs = latestByTimepoint(state.runningSpeech.filter(r => !r.skipped), tp);
+    const baseRs = latestByTimepoint(state.runningSpeech.filter(r => !r.skipped), "baseline");
+    let cc = "—";
+    if (rs && rs.percent != null) {
+      if (baseRs && baseRs.percent != null) {
+        const d = rs.percent - baseRs.percent;
+        cc = (d > 0 ? "+" : "") + d + " p.p. · " + (d === 0 ? "estável" : (d > 0 ? "melhor" : "pior"));
+      } else {
+        cc = rs.percent + "% (referência)";
+      }
+    }
     let gg = "—";
     if (baseG && g) {
       const d = Math.round((g.thresholdMs - baseG.thresholdMs) * 10) / 10;
       gg = (d > 0 ? "+" : "") + d + " ms · " + (d === 0 ? "estável" : (d < 0 ? "melhor" : "pior"));
     }
-    rows.push("<tr><td>" + esc(timepointLabel(tp)) + "</td><td>" + esc(hh) + "</td><td>" + esc(ss) + "</td><td>" + esc(gg) + "</td><td>" + esc(rr) + "</td></tr>");
+    rows.push("<tr><td>" + esc(timepointLabel(tp)) + "</td><td>" + esc(hh) + "</td><td>" + esc(ss) + "</td><td>" + esc(gg) + "</td><td>" + esc(rr) + "</td><td>" + esc(cc) + "</td></tr>");
   });
   if (!rows.length) { box.innerHTML = "<p class='muted'>Ainda não há duas avaliações para comparar.</p>"; return; }
-  box.innerHTML = "<table><thead><tr><th>Momento</th><th>HHIE-S</th><th>Fala</th><th>Gap</th><th>Vida real</th></tr></thead><tbody>" + rows.join("") + "</tbody></table>" +
+  box.innerHTML = "<table><thead><tr><th>Momento</th><th>HHIE-S</th><th>Fala</th><th>Gap</th><th>Vida real</th><th>Fala corrida</th></tr></thead><tbody>" + rows.join("") + "</tbody></table>" +
     "<p class='small muted'>Para os três indicadores, menor é melhor: menos handicap, limiar de fala com mais ruído e pausa menor detectável. A mudança mostra a direção; diferenças dentro da faixa de medição não são interpretáveis.</p>";
 }
 
@@ -3045,11 +3522,28 @@ function generateReport() {
   if (!rlBase || rlBase.skipped) lines.push("• Sem medida válida deste bloco; a primeira execução passa a ser a referência.");
   lines.push("• Bloco fixo, não adaptativo, no mesmo ruído. Frases longas medem audição, memória e atenção juntas; mudança aqui não é prova de transferência para a vida real.");
 
-  lines.push("2.5 Temporal — gap (tarefa específica)");
+  const rsBase = latestByTimepoint(state.runningSpeech, "baseline");
+  const rsLast = latestOverall(state.runningSpeech);
+  lines.push("2.5 Fala corrida — texto de telejornal/entrevista (exploratória, % de acerto)");
+  if (rsBase && !rsBase.skipped) lines.push("• Primeira medida (referência): " + rsBase.percent + "% em " + fmtDay(rsBase.date) + " · " + rsBase.tier + " · " + rsBase.genre);
+  if (rsLast && !rsLast.skipped && (!rsBase || rsLast.id !== rsBase.id)) lines.push("• Última: " + rsLast.percent + "% em " + fmtDay(rsLast.date) + " · " + rsLast.tier + " · " + rsLast.genre);
+  if (rsBase && rsLast && rsLast.id !== rsBase.id && rsBase.percent != null && rsLast.percent != null) {
+    const d = rsLast.percent - rsBase.percent;
+    lines.push("• Mudança: " + (d >= 0 ? "+" : "") + d + " pontos percentuais" + (rsBase.passageId !== rsLast.passageId ? " (textos diferentes; comparar com cautela)" : "") + ".");
+  }
+  if (!rsBase || rsBase.skipped) lines.push("• Sem medida válida deste bloco; a primeira execução passa a ser a referência.");
+  const runsDisc = (state.discourse || []).slice(-4);
+  if (runsDisc.length) {
+    const avg = Math.round(runsDisc.reduce((a, r) => a + Number(r.percent || 0), 0) / runsDisc.length);
+    const rep = runsDisc.reduce((a, r) => a + Number(r.replays || 0), 0);
+    lines.push("• Treino de texto corrido (últimos " + runsDisc.length + "): média " + avg + "% · repetições pedidas: " + rep + " · níveis: " + Array.from(new Set(runsDisc.map(r => r.tier))).join(", "));
+  }
+  lines.push("• Texto corrido não para e não repete: é a condição da TV e do YouTube. Quatro perguntas por texto; cada uma vale 25 pontos percentuais. Mede audição, memória e atenção juntas — não é limiar auditivo.");
+  lines.push("2.6 Temporal — gap (tarefa específica)");
   if (baseG) lines.push("• Linha de base: " + baseG.thresholdMs + " ms" + (baseG.lowMs == null ? "" : " (" + baseG.lowMs + "–" + baseG.highMs + ")"));
   if (lastG) lines.push("• Último: " + lastG.thresholdMs + " ms" + (lastG.lowMs == null ? "" : " (" + lastG.lowMs + "–" + lastG.highMs + ")") + (lastG.falsePositiveRate != null ? " | falso positivo " + Math.round(lastG.falsePositiveRate * 100) + "%" : ""));
   lines.push("• O treino melhora a tarefa treinada; transferência para fala no ruído não foi estabelecida.");
-  lines.push("2.6 Vida real — diário, TV, parceiro e música");
+  lines.push("2.7 Vida real — diário, TV, parceiro e música");
   if (diary) lines.push("• Diário da semana " + state.week + ": TV sem repetir " + diary.tv + " | conversas " + diary.conv + " | cansaço " + diary.fatigue + "/10 | " + (diary.note || "sem nota"));
   else lines.push("• Sem diário nesta semana.");
   const diaryWeeks = Object.keys(state.diary || {}).map(Number).filter(w => state.diary[w] && (state.diary[w].date || state.diary[w].updatedAt)).sort((a, b) => a - b);
@@ -3181,6 +3675,7 @@ function buildPackage() {
       hhie_s: state.hhie,
       speech_in_noise: state.speechTests,
       real_life_comprehension: state.realLife,
+      running_speech: state.runningSpeech,
       gap_detection: state.gapTests,
       transfer: transfer,
       diary: state.diary,
@@ -3188,6 +3683,31 @@ function buildPackage() {
       partner: state.partner,
       music: state.music
     },
+    runningStats: (state.runningSpeech || []).map(r => ({
+      date: r.date,
+      timepoint: r.timepoint,
+      set: r.set,
+      passageId: r.passageId,
+      tier: r.tier,
+      genre: r.genre,
+      scored: r.scored,
+      correct: r.correct,
+      percent: r.percent,
+      replays: r.replays,
+      adaptive: false,
+      skipped: r.skipped
+    })),
+    discourseStats: (state.discourse || []).map(r => ({
+      date: r.date,
+      week: r.week,
+      tier: r.tier,
+      genre: r.genre,
+      passageId: r.passageId,
+      scored: r.scored,
+      correct: r.correct,
+      percent: r.percent,
+      replays: r.replays
+    })),
     realLifeStats: (state.realLife || []).map(r => ({
       date: r.date,
       timepoint: r.timepoint,
@@ -3537,8 +4057,9 @@ function renderProtocol(protocol) {
     parts.push("<div class='card'><h2>Conteúdo das frases</h2><p class='muted'>" + esc(ct.principle) + "</p>" +
       table(["Semana", "Níveis", "Foco"], ct.training_ladder.map(r => [esc(r.weeks.join("–")), esc(r.tiers.join(" + ")), esc(r.focus)])) +
       "<h3>Degraus</h3>" + table(["Nível", "Máx. palavras", "O que é", "Por quê"], Object.keys(ct.material.tiers).map(k => [esc(k), esc(ct.material.tiers[k].max_words), esc(ct.material.tiers[k].what), esc(ct.material.tiers[k].why)])) +
+      (Array.isArray(ct.discourse_ladder) ? "<h3>Texto corrido</h3>" + table(["Semana", "Nível", "Foco"], ct.discourse_ladder.map(r => [esc(r.weeks.join("–")), esc(r.tier), esc(r.focus)])) : "") +
       "<h3>Material</h3><ul>" +
-      "<li>Prática: " + esc(ct.material.practice_items) + " · formas A/B/C: " + esc(ct.material.test_forms.A) + " cada · treino: " + esc(ct.material.training_items) + " · vida real: " + esc(ct.material.real_life_items) + "</li>" +
+      "<li>Prática: " + esc(ct.material.practice_items) + " · formas A/B/C: " + esc(ct.material.test_forms.A) + " cada · treino: " + esc(ct.material.training_items) + " · vida real: " + esc(ct.material.real_life_items) + " · texto corrido: " + esc(ct.material.discourse_passages) + " textos e " + esc(ct.material.discourse_questions) + " perguntas</li>" +
       "<li>" + esc(ct.material.kept_simple) + "</li><li>" + esc(ct.material.test_forms_untouched) + "</li>" +
       "</ul><p class='small'>" + esc(ct.plan) + "</p></div>");
   }
@@ -3717,6 +4238,7 @@ function renderAll() {
   renderAssessmentHistory();
   renderTrainingConfig();
   renderTrainingHistory();
+  renderDiscourse();
   renderVida();
   renderReport();
   renderSettings();

@@ -10,12 +10,12 @@ Sistema de reabilitação auditiva domiciliar para um idoso de 90 anos com presb
 construído para um padrão auditável: decisão determinística, evidência rastreável e
 medição que declara o que **não** consegue provar.
 
-## O que o v5 entrega
+## O que o v6 entrega
 
 - **Um desfecho primário funcional.** O HHIE-S (10 itens, 0–40) é a medida principal.
   Ele mede handicap percebido, não sensibilidade auditiva, e é o número mais próximo da
   vida real que o app consegue produzir.
-- **Quatro medidas separadas, sem misturar as coisas.**
+- **Cinco medidas separadas, sem misturar as coisas.**
   - *Tarefa treinada*: fala em ruído com 4 alternativas e escada adaptativa 2-down/1-up
     (alvo ≈ 71% de acerto, acima do acaso de 25%). O resultado é um **SNR relativo**, não
     QuickSIN, não audiograma.
@@ -23,6 +23,9 @@ medição que declara o que **não** consegue provar.
     a evidência mostra transferência limitada para estímulos não treinados.
   - *Vida real*: 4 frases longas do dia a dia, fixas, com pontuação em **% de acerto**.
     É **exploratório** e opcional: frase longa mede audição, memória e atenção juntas.
+  - *Fala corrida*: um texto contínuo (telejornal, entrevista, esporte) que toca **uma
+    vez** e não repete, com 4 perguntas depois. É o mais perto da TV e do YouTube que o
+    app consegue chegar; também **exploratório**.
   - *Temporal*: detecção de gap. O treino melhora a tarefa treinada; transferência para
     fala no ruído **não foi estabelecida**.
 - **Frases simples mantidas, teto mais alto.** As frases curtas originais continuam; o
@@ -30,6 +33,10 @@ medição que declara o que **não** consegue provar.
   N3 (longa com dois fatos, ordem ou inferência) → N4 (relato de 2–3 frases com pergunta
   de sentido). As formas de teste A/B/C não foram reescritas, para a linha de base
   continuar comparável. Detalhes em [docs/SENTENCES_V5.md](docs/SENTENCES_V5.md).
+- **Treino do áudio que não para.** Além das frases, o treino tem **texto corrido** em
+  quatro níveis (D1 nota curta ~20 s → D4 entrevista ~60 s), com o áudio tocando uma vez
+  e as perguntas vindo depois. Uma repetição só se o interruptor estiver ligado — e ela
+  é contada. Detalhes em [docs/CONNECTED_SPEECH_V6.md](docs/CONNECTED_SPEECH_V6.md).
 - **Treino de 8 semanas no próprio navegador.** 1 sessão curta por dia de treino,
   2–3 dias por semana, teto de 10 min/dia. O app lê o plano determinístico, conduz a
   sessão adaptativa, faz o treino de gap da semana 5 e termina sempre em um acerto.
@@ -38,7 +45,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 99 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 106 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -72,7 +79,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            99 testes (pytest) incluindo paridade Python↔JS
+tests/            106 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -161,10 +168,29 @@ Bloco novo e **opcional** dentro da avaliação (entre a fala em ruído e o gap)
 Por que é exploratório: acertar frase longa exige audição **e** memória **e** atenção.
 Com 4 itens, um item vale 25 pontos percentuais.
 
+### Fala corrida (texto contínuo)
+
+O ponto que mais atrapalha na vida real: entrevista, telejornal e programa de
+esportes chegam **corridos, sem pausa e sem botão de repetir**.
+
+- 10 textos originais (nada copiado de programa), 40 perguntas, gêneros
+  telejornal, entrevista, jornal e esporte;
+- o áudio toca uma vez; as perguntas aparecem depois; na avaliação **não há**
+  botão de repetir;
+- D1 (~20 s) → D4 (~60 s), uma faixa a cada duas semanas, com botão de subir ou
+  descer um degrau;
+- dois textos ficam reservados para medir e nunca entram no treino;
+- resultado só em **% de acerto**, com o aviso de que 4 perguntas = 25 p.p. por
+  pergunta.
+
+Para o áudio real, o protocolo continua sendo o trecho de 1–2 min do programa
+dele, assistido uma vez, com três perguntas escritas pela família e anotação no
+diário — isso o app não mede.
+
 ### Testes e verificação
 
 ```bash
-make test         # pytest (99 testes)
+make test         # pytest (106 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make smoke        # opcional: fluxo completo no jsdom (requer npm install jsdom)
