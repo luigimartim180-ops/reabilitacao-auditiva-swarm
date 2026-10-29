@@ -119,6 +119,10 @@ function makeDom(seed, url, extra, options) {
         }
       };
 
+      if (options && options.fetch) {
+        window.fetch = options.fetch;
+        window.navigator.sendBeacon = () => false;
+      }
       if (seed) {
         window.localStorage.setItem("audioswarm.v4.state", JSON.stringify(seed));
       }
@@ -363,6 +367,123 @@ async function twoSessionsOneDayDoNotAdvanceTheWeek() {
   check("two sessions in one day count as one training day", text.includes("1 / 3"), text.slice(0, 90));
   check("two sessions in one day do not finish the week", !dom.window.document.querySelector("#btnAdvanceWeek"));
   dom.window.close();
+}
+
+function makeFetchMock(remote) {
+  const calls = [];
+  const mock = async (url, opts) => {
+    const method = (opts && opts.method) || "GET";
+    calls.push({ url, method, body: opts && opts.body });
+    if (url.indexOf("/api/state") < 0) return { ok: false, status: 404, async json() { return {}; } };
+    if (method === "GET") {
+      if (!remote) return { ok: false, status: 204, async json() { return {}; } };
+      return { ok: true, status: 200, async json() { return remote; } };
+    }
+    return { ok: true, status: 200, async json() { return { ok: true }; } };
+  };
+  mock.calls = calls;
+  return mock;
+}
+
+async function trainingWithoutBaselineFlow() {
+  // estado de primeira vez: nenhuma avaliação feita
+  const dom = makeDom(null, "https://example.org/app/", null, { fetch: makeFetchMock(null) });
+  await sleep(160);
+  click(dom, '[data-tab="treino"]');
+  await sleep(60);
+  const warn = dom.window.document.querySelector("#trainingPlanSummary").textContent;
+  check("sem linha de base o treino avisa", warn.includes("Sem avaliação inicial"), warn.slice(0, 80));
+  click(dom, "#btnStartSession");
+  await sleep(80);
+  check("treinar sem avaliação inicial é permitido", Boolean(dom.window.document.querySelector("#btnPlayTraining")));
+  dom.window.close();
+}
+
+async function mirrorRecoveryFlow() {
+  const now = new Date().toISOString();
+  const saved = JSON.stringify({
+    version: 4, week: 5, baselineDone: true, createdAt: now,
+    sessions: [{ id: "m1", date: now, week: 5, accuracy: 80, correct: 8, total: 10, startSnr: 6, endSnr: 4, moves: 1, fatigue: 2, durationSec: 200, noise: "rosa", level: 1, rate: 0.9, endedOnSuccess: true }],
+    hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 20, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
+  });
+  // só o espelho existe: a chave principal sumiu
+  const dom = makeDom(null, "https://example.org/app/", { "audioswarm.v4.state.mirror": saved });
+  await sleep(180);
+  click(dom, '[data-tab="inicio"]');
+  await sleep(60);
+  const header = dom.window.document.querySelector("#weekSelect").value;
+  check("estado volta do espelho quando a chave principal some", header === "5", header);
+  const st = state(dom);
+  check("o espelho recupera as sessões", st && st.sessions.length === 1, st && String(st.sessions && st.sessions.length));
+  dom.window.close();
+}
+
+async function serverRestoreFlow() {
+  const now = new Date().toISOString();
+  const remote = {
+    savedAt: new Date().toISOString(),
+    state: {
+      version: 4, week: 6, baselineDone: true, createdAt: now,
+      sessions: [{ id: "r1", date: now, week: 6, accuracy: 88, correct: 7, total: 8, startSnr: 4, endSnr: 2, moves: 2, fatigue: 1, durationSec: 180, noise: "casa", level: 1, rate: 0.9, endedOnSuccess: true }],
+      hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 18, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
+      diary: { 6: { tv: "3-5", conv: "1-2", fatigue: 2, note: "jornal sem repetir", date: now.slice(0, 10) } },
+    },
+  };
+  const mock = makeFetchMock(remote);
+  const dom = makeDom(null, "https://example.org/app/", null, { fetch: mock });
+  await sleep(220);
+  const st = state(dom);
+  check("abre vazio e adota o progresso do servidor", st && st.week === 6, st && String(st.week));
+  check("o progresso do servidor traz as sessões", st && st.sessions.length === 1);
+  check("o progresso do servidor traz o diário", st && st.diary && Object.keys(st.diary).length === 1);
+  check("o app avisa que recuperou do servidor",
+    dom.window.document.querySelector("#syncStatus").textContent.includes("Cópia no servidor ativa"),
+    dom.window.document.querySelector("#syncStatus").textContent.slice(0, 60));
+  check("o servidor recebe o estado de volta (POST)", mock.calls.some(c => c.method === "POST"));
+  dom.window.close();
+}
+
+async function staticHostDoesNotFakeSyncFlow() {
+  // Netlify/SPA devolve index.html (HTML) com 200 em /api/state: não é API.
+  const htmlMock = async () => ({ ok: true, status: 200, async json() { throw new Error("HTML"); }, async text() { return "<!doctype html>"; } });
+  const dom = makeDom(null, "https://example.netlify.app/app/", null, { fetch: htmlMock });
+  await sleep(200);
+  const line = dom.window.document.querySelector("#syncStatus").textContent;
+  check("host estático não é confundido com servidor", line.includes("Sem cópia no servidor"), line.slice(0, 70));
+  dom.window.close();
+}
+
+async function resumeCodeFlow() {
+  const now = new Date().toISOString();
+  const seed = {
+    version: 4, week: 4, baselineDone: true, createdAt: now,
+    sessions: [{ id: "c1", date: now, week: 4, accuracy: 75, correct: 6, total: 8, startSnr: 6, endSnr: 5, moves: 1, fatigue: 2, durationSec: 190, noise: "rosa", level: 1, rate: 0.9, endedOnSuccess: true }],
+    hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 21, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
+  };
+  const dom = makeDom(seed, "https://example.org/app/", null, { fetch: makeFetchMock(null) });
+  await sleep(180);
+  click(dom, '[data-tab="ajustes"]');
+  await sleep(60);
+  dom.window.document.querySelector("#btnMakeResumeCode").click();
+  await sleep(40);
+  const code = dom.window.document.querySelector("#resumeCodeOut").value;
+  check("o código de retomada é gerado", code.startsWith("AW1."), code.slice(0, 12));
+  check("o código é texto, não arquivo", code.length > 200 && !code.includes("\n"));
+  dom.window.close();
+
+  // aparelho/origem nova, vazia: restaura pelo código
+  const fresh = makeDom(null, "https://outro.example.org/app/", null, { fetch: makeFetchMock(null) });
+  await sleep(160);
+  click(fresh, '[data-tab="ajustes"]');
+  await sleep(60);
+  fresh.window.document.querySelector("#resumeCodeOut").value = code;
+  fresh.window.document.querySelector("#btnApplyResumeCode").click();
+  await sleep(120);
+  const st = state(fresh);
+  check("o código restaura a semana", st && st.week === 4, st && String(st.week));
+  check("o código restaura as sessões", st && st.sessions.length === 1);
+  check("o código restaura a avaliação inicial", st && st.baselineDone === true);
+  fresh.window.close();
 }
 
 async function reportFlow(dom) {
@@ -902,6 +1023,11 @@ async function demoFlow() {
   await week4AssessmentFlow();
   await realLifeSkipFlow();
   await discourseFlow();
+  await trainingWithoutBaselineFlow();
+  await mirrorRecoveryFlow();
+  await serverRestoreFlow();
+  await resumeCodeFlow();
+  await staticHostDoesNotFakeSyncFlow();
   await demoFlow();
 
   const failed = results.filter((r) => !r.ok);

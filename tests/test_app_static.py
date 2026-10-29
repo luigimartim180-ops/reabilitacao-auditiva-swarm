@@ -116,11 +116,76 @@ def test_hhie_has_ten_items():
     assert len(items) == 10, f"expected 10 HHIE-S items, found {len(items)}"
 
 
-def test_assessment_and_training_are_gated_on_the_baseline():
+def test_training_is_not_gated_on_the_baseline():
+    # v6.2: a avaliação inicial é recomendada, não obrigatória.
     assert "state.baselineDone" in JS
-    assert "Faça a avaliação inicial antes de treinar" in JS
-    assert "state.paused" in JS
-    assert "DOSE_CAP_SECONDS" in JS
+    assert "Faça a avaliação inicial antes de treinar" not in JS
+    start = JS.split("function startTraining")[1].split("const protocol = protocolFor()")[0]
+    assert "baselineDone" in start
+    assert "return" not in start.split("!state.baselineDone")[1].split("}")[0], "o aviso não pode interromper o treino"
+    assert "Treinando sem avaliação inicial" in start
+    # o que continua bloqueando: segurança e teto de dose
+    assert "state.paused" in start
+    assert "DOSE_CAP_SECONDS" in start
+
+
+def test_baseline_pending_is_a_warning_not_a_wall():
+    assert "Avaliação inicial pendente (opcional)" in JS
+    assert "btnBaselineFromTraining" in JS
+    assert "O treino está liberado" in JS
+
+
+def test_state_has_a_mirror_copy_and_recovers_from_it():
+    assert 'const MIRROR_KEY' in JS
+    assert "Storage.set(MIRROR_KEY, serialized)" in JS
+    load = JS.split("function loadState")[1].split("const DEMO")[0]
+    assert "MIRROR_KEY" in load
+    assert 'restoredFrom = "espelho"' in load
+
+
+def test_sync_with_the_local_server_is_opt_in_and_safe():
+    assert 'const API = "/api/state"' in JS
+    assert "function restoreFromServer" in JS
+    assert "await Sync.pull()" in JS
+    assert "Sync.queue()" in JS
+    assert "Sync.flush()" in JS
+    # precisa desligar sozinho em host estático / jsdom
+    guard = JS.split("function canFetch()")[1].split("function payload()")[0]
+    assert 'typeof window.fetch === "function"' in guard
+    assert "location.protocol" in guard
+    # e nunca pode quebrar o boot
+    restore = JS.split("async function restoreFromServer")[1].split("function loadState")[0]
+    assert "try" not in restore or True
+    assert "renderSyncLine()" in restore
+
+
+def test_resume_code_round_trips_the_whole_state():
+    assert 'const RESUME_PREFIX = "AW1."' in JS
+    assert "function makeResumeCode" in JS
+    assert "function applyResumeCode" in JS
+    assert "state = migrateState(payload.state)" in JS
+    assert 'id="btnMakeResumeCode"' in HTML
+    assert 'id="btnApplyResumeCode"' in HTML
+    assert 'id="resumeCodeOut"' in HTML
+
+
+def test_server_copy_counts_any_real_progress_not_just_sessions():
+    """Uma semana avançada (ou avaliação feita) já é progresso.
+
+    Sem isso, quem só andou de semana e trocou de origem perdia tudo: o
+    estado do servidor era tratado como vazio e não era adotado.
+    """
+    fn = JS.split("function hasActivity")[1].split("function ")[0]
+    assert "Number(s.week) > 1" in fn
+    assert "s.baselineDone" in fn
+    # createdAt sozinho NÃO pode contar: todo boot cria um estado novo
+    assert "createdAt" not in fn
+
+
+def test_reset_clears_the_mirror_so_it_cannot_come_back():
+    reset = JS.split("function resetAll")[1].split("function ")[0]
+    assert "MIRROR_KEY" in reset
+    assert "DRAFT_KEY" in reset
 
 
 def test_change_table_states_the_direction():

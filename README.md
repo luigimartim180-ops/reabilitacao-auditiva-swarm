@@ -47,7 +47,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 109 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 122 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -81,7 +81,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            109 testes (pytest) incluindo paridade Python↔JS
+tests/            122 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -170,6 +170,21 @@ Bloco novo e **opcional** dentro da avaliação (entre a fala em ruído e o gap)
 Por que é exploratório: acertar frase longa exige audição **e** memória **e** atenção.
 Com 4 itens, um item vale 25 pontos percentuais.
 
+### O progresso não se perde (v6.2)
+
+- A **avaliação inicial não é obrigatória**: o treino roda sem ela, com aviso de que
+  sem linha de base não há como comparar mudança.
+- O estado vive em **três camadas**: `localStorage` (principal), uma **cópia espelho**
+  na mesma origem e, quando servido por `make serve`, uma **cópia no servidor** em
+  `data/app-state.json`.
+- Se a URL mudar (preview reiniciou) ou o servidor cair, ao abrir o app ele **adota o
+  progresso do servidor** e avisa: *"Progresso recuperado do servidor"*. A sessão
+  interrompida também volta, pelo rascunho.
+- Em hospedagem estática (sem API), use **Ajustes → Código de retomada**: um texto
+  `AW1.…` com todo o progresso, para colar em outro aparelho/endereço.
+
+Detalhes: [docs/PERSISTENCE.md](docs/PERSISTENCE.md).
+
 ### Fala corrida (texto contínuo)
 
 O ponto que mais atrapalha na vida real: entrevista, telejornal e programa de
@@ -192,10 +207,12 @@ diário — isso o app não mede.
 ### Testes e verificação
 
 ```bash
-make test         # pytest (109 testes)
+make test         # pytest (122 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
+make serve        # app em http://localhost:12000 COM progresso salvo no servidor
 make smoke        # opcional: fluxo completo no jsdom (requer npm install jsdom)
+make e2e-sync     # opcional: app + servidor reais; prova que o progresso volta após queda/URL nova
 ```
 
 ## O que conta como resultado

@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "6.1.0";
+const APP_VERSION = "6.2.0";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
@@ -23,6 +23,8 @@ const DRAFT_KEY = STORAGE_KEY + ".draft";
    written on a short debounce; if the machine is switched off inside that
    window, this key is what restores the text. */
 const DIARY_KEY = STORAGE_KEY + ".diary";
+/* Cópia espelho: se a chave principal corromper, o estado volta daqui. */
+const MIRROR_KEY = STORAGE_KEY + ".mirror";
 const DRAFT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 const $ = (sel, root) => (root || document).querySelector(sel);
@@ -442,11 +444,205 @@ const Storage = (function () {
   };
 })();
 
+let restoredFrom = null; // "espelho" | "servidor" | null
+
+/* ------------------------------------------------------------------ */
+/* Sincronização com o servidor (tools/serve.py)                       */
+/* ------------------------------------------------------------------ */
+/*
+ * O localStorage pertence à ORIGEM da página. Quando o preview reinicia, a URL
+ * muda, a origem muda e o navegador entrega um armazenamento vazio: o progresso
+ * "desaparece" mesmo tendo sido salvo. Se o app estiver sendo servido por
+ * tools/serve.py, existe uma API /api/state que guarda o estado em disco. O app
+ * empurra cada save para lá e, ao abrir, adota o que for mais recente.
+ *
+ * Em host estático (Netlify, GitHub Pages) a API responde 404: o Sync se desliga
+ * sozinho e tudo continua funcionando apenas com o localStorage.
+ */
+const Sync = (function () {
+  const API = "/api/state";
+  let state_ = "unknown"; // "unknown" | "on" | "off"
+  let timer = null;
+  let inflight = false;
+
+  function canFetch() {
+    try {
+      return typeof window !== "undefined" && typeof window.fetch === "function" &&
+        /^https?:$/.test(location.protocol);
+    } catch (e) { return false; }
+  }
+
+  function payload() {
+    let draft = null;
+    try { draft = Storage.get(DRAFT_KEY); } catch (e) { draft = null; }
+    return JSON.stringify({ savedAt: new Date().toISOString(), state: state, draft: draft });
+  }
+
+  async function probe() {
+    if (state_ !== "unknown") return state_ === "on";
+    if (!canFetch()) { state_ = "off"; return false; }
+    try {
+      const res = await window.fetch(API, { method: "GET", cache: "no-store" });
+      if (res.status === 204) {
+        state_ = "on";
+      } else if (!res.ok) {
+        state_ = "off";
+      } else {
+        /* host estático com fallback de SPA devolve index.html com 200:
+           só aceitamos a API se o corpo for JSON do nosso formato. */
+        let data = null;
+        try { data = await res.json(); } catch (e) { data = null; }
+        state_ = (data && (data.state || data.ok || data.storage)) ? "on" : "off";
+      }
+    } catch (e) { state_ = "off"; }
+    return state_ === "on";
+  }
+
+  async function pull() {
+    if (!(await probe())) return null;
+    try {
+      const res = await window.fetch(API, { method: "GET", cache: "no-store" });
+      if (res.status === 204) return null;
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data && data.state ? data : null;
+    } catch (e) { return null; }
+  }
+
+  async function pushNow() {
+    if (!(await probe()) || DEMO_MODE) return false;
+    if (inflight) return false;
+    inflight = true;
+    try {
+      const res = await window.fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload(),
+        keepalive: true
+      });
+      return res.ok;
+    } catch (e) { return false; }
+    finally { inflight = false; }
+  }
+
+  function queue(delay) {
+    if (DEMO_MODE) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => { pushNow().then(renderSyncLine); }, Math.max(250, Number(delay) || 900));
+  }
+
+  function flush() {
+    clearTimeout(timer);
+    if (DEMO_MODE) return;
+    if (!canFetch()) return;
+    try {
+      const body = payload();
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: "application/json" });
+        if (navigator.sendBeacon(API, blob)) return;
+      }
+    } catch (e) { /* cai no push normal */ }
+    pushNow();
+  }
+
+  function status() { return state_; }
+
+  return { probe, pull, pushNow, queue, flush, status, get enabled() { return state_ === "on"; } };
+})();
+
+/* "Tem progresso" não é só ter sessão: semana avançada, avaliação feita, diário
+   escrito ou qualquer histórico contam. createdAt NÃO conta — toda abertura cria
+   um estado novo com createdAt. */
+function hasActivity(s) {
+  if (!s) return false;
+  if (Number(s.week) > 1) return true;
+  if (s.baselineDone || s.completed || s.retentionDone) return true;
+  const lists = ["sessions", "hhie", "speechTests", "gapTests", "realLife", "runningSpeech", "discourse", "events"];
+  if (lists.some(k => Array.isArray(s[k]) && s[k].length)) return true;
+  if (s.diary && Object.keys(s.diary).length) return true;
+  if (s.tv && Object.keys(s.tv).length) return true;
+  if (s.music && Object.keys(s.music).length) return true;
+  return false;
+}
+
+function renderSyncLine() {
+  const el = $("#syncStatus");
+  if (!el) return;
+  if (DEMO_MODE) { el.textContent = "demonstração: não salva em lugar nenhum"; el.className = "small muted"; return; }
+  if (Sync.status() === "on") {
+    el.textContent = "Cópia no servidor ativa: se o servidor cair ou a URL mudar, o app recupera o progresso daqui.";
+    el.className = "small ok";
+  } else if (Sync.status() === "off") {
+    el.textContent = "Sem cópia no servidor (hospedagem estática). O progresso fica neste navegador; exporte o backup para trocar de aparelho.";
+    el.className = "small muted";
+  } else {
+    el.textContent = "Verificando cópia no servidor…";
+    el.className = "small muted";
+  }
+}
+
+/* Ao abrir: se o servidor tem progresso e o navegador está vazio (ou atrás),
+   adota o do servidor. É isso que faz o treino voltar onde estava. */
+async function restoreFromServer() {
+  if (DEMO_MODE) return;
+  const remote = await Sync.pull();
+  renderSyncLine();
+  if (!remote || !remote.state) return;
+
+  const remoteState = remote.state;
+  const localActive = hasActivity(state);
+  const remoteActive = hasActivity(remoteState);
+  const localAt = Date.parse(state.updatedAt || "") || 0;
+  const remoteAt = Date.parse(remote.savedAt || remote.updatedAt || "") || 0;
+
+  let adopt = false;
+  let why = "";
+  if (!localActive && remoteActive) { adopt = true; why = "servidor"; }
+  else if (remoteActive && remoteAt > localAt + 2000) { adopt = true; why = "servidor"; }
+
+  if (!adopt) {
+    if (localActive) Sync.queue(300);
+    return;
+  }
+  state = migrateState(remoteState);
+  restoredFrom = why;
+  if (remote.draft) {
+    try {
+      if (!Storage.get(DRAFT_KEY)) Storage.set(DRAFT_KEY, remote.draft);
+    } catch (e) { /* ignore */ }
+  }
+  if (!DEMO_MODE) {
+    diaryViewWeek = Number(state.diaryViewWeek) || Number(state.week);
+    mergeHotDiary();
+  }
+  pendingDraft = DEMO_MODE ? null : loadDraft();
+  save();
+  renderAll();
+  renderAssessment();
+  renderResumeNotice();
+  renderSyncLine();
+  toast("Progresso recuperado do servidor: semana " + state.week + (state.sessions.length ? " · " + state.sessions.length + " sessão(ões)" : "") + ".");
+}
+
 function loadState() {
+  let main = null;
   try {
     const raw = Storage.get(STORAGE_KEY);
-    if (raw) return migrateState(JSON.parse(raw));
-  } catch (e) { /* estado corrompido: começa limpo */ }
+    if (raw) { main = JSON.parse(raw); }
+  } catch (e) { main = null; }
+  if (main && typeof main === "object") return migrateState(main);
+
+  /* A chave principal sumiu ou corrompeu: tentar o espelho antes de começar do zero. */
+  try {
+    const raw = Storage.get(MIRROR_KEY);
+    if (raw) {
+      const mirror = JSON.parse(raw);
+      if (mirror && typeof mirror === "object") {
+        restoredFrom = "espelho";
+        return migrateState(mirror);
+      }
+    }
+  } catch (e) { /* espelho também inválido */ }
   return newState();
 }
 
@@ -522,8 +718,14 @@ function save() {
     setSaveStatus("demo: não salva", "err");
     return true;
   }
-  const ok = Storage.set(STORAGE_KEY, JSON.stringify(state));
+  state.updatedAt = new Date().toISOString();
+  let serialized = null;
+  try { serialized = JSON.stringify(state); } catch (e) { serialized = null; }
+  const ok = serialized ? Storage.set(STORAGE_KEY, serialized) : false;
+  /* Espelho separado: sobrevive a uma chave principal corrompida/cheia. */
+  if (ok && serialized) Storage.set(MIRROR_KEY, serialized);
   if (ok) lastSavedAt = new Date();
+  if (ok) Sync.queue();
   setSaveStatus(ok ? "salvo " + clockLabel(lastSavedAt) : "falha ao salvar", ok ? "ok" : "err");
   if (!ok) toast("Não foi possível salvar: armazenamento cheio ou bloqueado. Exporte o backup.");
   return ok;
@@ -1275,10 +1477,13 @@ function renderStorageBanner() {
    another app is open, so the unfinished session is written before that. */
 function flushSession() {
   flushDiary();
-  if (!training) return;
-  if (training.phase === "finished") finishTrainingAndSave();
-  else saveDraft();
-  save();
+  if (training) {
+    if (training.phase === "finished") finishTrainingAndSave();
+    else saveDraft();
+    save();
+  }
+  /* mesmo sem sessão aberta, garantir que o servidor tem a última versão */
+  Sync.flush();
 }
 
 function setTab(name) {
@@ -1348,6 +1553,7 @@ function renderHome() {
     const pct = planned ? Math.min(100, Math.round(done / planned * 100)) : 0;
     const eff = effectiveSettings(cfg);
     summary.innerHTML =
+      (state.baselineDone ? "" : "<div class='card warn' style='margin-bottom:10px'><strong>Sem avaliação inicial.</strong> O treino está liberado; só não há linha de base para comparar mudança depois. <button id='btnBaselineFromTraining' class='small'>Fazer avaliação</button></div>") +
       "<div class='kv'><span>Foco da semana</span><span class='v'>" + esc(focusLabel(cfg.focus)) + "</span></div>" +
       "<div class='kv'><span>Dias treinados</span><span class='v'>" + esc(done) + " / " + esc(planned) + " nesta semana" + (sessionCount > done ? " · " + esc(sessionCount) + " sessões" : "") + "</span></div>" +
       "<div class='kv'><span>Dose de hoje</span><span class='v'>" + esc(doseMin) + " / 10 min" + (doseMin >= 10 ? " · teto atingido" : " · restam " + esc(Math.max(0, 10 - doseMin)) + " min") + "</span></div>" +
@@ -1355,6 +1561,8 @@ function renderHome() {
       "<div class='kv'><span>Ruído recomendado</span><span class='v'>" + esc(noiseLabel(eff.noise)) + " · nível " + esc(eff.level) + "</span></div>" +
       "<div class='kv'><span>Início de SNR</span><span class='v'>" + esc(snrText(cfg.snr_start_db)) + "</span></div>" +
       "<div class='progress'><div style='width:" + pct + "%'></div></div>";
+    const goBase = $("#btnBaselineFromTraining");
+    if (goBase) goBase.addEventListener("click", () => setTab("avaliacao"));
   }
   const baselineBadge = $("#baselineBadge");
   if (baselineBadge) {
@@ -1386,7 +1594,9 @@ function renderHome() {
   if (action) {
     action.innerHTML = "";
     if (!state.baselineDone) {
-      action.innerHTML = "<div class='card warn' style='margin:10px 0'><strong>Primeiro passo:</strong> faça a avaliação inicial (HHIE-S + fala em ruído + gap) antes de treinar. Sem linha de base, não há como interpretar mudança.</div>";
+      action.innerHTML = "<div class='card warn' style='margin:10px 0'><strong>Avaliação inicial pendente (opcional).</strong> Você pode treinar agora: o treino não fica travado. A avaliação serve para ter uma referência — sem ela o app não consegue dizer se houve mudança. <button id='btnGoAssessment' class='small' style='margin-top:8px'>Fazer a avaliação depois</button></div>";
+      const goA = $("#btnGoAssessment");
+      if (goA) goA.addEventListener("click", () => setTab("avaliacao"));
     } else if (cfg && trainingDaysThisWeek() >= cfg.sessions_planned) {
       const isAssessment = state.week === 4 || state.week === 8;
       const done = isAssessment && latestByTimepoint(state.hhie, state.week === 4 ? "week4" : "week8");
@@ -2500,6 +2710,7 @@ function renderTrainingConfig() {
       ? protocol.training.session_structure
       : { warm_up_items: 1, core_items: 8, closing_items: 1 };
     box.innerHTML =
+      (state.baselineDone ? "" : "<div class='card warn' style='margin-bottom:10px'><strong>Sem avaliação inicial.</strong> O treino está liberado; só não há linha de base para comparar mudança depois. <button id='btnBaselineFromTraining' class='small'>Fazer avaliação</button></div>") +
       "<div class='kv'><span>Semana " + esc(state.week) + "</span><span class='v'>" + esc(focusLabel(cfg.focus)) + "</span></div>" +
       "<div class='kv'><span>Sessões planejadas</span><span class='v'>" + esc(cfg.sessions_planned) + " por semana</span></div>" +
       "<div class='kv'><span>Estrutura</span><span class='v'>" + esc(structure.warm_up_items) + " aquecimento + " + esc(structure.core_items) + " itens + " + esc(structure.closing_items) + " fechamento</span></div>" +
@@ -2507,6 +2718,8 @@ function renderTrainingConfig() {
       "<div class='kv'><span>Início de SNR</span><span class='v'>" + esc(snrText(cfg.snr_start_db)) + "</span></div>" +
       "<div class='kv'><span>Ruído e nível</span><span class='v'>" + esc(noiseLabel(eff.noise)) + " · " + esc(eff.level) + "</span></div>";
   }
+  const goBaseTrain = $("#btnBaselineFromTraining");
+  if (goBaseTrain) goBaseTrain.addEventListener("click", () => setTab("avaliacao"));
   const rate = $("#rateSlider");
   if (rate) { rate.value = String(eff.rate); }
   const rv = $("#rateVal");
@@ -2542,7 +2755,11 @@ function startTraining() {
     pendingDraft = null;
   }
   if (state.paused) { alert("Treino pausado por evento adverso. Procure avaliação e use ‘Liberar retomada’ depois."); return; }
-  if (!state.baselineDone) { alert("Faça a avaliação inicial antes de treinar. Sem linha de base não há como interpretar mudança."); setTab("avaliacao"); return; }
+  /* Treinar não exige avaliação inicial. Sem linha de base o app avisa que
+     mudança não pode ser interpretada, mas não trava o treino. */
+  if (!state.baselineDone) {
+    toast("Treinando sem avaliação inicial: o treino vale, mas ainda não dá para comparar mudança.");
+  }
   if (doseToday() >= DOSE_CAP_SECONDS) {
     alert("Teto de tolerabilidade de 10 min/dia atingido (você já treinou " + Math.floor(doseToday() / 60) + " min hoje). O treino volta amanhã.");
     return;
@@ -3795,6 +4012,68 @@ function downloadText(filename, text, mime) {
   }
 }
 
+/* ---- código de retomada: estado inteiro em texto, para trocar de origem ---- */
+
+function b64encode(text) {
+  const bytes = new TextEncoder ? new TextEncoder().encode(text) : null;
+  if (bytes) {
+    let bin = "";
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    return btoa(bin);
+  }
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
+function b64decode(text) {
+  const bin = atob(text);
+  if (typeof TextDecoder !== "undefined") {
+    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+  return decodeURIComponent(escape(bin));
+}
+
+const RESUME_PREFIX = "AW1.";
+
+function makeResumeCode() {
+  const payload = { kind: "audioswarm.resume", savedAt: new Date().toISOString(), state: state };
+  return RESUME_PREFIX + b64encode(JSON.stringify(payload));
+}
+
+function applyResumeCode(raw) {
+  const text = String(raw || "").trim();
+  if (!text) { toast("Cole o código de retomada primeiro."); return false; }
+  let json = null;
+  try {
+    json = text.startsWith(RESUME_PREFIX) ? b64decode(text.slice(RESUME_PREFIX.length)) : null;
+  } catch (e) { json = null; }
+  if (!json) {
+    /* aceita também o pacote audioswarm colado como texto */
+    try { const pkg = JSON.parse(text); if (pkg && String(pkg.schema || "").indexOf("audioswarm") === 0) { applyPackage(text); return true; } } catch (e) { /* nada */ }
+    toast("Código inválido. Confira se copiou inteiro.");
+    return false;
+  }
+  let payload = null;
+  try { payload = JSON.parse(json); } catch (e) { payload = null; }
+  if (!payload || !payload.state || typeof payload.state !== "object") {
+    toast("Código sem progresso reconhecível.");
+    return false;
+  }
+  if (!confirm("Restaurar o progresso deste código substitui o que está neste navegador. Continuar?")) return false;
+  state = migrateState(payload.state);
+  restoredFrom = "código";
+  diaryViewWeek = Number(state.diaryViewWeek) || Number(state.week);
+  mergeHotDiary();
+  save();
+  renderAll();
+  renderAssessment();
+  renderResumeNotice();
+  const status = $("#resumeCodeStatus");
+  if (status) status.textContent = "Restaurado: semana " + state.week + " · " + state.sessions.length + " sessão(ões) · " + (state.baselineDone ? "com avaliação inicial" : "sem avaliação inicial") + ".";
+  toast("Progresso restaurado: semana " + state.week + ".");
+  return true;
+}
+
 function exportPackage() {
   const pkg = buildPackage();
   const text = JSON.stringify(pkg, null, 2);
@@ -4215,7 +4494,11 @@ function releaseTraining() {
 function resetAll() {
   if (!confirm("Apagar TODOS os dados deste app?")) return;
   if (!confirm("Tem certeza? Exporte um backup antes se quiser guardar o histórico.")) return;
-  Storage.remove(STORAGE_KEY);
+  /* apaga também o espelho e a cópia do servidor, senão o "apagar tudo"
+     ressuscitaria o estado antigo na próxima abertura. */
+  [STORAGE_KEY, MIRROR_KEY, DRAFT_KEY, DIARY_KEY].forEach(k => { try { Storage.remove(k); } catch (e) { /* ignore */ } });
+  state = newState();
+  save();
   location.reload();
 }
 
@@ -4385,6 +4668,19 @@ function bindEvents() {
   $("#btnImportBackup").addEventListener("click", importPackage);
   $("#btnLegacy").addEventListener("click", importLegacy);
   $("#btnReset").addEventListener("click", resetAll);
+  $("#btnMakeResumeCode").addEventListener("click", () => {
+    $("#resumeCodeOut").value = makeResumeCode();
+    $("#resumeCodeStatus").textContent = "Código gerado agora. Copie e guarde; ele vale como backup do progresso.";
+    toast("Código de retomada gerado. Toque em copiar.");
+  });
+  $("#btnCopyResumeCode").addEventListener("click", () => {
+    const ta = $("#resumeCodeOut");
+    if (!ta.value) ta.value = makeResumeCode();
+    copyText(ta.value).then(ok => toast(ok ? "Código copiado." : "Selecione o texto e copie manualmente."));
+  });
+  $("#btnApplyResumeCode").addEventListener("click", () => {
+    applyResumeCode($("#resumeCodeOut").value);
+  });
   $("#btnBuildProtocol").addEventListener("click", buildAndRenderProtocol);
   $("#btnDiagnostics").addEventListener("click", runDiagnostics);
   $("#btnVoiceTest").addEventListener("click", async () => {
@@ -4422,12 +4718,18 @@ function init() {
     mergeHotDiary();
   }
   pendingDraft = DEMO_MODE ? null : loadDraft();
+  if (restoredFrom === "espelho") {
+    save();
+    setTimeout(() => toast("Progresso recuperado da cópia local (a chave principal tinha se perdido)."), 400);
+  }
   renderStorageBanner();
   setSaveStatus(DEMO_MODE ? "demo: não salva" : (Storage.mode === "localStorage" ? "pronto para salvar" : "memória temporária"),
     DEMO_MODE || Storage.mode !== "localStorage" ? "err" : "ok");
   bindEvents();
   renderAll();
   renderAssessment();
+  renderSyncLine();
+  restoreFromServer();
   window.addEventListener("pagehide", flushSession);
   window.addEventListener("beforeunload", flushSession);
   document.addEventListener("visibilitychange", () => {

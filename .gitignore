@@ -22,6 +22,10 @@ env/
 browse.html
 app/browse.html
 
+# Estado local do servidor de desenvolvimento (dado pessoal: nunca versionar)
+data/
+*.state.json
+
 # Sistema operacional / editores
 .DS_Store
 Thumbs.db

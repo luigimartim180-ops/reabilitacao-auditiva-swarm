@@ -42,6 +42,17 @@ pare: adicione uma entrada em `swarm/evidence.py` e um gatilho determinístico n
   medição, material de frases (`SENTENCES_V5.md`), fala corrida
   (`CONNECTED_SPEECH_V6.md`) e auditoria do v4.
 
+## Regras de persistência (não quebrar)
+
+- A avaliação inicial é **recomendada, não obrigatória**. `startTraining` não pode
+  voltar a bloquear por `!state.baselineDone`; só `state.paused` (segurança) e o teto
+  de 10 min/dia bloqueiam.
+- Todo `save()` escreve a chave principal **e** o espelho (`MIRROR_KEY`) e agenda o
+  `POST /api/state`. `flushSession` chama `Sync.flush()` (sendBeacon) mesmo sem sessão.
+- O `Sync` tem que se desligar sozinho quando não há `/api/state` (host estático,
+  jsdom): guarda em `canFetch()`.
+- O estado do servidor fica em `data/` (gitignored, dado pessoal). Nunca versionar.
+
 ## Regras de adesão (não quebrar)
 
 Adesão semanal é contada em **dias com treino** (`trainingDaysThisWeek`), nunca em
@@ -57,11 +68,12 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (109 testes)
+make test     # pytest (122 testes, inclui tests/test_serve.py)
 make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
-make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 142 checks
-make serve    # app em http://localhost:12000
+make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 157 checks
+make serve    # app em http://localhost:12000 (tools/serve.py, guarda o estado em data/)
+make e2e-sync # ponta a ponta de verdade: app + servidor (precisa de `make serve` e jsdom)
 make demo     # protocolo a partir de examples/profile.json
 ```
 
