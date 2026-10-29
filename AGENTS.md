@@ -68,10 +68,10 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (126 testes, inclui tests/test_serve.py)
+make test     # pytest (127 testes, inclui tests/test_serve.py)
 make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
-make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 160 checks
+make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 167 checks
 make serve    # app em http://localhost:12000 (tools/serve.py, guarda o estado em data/)
 make e2e-sync # ponta a ponta de verdade: app + servidor (precisa de `make serve` e jsdom)
 make demo     # protocolo a partir de examples/profile.json

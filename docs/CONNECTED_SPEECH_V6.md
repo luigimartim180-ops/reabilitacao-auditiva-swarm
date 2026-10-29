@@ -12,8 +12,10 @@ construído no lugar, e o que a evidência permite e não permite afirmar.
 Uma frase longa treina **decifrar uma frase**: ele ouve, tem alguns segundos,
 responde. No YouTube há três diferenças que nenhum item de frase reproduz:
 
-1. **O áudio não espera.** Não existe botão de repetir; se ele perde o fio no
-   meio, o resto do texto não volta.
+1. **O áudio não espera.** Na rua, na TV e no YouTube não existe botão de
+   repetir; se ele perde o fio no meio, o resto do texto não volta. (No treino
+   do app o botão existe e é livre — ver abaixo; o que não pode existir é na
+   medição.)
 2. **O conteúdo se acumula.** Para responder "o que o técnico disse sobre o
    atacante", ele precisa segurar quem é o atacante, o que aconteceu e o que foi
    dito — três informações ao mesmo tempo.
@@ -44,13 +46,23 @@ Gêneros: **telejornal**, **entrevista**, **jornal** e **esporte**. Cada texto t
 4 perguntas de tipos diferentes: ideia principal, detalhe, ordem e inferência.
 Nenhuma pergunta é "qual palavra você ouviu".
 
-### 2. O áudio toca uma vez
+### 2. O áudio toca uma vez — e no treino pode ser repetido
 
 No treino e na avaliação, o texto é lido do começo ao fim e **as perguntas só
-aparecem depois**. Na avaliação não existe botão de repetir. No treino existe um
-interruptor, desligado por padrão, que libera **uma** repetição — e ela é
-contada (`replays`) e aparece no relatório. A ideia é simples: repetir é o que a
-TV não faz.
+aparecem depois**.
+
+- **Na avaliação não existe botão de repetir.** Ali é medição: repetir mudaria a
+  nota e estragaria a comparação com a semana 4 e a semana 8.
+- **No treino existe, sempre visível e sem limite** ("Ouvir o texto de novo").
+  Treino é prática: travar sem poder ouvir de novo não ensina nada, só irrita.
+  Cada repetição é **contada** (`replays`), aparece no relatório, trava as
+  respostas enquanto o áudio roda e **soma tempo** no teto de 10 min do dia.
+  Quando há repetição, o resumo diz que o acerto não é comparável a uma escuta
+  única.
+
+A regra que fica: o número de repetições é registro honesto, não penalidade. Se
+ele repetiu 3 vezes, o resultado vale como treino daquele dia — não entra em
+comparação de evolução.
 
 ### 3. Dois textos ficam reservados para medir
 
@@ -101,13 +113,16 @@ registrado no diário, não no teste do app.
 
 ## Como usar na rotina
 
-- **Semanas 1–2:** um texto D1 por dia de treino, com o interruptor de repetição
-  ligado se ele travar — mas anotando que repetiu.
-- **Semanas 3–4:** D2, repetição desligada.
+- **Semanas 1–2:** um texto D1 por dia de treino; repetir à vontade se travar —
+  o app conta e mostra quantas vezes.
+- **Semanas 3–4:** D2, tentando ouvir uma vez só; se repetir, tudo bem, o
+  registro mostra.
+- **Regra de leitura:** corrida com repetição é treino; corrida sem repetição é
+  o que se compara semana a semana.
 - **Semanas 5–6:** D3. Se o cansaço passar de 4/5, ficar em D2.
 - **Semanas 7–8:** D4, que é a duração de um trecho de entrevista.
-- **Sempre:** o texto corrido entra na dose do dia (10 min de teto). O app
-  contabiliza ~1,2 s por palavra falada.
+- **Sempre:** o texto corrido entra na dose do dia (10 min de teto), contando
+  cada repetição. O app contabiliza ~1,2 s por palavra falada.
 
 ## Referências
 

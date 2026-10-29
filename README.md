@@ -35,8 +35,9 @@ medição que declara o que **não** consegue provar.
   continuar comparável. Detalhes em [docs/SENTENCES_V5.md](docs/SENTENCES_V5.md).
 - **Treino do áudio que não para.** Além das frases, o treino tem **texto corrido** em
   quatro níveis (D1 nota curta ~20 s → D4 entrevista ~60 s), com o áudio tocando uma vez
-  e as perguntas vindo depois. Uma repetição só se o interruptor estiver ligado — e ela
-  é contada. Detalhes em [docs/CONNECTED_SPEECH_V6.md](docs/CONNECTED_SPEECH_V6.md).
+  e as perguntas vindo depois. No treino, "Ouvir o texto de novo" fica sempre visível e
+  **sem limite** — cada repetição é contada, trava as respostas enquanto toca e soma no
+  teto de 10 min. Na avaliação não existe repetição. Detalhes em [docs/CONNECTED_SPEECH_V6.md](docs/CONNECTED_SPEECH_V6.md).
 - **Treino de 8 semanas no próprio navegador.** Sessões curtas, 2–3 dias por semana. Mais de
   uma sessão no mesmo dia é permitida — o app não trava: o que limita é o teto de 10 min de
   escuta por dia, e a adesão semanal conta **dias** com treino (duas sessões na terça = 1 dia). 1 sessão curta por dia de treino,
@@ -47,7 +48,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 126 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 127 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -81,7 +82,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            126 testes (pytest) incluindo paridade Python↔JS
+tests/            127 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -192,8 +193,9 @@ esportes chegam **corridos, sem pausa e sem botão de repetir**.
 
 - 10 textos originais (nada copiado de programa), 40 perguntas, gêneros
   telejornal, entrevista, jornal e esporte;
-- o áudio toca uma vez; as perguntas aparecem depois; na avaliação **não há**
-  botão de repetir;
+- o áudio toca uma vez; as perguntas aparecem depois;
+- no treino, **"Ouvir o texto de novo" sem limite** (contado no histórico e no
+  tempo do dia); na avaliação **não há** botão de repetir;
 - D1 (~20 s) → D4 (~60 s), uma faixa a cada duas semanas, com botão de subir ou
   descer um degrau;
 - dois textos ficam reservados para medir e nunca entram no treino;
@@ -207,7 +209,7 @@ diário — isso o app não mede.
 ### Testes e verificação
 
 ```bash
-make test         # pytest (126 testes)
+make test         # pytest (127 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make serve        # app em http://localhost:12000 COM progresso salvo no servidor

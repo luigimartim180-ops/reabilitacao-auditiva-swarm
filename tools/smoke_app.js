@@ -994,8 +994,27 @@ async function discourseFlow() {
   dom.window.document.querySelector("#btnPlayDiscourse").click();
   await sleep(260);
   check("the questions only show after the text ends", Boolean(dom.window.document.querySelector("#discourseOptions")));
-  const repeatOff = !dom.window.document.querySelector("#btnRepeatDiscourse");
-  check("no replay by default", repeatOff);
+
+  /* a queixa do usuário: "não consigo escutar o áudio várias vezes" */
+  check("o botão de ouvir de novo aparece sem precisar ligar nada", Boolean(dom.window.document.querySelector("#btnRepeatDiscourse")));
+  dom.window.document.querySelector("#btnRepeatDiscourse").click();
+  await sleep(20);
+  const duringReplay = dom.window.document.querySelectorAll("#discourseOptions button");
+  const allDisabled = duringReplay.length > 0 && Array.from(duringReplay).every(b => b.disabled);
+  check("durante a repetição as respostas ficam travadas", allDisabled, String(duringReplay.length));
+  check("durante a repetição aparece o aviso de tocando", Boolean(dom.window.document.querySelector("#discoursePlaying")));
+  await sleep(250);
+  let sAfter = state(dom);
+  check("a primeira repetição é do treino e não vai para o relatório ainda", Boolean(sAfter));
+  const repBtn2 = dom.window.document.querySelector("#btnRepeatDiscourse");
+  check("o botão volta depois da repetição, ainda liberado", Boolean(repBtn2), repBtn2 && repBtn2.textContent);
+  repBtn2.click();
+  await sleep(250);
+  const thirdBtn = dom.window.document.querySelector("#btnRepeatDiscourse");
+  check("dá para repetir de novo (não trava em uma)", Boolean(thirdBtn), thirdBtn && thirdBtn.textContent);
+  const counterText = dom.window.document.querySelector("#discourseCard").textContent;
+  check("o contador mostra as repetições feitas", /Repetições:\s*2/.test(counterText), counterText.match(/Repetições:\s*\d+/));
+
   for (let q = 0; q < 4; q++) {
     const opts = dom.window.document.querySelectorAll("#discourseOptions button");
     if (!opts.length) throw new Error("no discourse options at question " + q);
@@ -1008,6 +1027,7 @@ async function discourseFlow() {
   const rec = s && s.discourse && s.discourse[0];
   check("running-text training is saved", Boolean(rec), JSON.stringify(rec));
   check("running-text record keeps replays and percent", Boolean(rec && typeof rec.percent === "number" && typeof rec.replays === "number"));
+  check("as repetições ficam registradas no histórico (2)", Boolean(rec && rec.replays === 2), rec && String(rec.replays));
   check("running-text record is marked non-adaptive", Boolean(rec && rec.adaptive === false));
 
   click(dom, "#btnDiscourseClose");

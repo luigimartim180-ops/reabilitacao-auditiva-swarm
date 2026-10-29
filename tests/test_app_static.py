@@ -475,14 +475,30 @@ def test_assessment_passages_never_enter_training():
     assert "DISCOURSE_RESERVED.indexOf(d.id) < 0" in pool
 
 
-def test_running_speech_has_no_replay_but_training_can_count_one():
+def test_the_assessment_has_no_replay_but_training_repeats_as_much_as_wanted():
+    """Repetir é legítimo no treino e proibido na medição.
+
+    O pai reclamou que não conseguia ouvir o áudio várias vezes: o botão existia,
+    mas escondido atrás de uma caixa e liberava uma única repetição.
+    """
     running = JS.split("function renderRunningTest")[1].split("function playRunning")[0]
     assert "btnRepeatRunning" not in running
     assert "não existe botão de repetir" in running
+
     training = JS.split("function renderDiscourse")[1].split("function playDiscourse")[0]
-    assert "chkDiscourseRepeat" in training
     assert "btnRepeatDiscourse" in training
-    assert "replays" in JS
+    assert "chkDiscourseRepeat" not in training  # sem caixa escondida
+
+    replay = JS.split("function playDiscourseAgain")[1].split("function answerDiscourse")[0]
+    assert "replays < 1" not in replay  # não trava em uma repetição
+    assert "t.replays += 1" in replay
+    # durante a repetição, responder fica bloqueado (senão a resposta sai no meio)
+    assert "b.disabled = playing" in training
+
+
+def test_replays_count_towards_the_daily_dose():
+    save = JS.split("function saveDiscourseRun")[1].split("function ")[0]
+    assert "perListen * (1 + (Number(t.replays) || 0))" in save
 
 
 def test_running_text_level_can_be_moved_by_hand():

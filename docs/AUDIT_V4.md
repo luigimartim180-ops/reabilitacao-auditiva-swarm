@@ -56,7 +56,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
 | 13 | Sem exportação/versionamento dos dados | Pacote `audioswarm.v1.1` com schema, limites, contexto, medidas, sessões, aderência, `mods`, `gapStats`, segurança e plano determinístico; exportação em arquivo + cópia; importação por arquivo. |
 | 14 | Sem testes da matemática de medição | `tests/test_measurement.py` (12 testes) + paridade JS↔Python (5 casos de fala, 7 de gap, 3 de SNR, 4 de HHIE-S). |
 | 15 | CI extraía script inline que não existia mais | `make check` e CI agora validam `app/protocol.js` e `app/app.js`; o HTML é checado para IDs duplicados e scripts. |
-| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **160/160**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
+| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **167/167**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
 
 ## O que foi implementado
 
@@ -74,7 +74,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
   diagnóstico, acessibilidade e voz com watchdog.
 - `app/index.html`: shell pt-BR com 7 abas, botões grandes, alto contraste e letra
   ampliável.
-- `tests/`: 126 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
+- `tests/`: 127 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
   campos do pacote, 10 itens do HHIE-S).
 
 ## Rodada de correções (26/10)
@@ -302,17 +302,33 @@ O que **não** muda: sem HHIE-S de linha de base, o relatório continua declaran
 comparação funcional é inválida; segurança e teto de dose continuam bloqueando; e não
 há nuvem — trocar de aparelho sem o código de retomada não recupera nada.
 
+## Adendo v6.2.2 — ouvir de novo no treino, sem limite
+
+Queixa do usuário ao ver uma pergunta do texto corrido: *"eu não consigo escutar
+o áudio várias vezes"*. A causa: o botão de repetir existia, mas só aparecia com
+uma caixa marcada no cartão anterior **e** liberava uma única repetição
+(`t.replays < 1`).
+
+Correção: no **treino**, "Ouvir o texto de novo" fica sempre visível e sem
+limite, contado em `replays`, com as respostas travadas enquanto o áudio roda e
+o tempo somando no teto de 10 min/dia (`~1,2 s por palavra × (1 + repetições)`).
+No resumo, quando houve repetição, o app escreve que o acerto não é comparável a
+uma escuta única.
+
+O que **não** muda: na **avaliação** (textos reservados `d03`/`d04`) continua
+sem botão de repetir e com o selo "sem repetir" — repetir ali mudaria a medida.
+
 ## Como verificar
 
 ```bash
-make test                                   # 99 passed
+make test                                   # 127 passed
 make check                                  # sintaxe + contratos do HTML
 make demo                                   # protocolo em texto
 python -m swarm.cli examples/profile.json --json > /tmp/p.json
-NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 160/160, requer jsdom
+NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 167/167, requer jsdom
 ```
 
-Estado local desta auditoria: `126 passed`, `make check` exit 0, smoke 160/160. O teste de
+Estado local desta auditoria: `127 passed`, `make check` exit 0, smoke 167/167. O teste de
 smoke é opcional; a CI roda pytest + sintaxe + protocolo de exemplo.
 
 ## Referências principais

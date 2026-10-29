@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "6.2.0";
+const APP_VERSION = "6.2.2";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
@@ -367,7 +367,7 @@ const DEFAULT_STATE = {
   events: [],
   paused: false,
   ui: { large: false, contrast: false },
-  settings: { voiceIndex: null, noise: "rosa", level: 1, rate: 0.9, discourseRepeat: false },
+  settings: { voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 },
   dose: { date: "", seconds: 0 },
   recentItems: [],
   legacyObjectives: []
@@ -386,7 +386,7 @@ function migrateState(raw) {
   out.profile = Object.assign(deepCopy(DEFAULT_PROFILE), raw.profile || {});
   out.context = Object.assign(deepCopy(DEFAULT_CONTEXT), raw.context || {});
   out.ui = Object.assign({ large: false, contrast: false }, raw.ui || {});
-  out.settings = Object.assign({ voiceIndex: null, noise: "rosa", level: 1, rate: 0.9, discourseRepeat: false }, raw.settings || {});
+  out.settings = Object.assign({ voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 }, raw.settings || {});
   if (!["auto", "D1", "D2", "D3", "D4"].includes(out.discourseLevel)) out.discourseLevel = "auto";
   out.dose = Object.assign({ date: "", seconds: 0 }, raw.dose || {});
   ["sessions", "hhie", "speechTests", "realLife", "discourse", "runningSpeech", "gapTests", "events", "recentItems", "legacyObjectives"].forEach(k => {
@@ -2180,16 +2180,11 @@ function renderDiscourse() {
       "<p class='small muted'>É o treino do ponto que mais atrapalha: perder o fio quando o áudio é corrido. Não é teste de audição; a voz é sintética e mais limpa que a TV.</p>" +
       levelRow +
       "<button id='btnStartDiscourse' class='primary big'>Ouvir um texto (" + esc(tier) + ", " + esc(DISCOURSE_LABEL[tier].replace(/[()]/g, "")) + ")</button>" +
-      "<label class='small' style='display:block;margin-top:10px'><input type='checkbox' id='chkDiscourseRepeat'" + (state.settings.discourseRepeat ? " checked" : "") + "> permitir uma repetição (modo treino; por padrão não repete)</label>" +
+      "<p class='small muted'>Pode ouvir o texto de novo quantas vezes quiser: aqui é treino, não teste. Cada repetição fica contada e aparece no relatório — e o tempo dela soma no limite de 10 min do dia.</p>" +
       historyHtml + "</div>";
     $("#btnStartDiscourse").addEventListener("click", newDiscourseRun);
     $("#btnDiscourseEasier").addEventListener("click", () => shiftDiscourseLevel(-1));
     $("#btnDiscourseHarder").addEventListener("click", () => shiftDiscourseLevel(1));
-    $("#chkDiscourseRepeat").addEventListener("change", ev => {
-      state.settings.discourseRepeat = Boolean(ev.target.checked);
-      save();
-      renderDiscourse();
-    });
     return;
   }
 
@@ -2207,21 +2202,24 @@ function renderDiscourse() {
 
   if (t.phase === "questions") {
     const q = t.questions[t.idx];
-    const canRepeat = Boolean(state.settings.discourseRepeat) && t.replays < 1;
+    const playing = Boolean(t.playing);
     box.innerHTML = "<div class='card accent'><div class='row between'><h2>Pergunta " + (t.idx + 1) + " de " + t.questions.length + "</h2><span class='badge'>" + esc(t.tier) + "</span></div>" +
       "<p class='question'>" + esc(q.q) + "</p>" +
       "<div id='discourseOptions' class='options'></div>" +
-      (canRepeat ? "<button id='btnRepeatDiscourse' class='small'>Ouvir de novo (conta 1 repetição)</button>" : "") +
-      "<p class='small muted'>Repetições: " + t.replays + "</p></div>";
+      (playing
+        ? "<p class='small muted' id='discoursePlaying'>Tocando o texto de novo… as respostas liberam no fim.</p>"
+        : "<button id='btnRepeatDiscourse' class='big'>🔊 Ouvir o texto de novo (" + t.replays + " repetição(ões))</button>") +
+      "<p class='small muted'>Repetições: " + t.replays + " · pode repetir quantas vezes quiser; cada uma fica registrada.</p></div>";
     const box2 = $("#discourseOptions");
     q.options.forEach((opt, i) => {
       const b = document.createElement("button");
       b.className = "option";
       b.textContent = opt;
+      b.disabled = playing;
       b.addEventListener("click", () => answerDiscourse(i));
       box2.appendChild(b);
     });
-    if (canRepeat) $("#btnRepeatDiscourse").addEventListener("click", playDiscourseAgain);
+    if (!playing) $("#btnRepeatDiscourse").addEventListener("click", playDiscourseAgain);
     return;
   }
 
@@ -2231,6 +2229,7 @@ function renderDiscourse() {
     "<div class='kv'><span>Acerto</span><span class='v'>" + pct + "% (" + t.correct + "/" + t.results.length + ")</span></div>" +
     "<div class='kv'><span>Texto</span><span class='v'>" + esc(t.tier) + " · " + esc(t.genre) + " · " + words + " palavras</span></div>" +
     "<div class='kv'><span>Repetições</span><span class='v'>" + t.replays + "</span></div>" +
+    (t.replays ? "<p class='small muted'>Você ouviu " + (t.replays + 1) + " vezes. Use como treino, não como nota: com repetição, o acerto não é comparável a uma escuta única.</p>" : "") +
     "<p class='small muted'>Isto é treino de compreensão de texto, não limiar de audição. O que conta aqui é acompanhar o fio do assunto e segurar dois ou três fatos até o fim.</p>" +
     "<button id='btnDiscourseNext' class='primary big'>Outro texto</button> <button id='btnDiscourseClose' class='big small'>Fechar</button></div>";
   $("#btnDiscourseNext").addEventListener("click", () => { discourseRun = null; newDiscourseRun(); });
@@ -2267,20 +2266,20 @@ function playDiscourse() {
 function playDiscourseAgain() {
   const t = discourseRun;
   if (!t || t.playing) return;
-  if (t.replays >= 1) return;
   t.replays += 1;
   t.playing = true;
+  renderDiscourse();               /* trava as respostas e mostra "tocando…" */
   Audio.stopNoise();
   Audio.startNoise(TEST_NOISE, TEST_LEVEL);
   Audio._lastSnr = DISCOURSE_SNR;
   Audio.setSnr(DISCOURSE_SNR);
   setTimeout(async () => {
-    await Voice.speak(t.text, DISCOURSE_RATE);
+    const ok = await Voice.speak(t.text, DISCOURSE_RATE);
     Audio.stopNoise();
     t.playing = false;
-    renderDiscourse();
-    toast("Repetição usada. Na vida real não existe esse botão.");
-  }, 400);
+    if (discourseRun === t) renderDiscourse();
+    if (!ok) toast("A voz não tocou. Toque em “Ouvir o texto de novo” outra vez.");
+  }, 300);
 }
 
 function answerDiscourse(idx) {
@@ -2325,8 +2324,10 @@ function saveDiscourseRun() {
     mode: "training"
   };
   state.discourse.push(record);
-  /* o texto corrido entra na dose do dia: ~1,2 s por palavra falada */
-  addDose(Math.round(t.text.split(" ").length * 1.2));
+  /* o texto corrido entra na dose do dia: ~1,2 s por palavra falada, contando
+     cada repetição — o tempo de escuta é real e o limite é de 10 min/dia */
+  const perListen = Math.round(t.text.split(" ").length * 1.2);
+  addDose(perListen * (1 + (Number(t.replays) || 0)));
   save();
   return record;
 }
