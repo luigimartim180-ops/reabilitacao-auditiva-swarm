@@ -47,7 +47,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 122 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 126 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -81,7 +81,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            122 testes (pytest) incluindo paridade Python↔JS
+tests/            126 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -207,7 +207,7 @@ diário — isso o app não mede.
 ### Testes e verificação
 
 ```bash
-make test         # pytest (122 testes)
+make test         # pytest (126 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make serve        # app em http://localhost:12000 COM progresso salvo no servidor

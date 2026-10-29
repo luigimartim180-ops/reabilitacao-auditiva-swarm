@@ -169,6 +169,24 @@ def test_resume_code_round_trips_the_whole_state():
     assert 'id="resumeCodeOut"' in HTML
 
 
+def test_the_app_never_uploads_before_it_knows_the_server_state():
+    """O caminho real de perda: `flush()` usa sendBeacon, que no navegador dispara
+    sem esperar resposta. Numa origem nova (estado vazio) isso apagaria o
+    progresso do servidor. O envio precisa da confirmação do GET."""
+    assert "let pulled = null;" in JS
+    assert "function canPush()" in JS
+    guard = JS.split("function canPush()")[1].split("}")[0]
+    assert "pulled === true" in guard
+    push_now = JS.split("async function pushNow()")[1].split("async function")[0]
+    assert "canPush()" in push_now
+    flush = JS.split("function flush()")[1].split("function status")[0]
+    assert "canPush()" in flush
+    # o pull precisa MARCAR o resultado (inclusive quando falha)
+    pull = JS.split("async function pull()")[1].split("function canPush()")[0]
+    assert "pulled = true" in pull
+    assert "pulled = false" in pull
+
+
 def test_server_copy_counts_any_real_progress_not_just_sessions():
     """Uma semana avançada (ou avaliação feita) já é progresso.
 

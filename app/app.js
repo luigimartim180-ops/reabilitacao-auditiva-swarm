@@ -464,6 +464,11 @@ const Sync = (function () {
   let state_ = "unknown"; // "unknown" | "on" | "off"
   let timer = null;
   let inflight = false;
+  /* null = ainda não sabemos o que há no servidor, false = tentamos e falhou,
+     true = sabemos (inclusive "está vazio"). Só com true podemos enviar: sem
+     isso, uma aba aberta numa origem nova (estado vazio) sobrescreveria com
+     vazio o progresso que está no servidor. */
+  let pulled = null;
 
   function canFetch() {
     try {
@@ -499,18 +504,23 @@ const Sync = (function () {
   }
 
   async function pull() {
-    if (!(await probe())) return null;
+    if (!(await probe())) { pulled = false; return null; }
     try {
       const res = await window.fetch(API, { method: "GET", cache: "no-store" });
-      if (res.status === 204) return null;
-      if (!res.ok) return null;
+      if (res.status === 204) { pulled = true; return null; }  // servidor vazio, e nós sabemos
+      if (!res.ok) { pulled = false; return null; }
       const data = await res.json();
+      pulled = true;
       return data && data.state ? data : null;
-    } catch (e) { return null; }
+    } catch (e) { pulled = false; return null; }
   }
 
+  /* Enviar só depois de saber o que o servidor tem. */
+  function canPush() { return pulled === true; }
+
   async function pushNow() {
-    if (!(await probe()) || DEMO_MODE) return false;
+    if (DEMO_MODE || !canPush()) return false;
+    if (!(await probe())) return false;
     if (inflight) return false;
     inflight = true;
     try {
@@ -533,7 +543,7 @@ const Sync = (function () {
 
   function flush() {
     clearTimeout(timer);
-    if (DEMO_MODE) return;
+    if (DEMO_MODE || !canPush()) return;
     if (!canFetch()) return;
     try {
       const body = payload();
@@ -547,7 +557,7 @@ const Sync = (function () {
 
   function status() { return state_; }
 
-  return { probe, pull, pushNow, queue, flush, status, get enabled() { return state_ === "on"; } };
+  return { probe, pull, pushNow, queue, flush, status, canPush, get enabled() { return state_ === "on"; } };
 })();
 
 /* "Tem progresso" não é só ter sessão: semana avançada, avaliação feita, diário

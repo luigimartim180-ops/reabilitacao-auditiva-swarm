@@ -172,11 +172,30 @@ class Handler(SimpleHTTPRequestHandler):
         write_state(payload)
         self._json(200, {"ok": True, "savedAt": payload["savedAt"]})
 
+    def do_DELETE(self) -> None:  # noqa: N802
+        """Apaga a cópia do servidor (usado por testes e por `--reset`).
+
+        Existe separado do POST de propósito: um POST com estado vazio NÃO
+        apaga nada, para que uma aba aberta sem progresso não destrua a cópia
+        boa só por abrir.
+        """
+        route = self.path.split("?")[0]
+        if route != "/api/state":
+            self._json(404, {"ok": False, "error": "rota desconhecida"})
+            return
+        try:
+            if STATE_FILE.exists():
+                STATE_FILE.unlink()
+        except OSError as exc:
+            self._json(500, {"ok": False, "error": str(exc)})
+            return
+        self._json(200, {"ok": True, "cleared": True})
+
     # CORS só para POST/GET simples na mesma origem não é necessário; mantemos
     # OPTIONS para não quebrar preflight de nenhum cliente futuro.
     def do_OPTIONS(self) -> None:  # noqa: N802
         self.send_response(204)
-        self.send_header("Allow", "GET, POST, OPTIONS")
+        self.send_header("Allow", "GET, POST, DELETE, OPTIONS")
         self.send_header("Content-Length", "0")
         self.end_headers()
 

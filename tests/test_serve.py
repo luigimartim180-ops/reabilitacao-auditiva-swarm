@@ -130,3 +130,43 @@ def test_body_limit_is_enforced(live_server):
     except urllib.error.URLError:
         pass  # conexão fechada depois do 413: aceitável
     assert module.read_state() is None
+
+
+def test_empty_post_does_not_erase_a_good_copy(live_server):
+    """Abrir o app numa origem nova não pode apagar o progresso do servidor.
+
+    O app só envia depois de saber o que há no servidor (guarda no Sync), mas o
+    servidor também não deve tratar "estado vazio" como "apagar".
+    """
+    module, base = live_server
+    _post(base + "/api/state", {"state": {"week": 5, "sessions": [{"id": "a"}]}})
+    assert module.read_state()["state"]["week"] == 5
+    # um POST com estado vazio é um save legítimo de um app vazio: guarda vazio,
+    # mas o caminho de apagar é explícito (DELETE)
+    _post(base + "/api/state", {"state": {}})
+    stored = module.read_state()
+    assert stored is not None and stored["state"] == {}
+
+
+def test_delete_removes_the_stored_state(live_server):
+    module, base = live_server
+    _post(base + "/api/state", {"state": {"week": 7}})
+    req = urllib.request.Request(base + "/api/state", method="DELETE")
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 200
+        assert json.loads(resp.read().decode("utf-8"))["cleared"] is True
+    assert module.STATE_FILE.exists() is False
+    assert module.read_state() is None
+    # depois de apagar, GET volta a 204
+    req = urllib.request.Request(base + "/api/state", method="GET")
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 204
+        assert resp.read() == b""
+
+
+def test_delete_only_accepts_the_state_route(live_server):
+    module, base = live_server
+    req = urllib.request.Request(base + "/api/other", method="DELETE")
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(req, timeout=5)
+    assert exc.value.code == 404

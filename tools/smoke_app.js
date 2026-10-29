@@ -121,7 +121,7 @@ function makeDom(seed, url, extra, options) {
 
       if (options && options.fetch) {
         window.fetch = options.fetch;
-        window.navigator.sendBeacon = () => false;
+        window.navigator.sendBeacon = (options && options.sendBeacon) || (() => false);
       }
       if (seed) {
         window.localStorage.setItem("audioswarm.v4.state", JSON.stringify(seed));
@@ -441,6 +441,73 @@ async function serverRestoreFlow() {
     dom.window.document.querySelector("#syncStatus").textContent.slice(0, 60));
   check("o servidor recebe o estado de volta (POST)", mock.calls.some(c => c.method === "POST"));
   dom.window.close();
+}
+
+async function emptyStateNeverOverwritesServerFlow() {
+  /* O caminho real de perda no navegador: ao fechar a aba, `flush()` usa
+     `navigator.sendBeacon`, que dispara e devolve `true` sem esperar resposta.
+     Numa origem nova (localStorage vazio) e com o GET ainda pendente, isso
+     mandaria um estado vazio por cima do progresso do servidor. */
+
+  // A) GET pendente + aba escondida: nenhum beacon pode sair
+  const beacons = [];
+  const pendingServer = (url, opts) => {
+    if (((opts && opts.method) || "GET") === "POST") {
+      beacons.push("POST");
+      return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true }) });
+    }
+    return new Promise(() => {}); // nunca resolve
+  };
+  const domA = makeDom(null, "https://origem-nova.example/app/", null, {
+    fetch: pendingServer,
+    sendBeacon: (url, blob) => { beacons.push("beacon"); return true; },
+  });
+  await sleep(80);
+  Object.defineProperty(domA.window.document, "visibilityState", { configurable: true, get: () => "hidden" });
+  domA.window.document.dispatchEvent(new domA.window.Event("visibilitychange"));
+  await sleep(80);
+  check("servidor ainda sem resposta: não envia nada ao fechar a aba", beacons.length === 0, beacons.join(","));
+  domA.window.close();
+
+  // B) servidor falhou no GET: salvar não pode sobrescrever o que não conhecemos
+  const postsB = [];
+  const failingServer = (url, opts) => {
+    if (((opts && opts.method) || "GET") === "POST") { postsB.push("POST"); return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true }) }); }
+    return Promise.reject(new Error("rede caiu"));
+  };
+  const domB = makeDom(null, "https://origem-b.example/app/", null, {
+    fetch: failingServer,
+    sendBeacon: () => { postsB.push("beacon"); return true; },
+  });
+  await sleep(150);
+  click(domB, '[data-tab="ajustes"]');
+  await sleep(60);
+  const weekSel = domB.window.document.querySelector("#weekSelect");
+  weekSel.value = "3";
+  weekSel.dispatchEvent(new domB.window.Event("change"));
+  await sleep(200);
+  check("servidor inacessível: nada é enviado (não dá para saber o que apagar)", postsB.length === 0, postsB.join(","));
+  domB.window.close();
+
+  // C) controle positivo: com servidor confirmado vazio, o envio ACONTECE
+  const postsC = [];
+  const emptyServer = (url, opts) => {
+    if (((opts && opts.method) || "GET") === "POST") {
+      postsC.push("POST");
+      return Promise.resolve({ ok: true, status: 200, json: async () => ({ ok: true }) });
+    }
+    return Promise.resolve({ ok: true, status: 204, json: async () => { throw new Error("204"); } });
+  };
+  const domC = makeDom(null, "https://origem-c.example/app/", null, { fetch: emptyServer });
+  await sleep(150);
+  click(domC, '[data-tab="ajustes"]');
+  await sleep(60);
+  const selC = domC.window.document.querySelector("#weekSelect");
+  selC.value = "2";
+  selC.dispatchEvent(new domC.window.Event("change"));
+  await sleep(250);
+  check("servidor confirmado vazio: o progresso É enviado", postsC.length > 0, String(postsC.length));
+  domC.window.close();
 }
 
 async function staticHostDoesNotFakeSyncFlow() {
@@ -1028,6 +1095,7 @@ async function demoFlow() {
   await serverRestoreFlow();
   await resumeCodeFlow();
   await staticHostDoesNotFakeSyncFlow();
+  await emptyStateNeverOverwritesServerFlow();
   await demoFlow();
 
   const failed = results.filter((r) => !r.ok);

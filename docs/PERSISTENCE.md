@@ -41,7 +41,8 @@ avaliação de novo — que é justamente o que o usuário descreveu.
 - **Espelho**: gravado a cada `save()`. Se a chave principal sumir ou não for
   JSON válido, o app carrega o espelho, regrava a principal e avisa: *"Progresso
   recuperado da cópia local"*.
-- **Servidor**: o app detecta `/api/state` sozinho.
+- **Servidor**: o app detecta `/api/state` sozinho
+  (`GET`, `POST` e `DELETE`; `DELETE` só é usado por teste/`--reset`).
   - ao abrir: `GET /api/state`;
   - a cada save: `POST` com atraso de 0,9 s (agrupado, para não escrever a cada tecla);
   - ao esconder/fechar a aba: `navigator.sendBeacon` (não perde o último evento).
@@ -58,6 +59,23 @@ música e eventos. `createdAt` **não** conta (todo boot cria um estado novo com
 A semana acima da 1 entrou depois de um teste ponta a ponta: quem só tinha
 avançado de semana, sem sessão registrada, era lido como "sem atividade" e o
 progresso do servidor não era adotado — a pessoa voltava para a semana 1.
+
+#### A guarda que evita apagar o progresso do pai
+
+Enviar é fácil de errar: ao fechar a aba, `navigator.sendBeacon` dispara e
+devolve `true` sem esperar resposta. Se a página abriu numa origem nova (estado
+vazio) e o `GET` ainda não voltou, esse envio mandaria **vazio** por cima do
+progresso que está no servidor.
+
+Por isso o `Sync` só envia depois de saber o que o servidor tem
+(`pulled === true`, marcado no fim do `pull()` — inclusive quando o servidor
+responde 204 "vazio"). Se o `GET` falhou ou está pendente, nada é enviado: o
+dado continua no `localStorage` e sobe na próxima abertura que conseguir
+conversar com o servidor. E `POST` com estado vazio **não** apaga arquivo:
+apagar é `DELETE`, explícito.
+
+Há um teste que reintroduz o furo de propósito para provar que ele é pego
+(`servidor ainda sem resposta: não envia nada ao fechar a aba`).
 
 ### 3. O rascunho da sessão também viaja
 

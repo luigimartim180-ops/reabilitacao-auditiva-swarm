@@ -72,9 +72,37 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = [];
 const check = (n, ok, d) => out.push((ok ? "PASS  " : "FAIL  ") + n + (d ? "  [" + d + "]" : ""));
 
+/* O teste precisa zerar o servidor. Se houver progresso de verdade lá, ele é
+   guardado aqui e devolvido no fim — inclusive se o teste falhar ou estourar. */
+async function readServerState() {
+  const r = await fetch(BASE + "/api/state");
+  if (r.status === 204) return null;
+  const body = await r.json();
+  return body && body.state && Object.keys(body.state).length ? body : null;
+}
+
+async function writeServerState(blob) {
+  if (!blob) { await fetch(BASE + "/api/state", { method: "DELETE" }); return; }
+  await fetch(BASE + "/api/state", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(blob) });
+}
+
 (async () => {
+  const backup = await readServerState();
+  if (backup) console.log("aviso: progresso real encontrado no servidor — será restaurado no fim");
+  const restore = async () => {
+    if (backup) { await writeServerState(backup); console.log("progresso original do servidor restaurado"); }
+    else { await writeServerState(null); }
+  };
+  process.on("exit", () => {});
+  try {
+    await run();
+  } finally {
+    await restore();
+  }
+
+  async function run() {
   // limpa o estado do servidor para o teste ser determinístico
-  await fetch(BASE + "/api/state", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: {}, savedAt: "1970-01-01T00:00:00Z" }) });
+  await writeServerState(null);
 
   const domA = makeDom("https://origem-a.example/app/");
   await sleep(400);
@@ -106,5 +134,6 @@ const check = (n, ok, d) => out.push((ok ? "PASS  " : "FAIL  ") + n + (d ? "  ["
 
   console.log(out.join("\n"));
   console.log(errors.length ? "ERRORS: " + errors.slice(0, 3).join(" | ") : "sem erros de página");
-  process.exit(out.some((l) => l.startsWith("FAIL")) ? 1 : 0);
+  if (out.some((l) => l.startsWith("FAIL"))) process.exitCode = 1;
+  }
 })();
