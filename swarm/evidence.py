@@ -20,11 +20,12 @@ EVIDENCE: dict[str, dict[str, Any]] = {
     "humes_dosage_2014": {
         "claim": (
             "For older adults with hearing impairment, most of the gain from "
-            "word-based auditory training is reached after 5-7.5 weeks, and "
-            "training 2-3 times per week produces significant gains with no "
-            "advantage for training every day."
+            "word-based auditory training was reached after 5-7.5 weeks at 2 or "
+            "3 sessions per week; the 2x and 3x groups did not differ. A "
+            "daily-training arm was not tested, so the study does not support a "
+            "claim that daily training is useless."
         ),
-        "effect": "gain largely complete by 5-7.5 weeks; 2x vs 3x/week not significantly different",
+        "effect": "most gain by 5-7.5 weeks; 2x/week vs 3x/week not different; daily training not tested",
         "citation": "Humes LE, et al. The effects of dosage and duration of auditory training for older adults with hearing impairment. J Acoust Soc Am. 2014.",
         "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4144170/",
         "grade": "A",
@@ -174,13 +175,14 @@ EVIDENCE: dict[str, dict[str, Any]] = {
     },
     "auditory_training_sin_meta": {
         "claim": (
-            "Computer-based auditory training improves speech-in-noise perception in "
-            "older adults, with adaptive difficulty a core design feature."
+            "Older listeners retain a capacity for auditory perceptual learning, "
+            "and adaptive auditory training can improve performance on the trained "
+            "speech task; the evidence for transfer to untrained speech is mixed."
         ),
-        "effect": "significant pooled improvement on speech-in-noise measures",
-        "citation": "Anderson S, Kraus N. In Older Adults, the Brain Can Still Be Trained to Hear in Noise. The Hearing Journal. 2013.",
-        "url": "https://brainvolts.northwestern.edu/wp-content/uploads/boxtrx/Kraus_Anderson_HearJour_May_2013.pdf",
-        "grade": "A",
+        "effect": "on-task learning is robust; transfer to untrained stimuli is limited and inconsistent",
+        "citation": "Bieber RE, Gordon-Salant S. Improving older adults' understanding of challenging speech: auditory training, rapid adaptation and perceptual learning. Hear Res. 2020;402:108054.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7880302/",
+        "grade": "B",
     },
     "presbycusis_irreversible": {
         "claim": (
@@ -283,6 +285,158 @@ EVIDENCE: dict[str, dict[str, Any]] = {
         "citation": "Active Communication Education RCTs, summarised in Practical Communication Strategies for People with Hearing Loss. HearingTracker.",
         "url": "https://www.hearingtracker.com/resources/7-practical-communication-strategies-for-people-with-hearing-loss",
         "grade": "B",
+    },
+    "humes_specificity_2014": {
+        "claim": (
+            "In the Humes 2014 dosage study, gains were significant for the speech "
+            "materials used in training, but new words improved only about 7-10% and "
+            "the study did not find generalization to untrained talkers or sentences."
+        ),
+        "effect": "on-task gain; ~7-10% for new words; no generalization to untrained talkers/sentences",
+        "citation": "Humes LE, Kinney DL, Brown SE, Kiener AL, Quigley TM. The effects of dosage and duration of auditory training for older adults with hearing impairment. J Acoust Soc Am. 2014;136(3):EL224-EL230.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4144170/",
+        "grade": "A",
+    },
+    "hhie_s_pt_br": {
+        "claim": (
+            "The HHIE-S was adapted to Brazilian Portuguese by Wieselberg (1997) "
+            "and is used as a self-report hearing-handicap measure in Brazilian "
+            "studies. Published Brazilian work reports slightly different band "
+            "boundaries (0-8 / 10-23 / 24-40), so the score should be reported "
+            "raw and the band treated as descriptive."
+        ),
+        "effect": "pt-BR adaptation exists; bands vary slightly by source",
+        "citation": (
+            "Wieselberg MB. A auto-percepcao do handicap auditivo em idosos "
+            "[dissertation]. Sao Paulo: PUC-SP; 1997. As cited in Rosis ACA, "
+            "Souza MRF, Iorio MCM. Rev Soc Bras Fonoaudiol. 2009;14(3):339-345."
+        ),
+        "url": "https://www.scielo.br/j/rsbf/a/mWWFPX9zjw43TTrkwXbBQBh/?format=html&lang=pt",
+        "grade": "B",
+    },
+    "quicksin_measure_2004": {
+        "claim": (
+            "QuickSIN estimates SNR loss from six sentences with five key words each "
+            "(SNR loss = 25.5 - total correct); one list is accurate to about 2.7 dB "
+            "at the 95% confidence level. It is an open-set test and is not equivalent "
+            "to a closed-set browser task."
+        ),
+        "effect": "6 sentences x 5 key words; +/-2.7 dB (95% CI) for one list; +/-1.3 dB for two lists",
+        "citation": "Killion MC, Niquette PA, Gudmundsen GI, Revit LJ, Banerjee S. Development of a quick speech-in-noise test for measuring signal-to-noise ratio loss in normal-hearing and hearing-impaired listeners. J Acoust Soc Am. 2004;116(4):2395-2405.",
+        "url": "https://pubs.aip.org/asa/jasa/article-abstract/116/4/2395/545472/Development-of-a-quick-speech-in-noise-test-for",
+        "grade": "B",
+    },
+    "gap_training_2013": {
+        "claim": (
+            "Ten days of gap-detection training improved gap-detection thresholds in "
+            "older adults, and the learning was retained at one month. The study did "
+            "not establish transfer from gap detection to speech-in-noise."
+        ),
+        "effect": "gap-detection threshold improved in the trained task; retention at 1 month; no speech-transfer claim",
+        "citation": "Kishon-Rabin L, et al. Improved gap detection thresholds following auditory training: evidence of auditory plasticity in older adults. Am J Audiol. 2013;22(2):343-346.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/24018576/",
+        "grade": "B",
+    },
+    "transfer_limits_2020": {
+        "claim": (
+            "Across auditory perceptual-learning studies in older adults, learning "
+            "on the trained stimuli is usually robust, but transfer to untrained "
+            "stimuli is limited and inconsistent. On-task gain must not be presented "
+            "as real-world benefit."
+        ),
+        "effect": "trained-task gain does not reliably transfer to untrained speech",
+        "citation": "Bieber RE, Gordon-Salant S. Improving older adults' understanding of challenging speech: auditory training, rapid adaptation and perceptual learning. Hear Res. 2020;402:108054.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7880302/",
+        "grade": "B",
+    },
+    "achieve_2023": {
+        "claim": (
+            "In the ACHIEVE randomised trial, a hearing intervention did not reduce "
+            "3-year global cognitive decline in the primary analysis of the total "
+            "cohort (difference 0.002 SD, p=0.96). A prespecified subgroup at higher "
+            "risk showed slower decline, but cognitive protection must not be promised "
+            "to an individual."
+        ),
+        "effect": "primary analysis null for global cognition; subgroup signal only; do not promise cognitive benefit",
+        "citation": "Lin FR, et al. Hearing intervention versus health education control to reduce cognitive decline in older adults with hearing loss in the USA (ACHIEVE): a multicentre, randomised controlled trial. Lancet. 2023;402:786-797.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37478886/",
+        "grade": "A",
+    },
+    "hhie_s_administration": {
+        "claim": (
+            "The HHIE-S has 10 items scored Yes=4, Sometimes=2, No=0 (total 0-40); "
+            "0-8 indicates no perceived handicap, 10-24 mild-to-moderate and 26-40 "
+            "significant handicap. A score of 10 or more is the usual referral "
+            "threshold for audiologic evaluation. The original instructions ask the "
+            "respondent not to skip an item because the situation is avoided and to "
+            "answer as they hear without the hearing aid."
+        ),
+        "effect": "0-40; bands 0-8 / 10-24 / 26-40; refer at >=10; unaided administration",
+        "citation": "Ventry IM, Weinstein BE. Identification of elderly people with hearing problems. ASHA. 1983;25(7):37-42. Scoring and bands as summarised by the Hartford Institute for Geriatric Nursing (Try This: Hearing Screening in Older Adults).",
+        "url": "https://hign.org/sites/default/files/2020-06/Try_This_General_Assessment_12.pdf",
+        "grade": "B",
+    },
+    "ecosin_2020": {
+        "claim": (
+            "Everyday conversational sentences recorded at natural rate and effort "
+            "form a valid speech-in-noise test material; sentence material drawn from "
+            "real conversation is more representative of daily listening than "
+            "laboratory sentences."
+        ),
+        "effect": "ECO-SiN corpus: 192 natural sentences, average 6.3 words, three vocal efforts",
+        "citation": "Miles KM, Keidser G, Freeston K, Beechey T, Best V, Buchholz JM. Development of the everyday conversational sentences in noise test. J Acoust Soc Am. 2020;147(3):1562-1576.",
+        "url": "https://doi.org/10.1121/10.0000780",
+        "grade": "B",
+    },
+    "real_world_sentences_2022": {
+        "claim": (
+            "Embedding everyday sentences in several real-world background noises "
+            "allows the difficulty of a speech test to be set away from ceiling and "
+            "floor for listeners with different hearing loss; scores are driven by the "
+            "hearing loss, the noise and also strongly by the sentence material."
+        ),
+        "effect": "choosing the environment sets a usable operating point; material effect is large",
+        "citation": "Miles K, Beechey T, Best V, Buchholz J. Measuring speech intelligibility and hearing-aid benefit using everyday conversational sentences in real-world environments. Front Neurosci. 2022;16:789565.",
+        "url": "https://doi.org/10.3389/fnins.2022.789565",
+        "grade": "B",
+    },
+    "ecological_validity_tradeoff_2025": {
+        "claim": (
+            "In cochlear-implant users, speech audiometry results and a "
+            "patient-reported outcome measure did not correlate across all test "
+            "conditions: there is a tension between precision audiometry (control, "
+            "reproducibility) and ecological validity (resemblance to daily listening). "
+            "The study is in CI users, so it is cited here as a general warning, not as "
+            "evidence about hearing-aid users."
+        ),
+        "effect": "realistic material buys face validity at the cost of precision",
+        "citation": "Hey M, Hocke T. Precision audiometry and ecological validity: exploring the link between patient-reported outcome measures and speech testing in CI users. Audiol Res. 2025;15(5):142.",
+        "url": "https://doi.org/10.3390/audiolres15050142",
+        "grade": "B",
+    },
+    "syntactic_complexity_aging": {
+        "claim": (
+            "Older adults, and especially older adults with hearing loss, understand "
+            "syntactically complex sentences less accurately than simple ones even when "
+            "the words are audible; the cost is attributed to limited working memory and "
+            "to the effort of listening."
+        ),
+        "effect": "clause complexity and hearing loss both reduce report accuracy; effort consumes resources",
+        "citation": "Stewart R, Wingfield A. Hearing loss and cognitive effort in older adults' report accuracy for verbal materials. J Am Acad Audiol. 2009;20(2):147-154.",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/19927677/",
+        "grade": "C",
+    },
+    "streaming_environment_awareness": {
+        "claim": (
+            "Streaming audio to hearing aids reduces the awareness of environmental "
+            "sounds because the ear is partly occluded and attention is directed to "
+            "the stream. It is a conservative safety precaution, not a training "
+            "claim, to avoid streaming while walking on stairs or in traffic."
+        ),
+        "effect": "safety precaution: do not stream while walking on stairs or in the street",
+        "citation": "Clinical guidance on hearing-aid use and environmental awareness (safety precaution; no primary trial of stair walking under streaming).",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/deafness-and-hearing-loss",
+        "grade": "D",
     },
 }
 

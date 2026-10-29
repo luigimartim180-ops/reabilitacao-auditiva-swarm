@@ -1,14 +1,18 @@
-.PHONY: test serve demo check clean browse ci
+.PHONY: test smoke serve demo check clean browse ci
 
 test:
 	python3 -m pytest tests/ -q
+
+smoke:
+	node tools/smoke_app.js
 
 ci: test check
 
 check:
 	node --check app/protocol.js
-	python3 -c "import re,sys; h=open('app/index.html').read(); m=re.findall(r'<script>\n(.*?)\n</script>', h, re.S); open('/tmp/_app.js','w').write(m[0])"
-	node --check /tmp/_app.js
+	node --check app/app.js
+	python3 -c "import re,sys; h=open('app/index.html').read(); ids=re.findall(r'id=\"([^\"]+)\"', h); dup=sorted({i for i in ids if ids.count(i)>1}); assert not dup, 'duplicate ids: %s' % dup; assert 'protocol.js' in h and 'app.js' in h, 'scripts missing'"
+	python3 -c "import sys; sys.path.insert(0,'.'); from swarm.evidence import EVIDENCE; assert len(EVIDENCE) >= 36; print('evidence entries:', len(EVIDENCE))"
 
 browse:
 	python3 tools/build_browser.py app/browse.html
@@ -20,4 +24,4 @@ demo:
 	python3 -m swarm.cli examples/profile.json
 
 clean:
-	rm -rf .pytest_cache **/__pycache__ /tmp/_app.js app/browse.html
+	rm -rf .pytest_cache **/__pycache__ app/browse.html

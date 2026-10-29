@@ -21,11 +21,21 @@ pare: adicione uma entrada em `swarm/evidence.py` e um gatilho determinístico n
 - `swarm/schema.py` — perfil validado. `PROFILE_FIELDS` são obrigatórios; faltar campo
   levanta `ProfileError`. Nunca transforme campo obrigatório em default silencioso.
 - `swarm/engine.py` — os 5 agentes (A1 sinal, A2 dosagem, A3 transferência, A4 família,
-  A5 segurança) e o plano de 8 semanas.
-- `app/index.html` — app pt-BR, áudio real (Web Audio + voz pt-BR), testes adaptativos.
-- `app/protocol.js` — espelho do motor para rodar offline. **Deve** ficar idêntico ao
-  Python; `tests/test_parity.py` falha se divergir.
-- `tests/` — pytest. `docs/` — análise, arquitetura, evidências, protocolo, segurança.
+  A5 segurança), o plano de 8 semanas, o plano de medição, o plano de treino e o bloco
+  de limites.
+- `swarm/measurement.py` — matemática pura da medição: HHIE-S, escada 2-down/1-up,
+  estimador de limiar, passo e estimador de gap, clamp. Não contém decisão clínica.
+- `app/index.html` — shell do app pt-BR (7 abas, acessibilidade, aviso de voz/iframe).
+- `app/app.js` — avaliação (HHIE-S + fala em ruído + gap), treino de 8 semanas,
+  treino de gap, diário, relatório e exportação/importação. Não recalcula limiar:
+  usa `SwarmEngine.measure`.
+- `app/protocol.js` — espelho do motor **e da medição** para rodar offline. **Deve**
+  ficar idêntico ao Python; `tests/test_parity.py` falha se divergir.
+- `app/app.js` `ITEMS` — banco de frases (89 itens) com `tier`, `kind`, `domain`; as
+  formas A/B/C são medidas repetidas e **não devem ser editadas**. O plano de níveis do
+  treino vem do motor (`content.training_ladder`), nunca de lista solta no app.
+- `tests/` — pytest. `docs/` — análise, arquitetura, evidências, protocolo, segurança,
+  medição, material de frases (`SENTENCES_V5.md`) e auditoria do v4.
 
 ## Ordem dos agentes importa
 
@@ -35,9 +45,10 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (32 testes)
-make check    # node --check no protocol.js e no script inline do index.html
+make test     # pytest (99 testes)
+make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
+make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 111 checks
 make serve    # app em http://localhost:12000
 make demo     # protocolo a partir de examples/profile.json
 ```
@@ -49,7 +60,14 @@ make demo     # protocolo a partir de examples/profile.json
 - Nunca prometa reversão de perda auditiva; o teto está em `presbycusis_irreversible`.
 - Não coloque tDCS nem protocolo experimental no plano domiciliar.
 - Ao adicionar evidência, prefira meta-análise/RCT (grau A/B) e registre a URL real.
-- Se alterar `engine.py`, atualize `protocol.js` e rode `make test` (paridade).
+- Se alterar `engine.py` **ou** `measurement.py`, atualize `protocol.js` e rode
+  `make test` (paridade). A ordem que funciona: Python primeiro, espelho depois.
+- Não volte a colocar JavaScript inline no `index.html`: `make check` e a CI validam
+  `app/app.js` e `app/protocol.js`.
+- O app não pode prometer prova de melhora, cura, prevenção de demência, dose diária
+  ótima, QuickSIN caseiro ou transferência do gap para fala. `tests/test_app_static.py`
+  verifica isso.
+- `tools/smoke_app.js` é opcional e depende de jsdom; não faz parte da CI.
 
 ## Acesso às conversas originais
 

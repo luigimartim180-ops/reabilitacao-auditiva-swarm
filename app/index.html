@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estação de Treino Auditivo — pt-BR</title>
+<title>Estação de Treino Auditivo — SWARM v4</title>
 <style>
   :root {
     --bg: #ffffff;
     --fg: #111111;
     --muted: #5a5a5a;
     --line: #d8d8d8;
+    --panel: #f6f8fb;
     --accent: #1a5fb4;
     --accent-soft: #e8f0fb;
     --ok: #1a7f37;
     --ok-soft: #e6f4ea;
-    --warn: #9a6700;
+    --warn: #8a5a00;
     --warn-soft: #fdf3d8;
     --err: #b42318;
     --err-soft: #fdecea;
@@ -26,6 +27,7 @@
       --fg: #f2f2f2;
       --muted: #b5b5b5;
       --line: #3a3a3a;
+      --panel: #1a1a1a;
       --accent: #7cb0ff;
       --accent-soft: #17233a;
       --ok: #6ddc8a;
@@ -36,6 +38,22 @@
       --err-soft: #2c1614;
     }
   }
+  body.contrast {
+    --bg: #000000;
+    --fg: #ffffff;
+    --muted: #e0e0e0;
+    --line: #ffffff;
+    --panel: #111111;
+    --accent: #8ec5ff;
+    --accent-soft: #10233d;
+    --ok: #7dffa8;
+    --ok-soft: #10240f;
+    --warn: #ffd36e;
+    --warn-soft: #2b2108;
+    --err: #ff9a90;
+    --err-soft: #2c0f0c;
+  }
+  body.large { font-size: 1.18rem; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -45,10 +63,22 @@
     font-size: 19px;
     line-height: 1.55;
   }
-  main { max-width: 820px; margin: 0 auto; padding: 20px 18px 60px; }
-  h1 { font-size: 1.5rem; margin: 0 0 6px; }
-  h2 { font-size: 1.15rem; margin: 26px 0 10px; }
-  p.lead { color: var(--muted); margin: 0 0 18px; }
+  main { max-width: 980px; margin: 0 auto; padding: 18px 16px 70px; }
+  h1 { font-size: 1.65rem; margin: 0 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 10px; }
+  h3 { font-size: 1.02rem; margin: 18px 0 6px; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 10px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.9rem; }
+  .tiny { font-size: 0.82rem; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .center { text-align: center; }
+  .hidden { display: none !important; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
   .card {
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -56,778 +86,493 @@
     margin: 16px 0;
     background: var(--bg);
   }
-  .card.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .card.panel { background: var(--panel); }
   .card.ok { background: var(--ok-soft); border-color: var(--ok); }
+  .card.warn { background: var(--warn-soft); border-color: var(--warn); }
   .card.err { background: var(--err-soft); border-color: var(--err); }
-  .steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px; }
-  .step {
-    font-size: 0.82rem;
-    padding: 5px 11px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--muted);
-  }
-  .step.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
-  .step.done { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
-  label.field { display: block; font-weight: 600; margin: 14px 0 6px; }
-  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  input[type=range] { flex: 1; min-width: 220px; height: 34px; }
-  button {
-    font: inherit;
+  .card.accent { border-left: 5px solid var(--accent); }
+  .banner {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    margin: 12px 0;
     font-weight: 600;
-    cursor: pointer;
     border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--fg);
-    border-radius: 12px;
-    padding: 14px 18px;
-    min-height: 56px;
   }
-  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  button.big { width: 100%; font-size: 1.1rem; }
+  .banner.err { background: var(--err-soft); border-color: var(--err); }
+  .banner.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .banner.ok { background: var(--ok-soft); border-color: var(--ok); }
+  .tabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg); padding: 10px 0; margin-bottom: 4px;
+  }
+  .tab {
+    font: inherit; font-size: 0.92rem; font-weight: 600;
+    padding: 11px 14px; min-height: 52px;
+    border: 2px solid var(--line); background: var(--bg); color: var(--fg);
+    border-radius: 999px; cursor: pointer;
+  }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    border-radius: 12px; padding: 13px 16px; min-height: 54px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 4px solid var(--accent); outline-offset: 2px; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  @media (max-width: 560px) { .grid3 { grid-template-columns: 1fr; } }
-  .hidden { display: none !important; }
-  .badge { display: inline-block; font-size: 0.85rem; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-  .num { font-variant-numeric: tabular-nums; font-weight: 700; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
-  .opt { font-size: 1.05rem; }
-  .feedback { margin-top: 12px; font-weight: 600; }
-  .foot { color: var(--muted); font-size: 0.86rem; margin-top: 26px; }
-  .kv { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+  button.warn { background: var(--warn); color: #fff; border-color: var(--warn); }
+  button.err { background: var(--err); color: #fff; border-color: var(--err); }
+  button.big { width: 100%; font-size: 1.08rem; margin: 6px 0; }
+  button.ghost { background: transparent; }
+  button.small { font-size: 0.88rem; padding: 8px 12px; min-height: 42px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row.between { justify-content: space-between; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 700px) {
+    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+    .tab { flex: 1 1 30%; font-size: 0.84rem; padding: 10px 8px; }
+    h1 { font-size: 1.4rem; }
+  }
+  label.field { display: block; font-weight: 600; margin: 14px 0 6px; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; padding: 12px; font: inherit; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  }
+  textarea { min-height: 170px; resize: vertical; }
+  input[type=range] { width: 100%; height: 38px; }
+  .checkline {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .checkline input { width: 24px; height: 24px; margin-top: 2px; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 0.82rem; font-weight: 700;
+  }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .badge.err { background: var(--err-soft); color: var(--err); }
+  .kv {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .kv:last-child { border-bottom: 0; }
+  .kv .v { text-align: right; font-weight: 700; }
+  .progress {
+    height: 14px; background: var(--line); border-radius: 999px;
+    overflow: hidden; margin: 10px 0;
+  }
+  .progress > div { height: 100%; background: var(--ok); width: 0; transition: width .25s; }
+  .options { display: grid; gap: 10px; margin-top: 14px; }
+  .option {
+    text-align: left; font-size: 1.04rem; padding: 14px 16px;
+    border: 2px solid var(--line); border-radius: 12px; background: var(--bg);
+  }
+  .option.correct { border-color: var(--ok); background: var(--ok-soft); }
+  .option.wrong { border-color: var(--err); background: var(--err-soft); }
+  .option:disabled { opacity: 1; }
+  .question { font-size: 1.08rem; font-weight: 700; margin: 14px 0 4px; }
+  .stimulus { font-size: 1.02rem; color: var(--muted); font-style: italic; }
+  .feedback { margin-top: 12px; font-weight: 700; }
+  .feedback.ok { color: var(--ok); }
+  .feedback.err { color: var(--err); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--line); font-size: 0.95rem; vertical-align: top; }
+  th { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: .03em; }
+  .chart { display: flex; align-items: flex-end; gap: 4px; height: 170px; padding: 10px; background: var(--panel); border-radius: 10px; margin-top: 10px; }
+  .bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 4px; position: relative; }
+  .bar span { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: .65rem; color: var(--muted); }
+  .chart-wrap { padding-bottom: 24px; }
+  .pre {
+    background: #101418; color: #d9ffe0; padding: 14px; border-radius: 10px;
+    white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem; max-height: 480px; overflow: auto;
+  }
+  .pill {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); font-size: 0.8rem; color: var(--muted);
+    margin: 2px 4px 2px 0;
+  }
+  .pill.ok { border-color: var(--ok); color: var(--ok); }
+  .pill.warn { border-color: var(--warn); color: var(--warn); }
+  .pill.err { border-color: var(--err); color: var(--err); }
+  details { margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+  ul, ol { margin: 8px 0 12px; padding-left: 24px; }
+  li { margin: 4px 0; }
+  .foot { color: var(--muted); font-size: 0.82rem; margin-top: 28px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .stepbar { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .stepbar span { font-size: .8rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .stepbar span.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .stepbar span.done { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+  .noise-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .hhie-item { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .hhie-item:last-child { border-bottom: 0; }
+  .hhie-item p { margin: 0 0 8px; font-weight: 600; }
+  .hhie-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hhie-options button { flex: 1; min-width: 90px; }
+  .hhie-options button.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    background: var(--fg); color: var(--bg); padding: 12px 18px;
+    border-radius: 999px; font-weight: 700; z-index: 99; max-width: 90vw;
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>Estação de Treino Auditivo</h1>
-  <p class="lead">Treino de fala em ruído e resolução temporal, em português do Brasil, para uso domiciliar acompanhado.</p>
+  <header>
+    <h1>Estação de Treino Auditivo</h1>
+    <p class="lead">Treino de fala em ruído e resolução temporal, em português do Brasil, para uso domiciliar acompanhado. <strong>Não é exame clínico e não é dispositivo médico.</strong></p>
+    <div class="row">
+      <span class="badge">SWARM v4</span>
+      <span class="badge">v5 · build 2026-10-29</span>
+      <span class="badge" id="storageBadge">armazenamento</span>
+      <span class="badge" id="saveStatus">ainda não salvo</span>
+      <span class="badge" id="voiceBadge">voz</span>
+    </div>
+  </header>
 
-  <div class="card" id="releaseCard" style="border-left:4px solid var(--accent)">
-    <strong>SWARM v3 — build <span id="buildId">2026-10-12</span></strong>
-    <p style="margin:8px 0 0">5 agentes com contrato completo: <strong>A1 sinal</strong>, <strong>A2 dosagem</strong>, <strong>A3 transferência</strong>, <strong>A4 família</strong>, <strong>A5 segurança</strong>. Cada um declara gatilhos, saída, critério de parada e lacunas de evidência.</p>
-    <p style="margin:6px 0 0"><button id="quickProtocol" type="button">Ver os 5 agentes agora</button> <a href="browse.html" style="margin-left:10px">📂 Ver todos os arquivos do projeto</a></p>
+  <div id="globalBanner"></div>
+  <div id="voiceBanner" class="banner err hidden" role="alert">
+    <div id="voiceBannerText">A voz do navegador está bloqueada neste ambiente.</div>
+    <div class="row" style="margin-top:10px">
+      <button id="openFullWindow" class="warn">Abrir em janela completa</button>
+      <button id="dismissVoiceBanner" class="ghost small">Entendi</button>
+    </div>
+    <p class="small" style="margin:10px 0 0">O preview em iframe bloqueia a síntese de fala; os ruídos funcionam. Em janela completa ou em https (Netlify/GitHub Pages) a voz funciona. O app não simula a voz: sem voz, a avaliação e o treino ficam bloqueados.</p>
+  </div>
+  <div id="demoBanner" class="banner err hidden" role="alert">
+    <strong>MODO DEMONSTRAÇÃO — nada do que você fizer aqui é salvo.</strong> Os dados são fictícios.
+    <div class="row" style="margin-top:10px">
+      <button id="exitDemo" class="warn">Sair da demonstração e usar o app de verdade</button>
+    </div>
   </div>
 
-  <div class="steps" id="steps">
-    <span class="step" data-step="0">1. Calibrar volume</span>
-    <span class="step" data-step="1">2. Fala em ruído</span>
-    <span class="step" data-step="2">3. Resolução temporal</span>
-    <span class="step" data-step="4">4. Resultados</span>
-    <span class="step" data-step="5">5. Protocolo</span>
+  <div id="storageBanner" class="banner err hidden" role="alert">
+    <strong>Este navegador está bloqueando o armazenamento.</strong> A sessão fica só enquanto esta aba está aberta e some ao recarregar.
+    <div class="row" style="margin-top:10px">
+      <button id="btnStorageBackup" class="warn">Exportar backup agora</button>
+      <button id="dismissStorageBanner" class="ghost small">Entendi</button>
+    </div>
+    <p class="small" style="margin:10px 0 0">Abra em janela completa ou publique em https (Netlify ou GitHub Pages). No preview em iframe o navegador pode bloquear o armazenamento. Além disso, <strong>cada endereço de preview é um site diferente</strong> para o navegador: se a URL mudar, o histórico antigo não aparece. Use sempre o mesmo endereço.</p>
   </div>
 
-  <div class="card warn">
-    <strong>Antes de começar</strong>
-    <p style="margin:8px 0 0">Use fones de ouvido em ambiente silencioso. Isto é uma ferramenta de treino e triagem orientativa, não um exame clínico calibrado. A voz é sintética e mais fácil que a voz humana real. Nada aqui substitui audiometria e avaliação profissional.</p>
-  </div>
+  <nav class="tabs" id="tabs" aria-label="Seções do app">
+    <button class="tab active" data-tab="inicio">Início</button>
+    <button class="tab" data-tab="avaliacao">Avaliação</button>
+    <button class="tab" data-tab="treino">Treino</button>
+    <button class="tab" data-tab="vida">Vida real</button>
+    <button class="tab" data-tab="relatorio">Relatório</button>
+    <button class="tab" data-tab="plano">Plano</button>
+    <button class="tab" data-tab="ajustes">Ajustes</button>
+  </nav>
 
-  <!-- STEP 0 -->
-  <section id="s0" class="card">
-    <h2>Passo 1 — Calibrar o volume</h2>
-    <p>Ajuste até ouvir o barulho de fundo de forma confortável: claramente audível, mas sem incomodar.</p>
-    <div class="row">
-      <button id="btnNoise" class="primary">Tocar barulho</button>
-      <span class="badge">Ruído rosa</span>
+  <!-- ===================== INÍCIO ===================== -->
+  <section id="tab-inicio" class="tab-panel">
+    <div class="card accent">
+      <h2>Hoje</h2>
+      <div class="row between">
+        <div>
+          <label class="field" for="weekSelect">Semana de treino</label>
+          <select id="weekSelect" style="max-width:180px"></select>
+        </div>
+        <div class="row">
+          <span class="badge" id="baselineBadge">avaliação inicial pendente</span>
+          <span class="badge" id="pausedBadge">treino liberado</span>
+        </div>
+      </div>
+      <div id="planSummary" style="margin-top:12px"></div>
+      <div id="resumeNotice"></div>
+      <div id="weekAction"></div>
+      <button id="btnStartAssessment" class="primary big">Fazer avaliação inicial</button>
+      <button id="btnStartTraining" class="ok big">Começar sessão de treino</button>
+      <button id="btnWeekAssessment" class="big hidden">Fazer avaliação da semana</button>
+      <button id="btnReport" class="big">Ver relatório</button>
     </div>
-    <label class="field" for="vol">Volume do barulho</label>
-    <div class="row">
-      <input id="vol" type="range" min="0" max="100" value="30">
-      <span class="num" id="volVal">30</span>
+
+    <div class="card">
+      <h2>O que conta como resultado</h2>
+      <p class="muted">Quatro níveis separados. Só o primeiro é funcional; os outros são tarefas e pistas, não prova de melhora na vida real.</p>
+      <div id="levelCards" class="grid2"></div>
     </div>
-    <label class="field">Testar a voz</label>
-    <button id="btnVoice">Ouvir uma frase de teste</button>
-    <p id="voiceMsg" class="feedback"></p>
-    <button id="toStep1" class="primary big" style="margin-top:18px">Ir para o teste de fala em ruído</button>
+
+    <div class="card">
+      <h2>Segurança</h2>
+      <p><strong>Pare e procure avaliação médica</strong> se houver perda súbita de audição, dor de ouvido, secreção, zumbido novo em um ouvido, tontura ou piora rápida.</p>
+      <ul id="stopsList" class="small"></ul>
+      <button id="btnEvent" class="err big">Registrar evento adverso e pausar</button>
+      <button id="btnRelease" class="ok big hidden">Liberar retomada do treino</button>
+      <p class="small muted" style="margin-top:10px">Esta lista é uma precaução de segurança, não um diagnóstico. O app nunca substitui otorrinolaringologista ou fonoaudiólogo.</p>
+    </div>
+
+    <div class="card">
+      <h2>Acessibilidade</h2>
+      <div class="row">
+        <button id="btnLargeFont" class="small">Aumentar letra</button>
+        <button id="btnContrast" class="small">Alto contraste</button>
+      </div>
+      <p class="small muted" style="margin-top:8px">As preferências ficam salvas neste aparelho.</p>
+    </div>
   </section>
 
-  <!-- STEP 1 -->
-  <section id="s1" class="card hidden">
-    <h2>Passo 2 — Fala em ruído</h2>
-    <p>Ouça a frase e escolha a resposta. São <span class="num">10</span> frases, do mais fácil ao mais difícil. O ruído começa antes da voz.</p>
-    <div class="row">
-      <button id="playSIN" class="primary">Ouvir frase</button>
-      <span class="badge" id="sinProgress">Frase 0 de 10</span>
-      <span class="badge" id="sinSNR">SNR +8 dB</span>
+  <!-- ===================== AVALIAÇÃO ===================== -->
+  <section id="tab-avaliacao" class="tab-panel hidden">
+    <div class="card warn">
+      <h2>Antes de qualquer teste</h2>
+      <p>Use o mesmo volume do aparelho em todas as avaliações. A voz é sintética e o ruído é do navegador: <strong>o dB é relativo e não calibrado</strong>. Não é audiometria e não é QuickSIN.</p>
+      <div class="row">
+        <button id="btnCalibrateNoise" class="small">Tocar ruído de calibração</button>
+        <button id="btnTestVoice" class="small">Testar voz agora</button>
+      </div>
+      <p id="calibrationStatus" class="small muted" style="margin-top:8px">Ajuste o volume do aparelho até ouvir o ruído confortavelmente.</p>
     </div>
-    <div id="sinOptions" class="grid3" style="margin-top:16px"></div>
-    <p id="sinFeedback" class="feedback"></p>
+
+    <div class="card">
+      <h2>Escolha o momento</h2>
+      <p class="muted">A linha de base é obrigatória antes do treino. A avaliação tem quatro partes: HHIE-S, fala em ruído, um bloco <strong>opcional</strong> de compreensão de vida real (frases longas, % de acerto, exploratório) e o gap. Semana 4 e semana 8 usam formas de frase não treinadas. O seguimento é cerca de 30 dias após a semana 8.</p>
+      <div id="assessmentButtons" class="grid2"></div>
+    </div>
+
+    <div id="assessmentArea"></div>
+
+    <div class="card">
+      <h2>Histórico de avaliações</h2>
+      <div id="assessmentHistory"></div>
+    </div>
   </section>
 
-  <!-- STEP 2 -->
-  <section id="s2" class="card hidden">
-    <h2>Passo 3 — Resolução temporal</h2>
-    <p>Você vai ouvir um ou dois sons. Se ouvir <strong>dois</strong>, aperte "Dois sons". Se ouvir <strong>um só</strong>, aperte "Um som".</p>
-    <div class="row">
-      <button id="playGap" class="primary">Tocar som</button>
-      <span class="badge" id="gapProgress">Tentativa 0</span>
+  <!-- ===================== TREINO ===================== -->
+  <section id="tab-treino" class="tab-panel hidden">
+    <div class="card">
+      <h2>Configuração da sessão</h2>
+      <div id="trainingPlanSummary"></div>
+      <label class="field" for="rateSlider">Velocidade da voz: <span id="rateVal">0.90</span>x</label>
+      <input id="rateSlider" type="range" min="0.7" max="1.2" step="0.05" value="0.9">
+      <p class="small muted">Mais lento = mais fácil. A partir da semana 6, o plano usa 1.00x (normal). Compressão acima de 1.0x é opcional e não é comprovada em casa.</p>
+      <label class="field">Tipo de ruído</label>
+      <div class="grid4" id="noiseButtons">
+        <button class="noise-btn" data-noise="rosa">Ruído rosa</button>
+        <button class="noise-btn" data-noise="casa">Casa</button>
+        <button class="noise-btn" data-noise="restaurante">Restaurante</button>
+        <button class="noise-btn" data-noise="tv">TV / vozes</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="badge" id="voiceName">voz padrão</span>
+        <button id="btnTestAudio" class="small">Testar áudio e ruído</button>
+      </div>
+      <button id="btnStartSession" class="ok big">Começar sessão (8 itens + fechamento)</button>
+      <p class="small muted">O app limita o treino a 10 minutos por dia e 2–3 dias por semana. O limite é de tolerabilidade; a dose testada em pesquisa foi 2–3 sessões por semana por 5–15 semanas.</p>
     </div>
-    <div class="grid2" style="margin-top:16px">
-      <button id="gapOne" class="opt">Um som</button>
-      <button id="gapTwo" class="opt">Dois sons</button>
+
+    <div id="trainingArea"></div>
+
+    <div class="card">
+      <h2>Sessões recentes</h2>
+      <div id="trainingHistory"></div>
     </div>
-    <p id="gapFeedback" class="feedback"></p>
   </section>
 
-  <!-- STEP 4 -->
-  <section id="s4" class="card hidden">
-    <h2>Resultados</h2>
-    <div id="results"></div>
-    <button id="copyResults" class="primary big" style="margin-top:18px">Copiar resultados</button>
-    <button id="toProfile" class="big" style="margin-top:10px">Gerar protocolo personalizado</button>
-    <button id="again" style="margin-top:10px" class="big">Refazer os testes</button>
+  <!-- ===================== VIDA REAL ===================== -->
+  <section id="tab-vida" class="tab-panel hidden">
+    <div class="card">
+      <h2>Escada de TV</h2>
+      <p class="muted">Comece pelo degrau mais fácil. O alvo é entender o conteúdo, não apenas ouvir som.</p>
+      <div id="tvLadder"></div>
+    </div>
+
+    <div class="card">
+      <h2>Treino do parceiro (20 min)</h2>
+      <p class="muted">A família também é parte do tratamento. Marque o que foi praticado nesta semana.</p>
+      <div id="partnerChecklist"></div>
+      <button id="btnPartnerSession" class="ok big">Registrar uma sessão de 20 min com o parceiro</button>
+      <p id="partnerStatus" class="small muted"></p>
+    </div>
+
+    <div class="card">
+      <h2>Música</h2>
+      <p>Meta: 15 min, 2 vezes por semana. Música da época dele, cantando junto quando possível.</p>
+      <div class="row">
+        <span class="badge" id="musicCount">0 nesta semana</span>
+        <button id="btnMusic" class="small">Registrar 15 min de música</button>
+      </div>
+      <p class="small muted">A evidência para música em casa é de estudos pequenos e grupais; trate como atividade de apoio, não como promessa.</p>
+    </div>
+
+    <div class="card">
+      <h2>Diário de vida real — semana <span id="diaryWeekLabel">1</span></h2>
+      <p class="muted">Este é o nível funcional. Não é uma medida calibrada; é o que a família observa.</p>
+      <p class="small muted">O que você escreve aqui é <strong>salvo a cada letra</strong>, sem precisar clicar em nada. Pode fechar o app, ir ao treino ou desligar o computador: ao voltar, o diário continua de onde parou.</p>
+      <label class="field" for="diaryWeekSelect">Semana deste diário</label>
+      <select id="diaryWeekSelect" style="max-width:220px"></select>
+      <p class="small muted" id="diaryWeekHint"></p>
+      <label class="field" for="diaryTv">Quantas vezes entendeu a TV sem pedir para repetir?</label>
+      <select id="diaryTv">
+        <option value="0">0</option>
+        <option value="1-2">1–2</option>
+        <option value="3-5">3–5</option>
+        <option value="6+">6 ou mais</option>
+      </select>
+      <label class="field" for="diaryConv">Conversas acompanhadas sem pedir repetição:</label>
+      <select id="diaryConv">
+        <option value="0">0</option>
+        <option value="1-2">1–2</option>
+        <option value="3-5">3–5</option>
+        <option value="6+">6 ou mais</option>
+      </select>
+      <label class="field" for="diaryFatigue">Cansaço auditivo no fim do dia (0–10): <span id="diaryFatigueVal">3</span></label>
+      <input id="diaryFatigue" type="range" min="0" max="10" value="3">
+      <label class="field" for="diaryNote">Observação da semana (opcional):</label>
+      <textarea id="diaryNote" rows="3" placeholder="Ex.: entendeu o jornal melhor, mas ainda pede repetição no restaurante."></textarea>
+      <button id="btnSaveDiary" class="primary big">Salvar agora (opcional)</button>
+      <p id="diaryStatus" class="small muted" role="status"></p>
+    </div>
+
+    <div class="card">
+      <h2>Semanas de diário já salvas</h2>
+      <p class="small muted">Cada semana fica guardada. Mudar de semana não apaga o diário anterior.</p>
+      <div id="diaryHistory"></div>
+    </div>
+
+    <div class="card">
+      <h2>Compreensão de vida real</h2>
+      <p>As frases do treino sobem em degraus: curtas e previsíveis (N1), médias do dia a dia (N2), longas com dois fatos ou ordem (N3) e, no topo (N4), frases de dois ou três fatos encadeados e relatos de duas a três frases com pergunta de sentido. O bloco de vida real usa quatro frases longas fixas no mesmo ruído e mostra <strong>percentual de acerto</strong>.</p>
+      <p class="small muted">Frases longas medem audição, memória e atenção <em>juntas</em>. Por isso o bloco é exploratório: ele não entra no limiar de fala em ruído e não é prova de transferência para a vida real.</p>
+      <div id="realLifeSummary"></div>
+    </div>
+
+    <div class="card">
+      <h2>Transferência para formas não treinadas</h2>
+      <p>A avaliação de fala em ruído usa formas de frase que nunca aparecem no treino. Uma mudança nessas formas é uma pista de transferência — <strong>possível, não garantida</strong>. O app não chama isso de melhora na vida real.</p>
+      <div id="transferSummary"></div>
+    </div>
   </section>
 
-  <!-- STEP 5 -->
-  <section id="s5" class="card hidden">
-    <h2>Protocolo personalizado</h2>
-    <p>Responda as perguntas de calibragem. O protocolo é gerado no próprio aparelho, sem servidor, a partir do mesmo motor auditável do repositório.</p>
-    <div id="profileForm"></div>
-    <button id="buildProtocol" class="primary big" style="margin-top:16px">Gerar protocolo</button>
-    <div id="protocolOut" style="margin-top:16px"></div>
+  <!-- ===================== RELATÓRIO ===================== -->
+  <section id="tab-relatorio" class="tab-panel hidden">
+    <div class="card">
+      <h2>Indicadores de desempenho</h2>
+      <p class="muted">Não é “prova de melhora fisiológica”. Desfecho funcional primário: HHIE-S. Tarefa treinada: fala em ruído relativa. Compreensão de vida real: bloco exploratório em % de acerto, com frases longas. Temporal: gap. Transferência: formas não treinadas, exploratória.</p>
+      <div id="outcomesTable"></div>
+      <h3>Mudanças desde a linha de base</h3>
+      <div id="changesTable"></div>
+      <p class="small muted">Uma mudança menor que a faixa de medição não é interpretável. O app nunca transforma um número caseiro em diagnóstico.</p>
+    </div>
+
+    <div class="card">
+      <h2>Sessões (últimas 14)</h2>
+      <div class="chart-wrap"><div class="chart" id="chart"></div></div>
+      <div id="sessionTable"></div>
+    </div>
+
+    <div class="card">
+      <h2>Relatório em texto</h2>
+      <button id="btnGenerateReport" class="primary big">Gerar relatório completo</button>
+      <div id="reportOut" class="pre hidden" style="margin-top:12px"></div>
+      <button id="btnCopyReport" class="big hidden">Copiar relatório</button>
+    </div>
+
+    <div class="card">
+      <h2>Pacote de dados (audioswarm.v1.1)</h2>
+      <p class="muted">JSON para revisão semanal. Inclui contexto, limites, medidas, sessões, segurança e o plano determinístico. Nada sai do aparelho.</p>
+      <button id="btnExportPackage" class="primary big">Exportar pacote JSON</button>
+      <textarea id="packageOut" class="mono hidden" rows="12" spellcheck="false" style="margin-top:10px"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button id="btnCopyPackage" class="small hidden">Copiar pacote</button>
+        <button id="btnImportPackage" class="small">Importar pacote</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Limitações</h2>
+      <ul id="limitationsList"></ul>
+      <h3>Segurança</h3>
+      <div id="safetySummary"></div>
+    </div>
+
+    <div class="card">
+      <h2>Fontes principais</h2>
+      <div id="citationsList"></div>
+      <p class="small muted">O registro completo, com 32 entradas e URLs, está em <span class="mono">swarm/evidence.py</span> e em <span class="mono">docs/EVIDENCE.md</span>.</p>
+    </div>
+  </section>
+
+  <!-- ===================== PLANO ===================== -->
+  <section id="tab-plano" class="tab-panel hidden">
+    <div class="card">
+      <h2>Perfil para o motor determinístico</h2>
+      <p class="muted">O motor não usa modelo de linguagem. Cada recomendação aponta para uma chave de evidência. Campos vazios ou inválidos falham alto.</p>
+      <div id="profileForm"></div>
+      <h3>Contexto para o pacote de revisão</h3>
+      <div id="contextForm"></div>
+      <button id="btnBuildProtocol" class="primary big">Gerar protocolo personalizado</button>
+      <div id="protocolOut" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section id="tab-ajustes" class="tab-panel hidden">
+    <div class="card">
+      <h2>Voz</h2>
+      <label class="field" for="voiceSelect">Voz pt-BR</label>
+      <select id="voiceSelect"></select>
+      <div class="row" style="margin-top:10px">
+        <button id="btnVoiceTest" class="ok">Testar voz</button>
+        <button id="btnOpenWindow2" class="warn">Abrir em janela completa</button>
+      </div>
+      <p id="voiceStatus" class="small muted" style="margin-top:8px"></p>
+    </div>
+
+    <div class="card">
+      <h2>Teste dos ruídos</h2>
+      <div class="grid2" id="noiseTestButtons">
+        <button data-test-noise="rosa">Ruído rosa (4 s)</button>
+        <button data-test-noise="casa">Casa real (4 s)</button>
+        <button data-test-noise="restaurante">Restaurante (4 s)</button>
+        <button data-test-noise="tv">TV / vozes (4 s)</button>
+      </div>
+      <p class="small muted">Os ruídos usam Web Audio API. Eles funcionam mesmo quando a voz está bloqueada.</p>
+    </div>
+
+    <div class="card">
+      <h2>Diagnóstico</h2>
+      <button id="btnDiagnostics" class="primary big">Rodar diagnóstico</button>
+      <div id="diagnostics" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Acessibilidade</h2>
+      <div class="row">
+        <button id="btnLargeFontSettings" class="small">Aumentar letra</button>
+        <button id="btnContrastSettings" class="small">Alto contraste</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Backup e dados</h2>
+      <p class="muted">O app guarda tudo no navegador. Faça backup antes de limpar o aparelho.</p>
+      <button id="btnExportBackup" class="primary big">Exportar pacote</button>
+      <button id="btnImportBackup" class="big">Importar pacote</button>
+      <button id="btnLegacy" class="big">Importar dados do app antigo (v3.1)</button>
+      <button id="btnReset" class="err big">Apagar tudo e reiniciar</button>
+      <p id="storageStatus" class="small muted"></p>
+    </div>
+
+    <div class="card">
+      <h2>Privacidade e limites</h2>
+      <p>Todo o processamento acontece no aparelho. Não há servidor, conta, chave de API nem envio de dados. O app é um protótipo experimental de apoio; não é dispositivo médico, não diagnostica, não prescreve e não substitui avaliação audiológica.</p>
+    </div>
   </section>
 
   <p class="foot" id="foot"></p>
 </main>
-
-<script src="protocol.js?v=3"></script>
-<script>
-"use strict";
-
-/* ---------------- audio engine ---------------- */
-let ctx = null;
-let noiseSrc = null;
-let noiseGain = null;
-let noiseBuffer = null;
-
-function ensureCtx() {
-  if (ctx) return ctx;
-  const AC = window.AudioContext || window.webkitAudioContext;
-  ctx = new AC();
-  noiseBuffer = makePinkNoise(ctx, 4);
-  return ctx;
-}
-
-function makePinkNoise(ac, seconds) {
-  const len = Math.floor(ac.sampleRate * seconds);
-  const buf = ac.createBuffer(1, len, ac.sampleRate);
-  const data = buf.getChannelData(0);
-  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-  for (let i = 0; i < len; i++) {
-    const white = Math.random() * 2 - 1;
-    b0 = 0.99886 * b0 + white * 0.0555179;
-    b1 = 0.99332 * b1 + white * 0.0750759;
-    b2 = 0.96900 * b2 + white * 0.1538520;
-    b3 = 0.86650 * b3 + white * 0.3104856;
-    b4 = 0.55000 * b4 + white * 0.5329522;
-    b5 = -0.7616 * b5 - white * 0.0168980;
-    data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
-    b6 = white * 0.115926;
-  }
-  return buf;
-}
-
-/* Noise level is expressed relative to the calibrated reference (0 dB). */
-function noiseGainFor(relDb) {
-  const calib = Number(vol.value) / 100;      // 0..1 user calibration
-  const base = 0.0001 + calib * 0.5;          // keep it audible but bounded
-  return base * Math.pow(10, relDb / 20);
-}
-
-function startNoise(relDb) {
-  const ac = ensureCtx();
-  if (ac.state === "suspended") ac.resume();
-  stopNoise();
-  noiseSrc = ac.createBufferSource();
-  noiseSrc.buffer = noiseBuffer;
-  noiseSrc.loop = true;
-  noiseGain = ac.createGain();
-  noiseGain.gain.value = noiseGainFor(relDb);
-  noiseSrc.connect(noiseGain).connect(ac.destination);
-  noiseSrc.start();
-}
-
-function stopNoise() {
-  if (noiseSrc) { try { noiseSrc.stop(); } catch (e) {} noiseSrc = null; }
-}
-
-function speak(text, rate) {
-  return new Promise((resolve) => {
-    if (!("speechSynthesis" in window)) { resolve(); return; }
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "pt-BR";
-    u.rate = rate || 0.95;
-    u.volume = 1;
-    const v = pickVoice();
-    if (v) u.voice = v;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  });
-}
-
-function pickVoice() {
-  const voices = window.speechSynthesis.getVoices() || [];
-  return voices.find(v => (v.lang || "").toLowerCase().startsWith("pt-br"))
-      || voices.find(v => (v.lang || "").toLowerCase().startsWith("pt"))
-      || null;
-}
-if ("speechSynthesis" in window) {
-  window.speechSynthesis.onvoiceschanged = () => { pickVoice(); };
-}
-
-function playTonePair(gapMs) {
-  const ac = ensureCtx();
-  if (ac.state === "suspended") ac.resume();
-  const t0 = ac.currentTime + 0.05;
-  const toneDur = 0.25;
-  const gap = gapMs / 1000;
-  playTone(t0, toneDur, ac);
-  if (gapMs > 0) playTone(t0 + toneDur + gap, toneDur, ac);
-}
-
-function playTone(startAt, dur, ac) {
-  const osc = ac.createOscillator();
-  const g = ac.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 500;
-  g.gain.setValueAtTime(0, startAt);
-  g.gain.linearRampToValueAtTime(0.28, startAt + 0.02);
-  g.gain.setValueAtTime(0.28, startAt + dur - 0.02);
-  g.gain.linearRampToValueAtTime(0, startAt + dur);
-  osc.connect(g).connect(ac.destination);
-  osc.start(startAt);
-  osc.stop(startAt + dur + 0.02);
-}
-
-/* ---------------- sentence bank (pt-BR) ---------------- */
-const SENTENCES = [
-  { s: "O neto do seu Joaquim chega no sábado à tarde.", q: "Quando o neto chega?", a: "sábado à tarde", d: ["domingo de manhã", "sexta à noite"] },
-  { s: "Dona Marta comprou pão, leite e ovos na padaria.", q: "O que ela comprou?", a: "pão, leite e ovos", d: ["arroz, feijão e café", "frutas e verduras"] },
-  { s: "O médico pediu para tomar o remédio depois do almoço.", q: "Quando tomar o remédio?", a: "depois do almoço", d: ["antes do café", "na hora de dormir"] },
-  { s: "O ônibus das cinco horas vai para o centro da cidade.", q: "Para onde vai o ônibus?", a: "para o centro", d: ["para a praia", "para o aeroporto"] },
-  { s: "A neta ligou para avisar que vai jantar aqui domingo.", q: "O que a neta avisou?", a: "que vai jantar aqui domingo", d: ["que vai viajar sábado", "que chegou de viagem"] },
-  { s: "O vizinho do lado esquerdo vendeu o carro antigo.", q: "O que o vizinho vendeu?", a: "o carro antigo", d: ["a moto nova", "a bicicleta"] },
-  { s: "A farmácia entrega o pedido na quarta-feira de manhã.", q: "Quando chega o pedido?", a: "quarta de manhã", d: ["quinta à tarde", "terça à noite"] },
-  { s: "O jardim ganhou rosas vermelhas no mês de agosto.", q: "O que o jardim ganhou?", a: "rosas vermelhas", d: ["flores amarelas", "plantas de sombra"] },
-  { s: "O gato subiu no telhado depois que a chuva parou.", q: "Quando o gato subiu?", a: "depois que a chuva parou", d: ["antes do almoço", "durante a chuva"] },
-  { s: "A conta de luz chegou mais alta neste mês de inverno.", q: "O que chegou mais alto?", a: "a conta de luz", d: ["o aluguel", "a conta de água"] },
-  { s: "O mecânico consertou o freio do carro antes do almoço.", q: "O que foi consertado?", a: "o freio do carro", d: ["o motor da moto", "o pneu da bicicleta"] },
-  { s: "O carteiro deixou uma encomenda na portaria hoje cedo.", q: "Onde deixou a encomenda?", a: "na portaria", d: ["na cozinha", "no quintal"] }
-];
-
-/* SNR levels relative to the calibrated noise reference (lower = harder). */
-const SIN_LEVELS = [8, 8, 4, 4, 0, 0, -4, -4, -8, -8];
-
-/* ---------------- UI helpers ---------------- */
-const vol = document.getElementById("vol");
-const volVal = document.getElementById("volVal");
-vol.addEventListener("input", () => { volVal.textContent = vol.value; });
-
-function show(id) {
-  ["s0", "s1", "s2", "s4", "s5"].forEach(s => document.getElementById(s).classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
-function setStep(n) {
-  document.querySelectorAll(".step").forEach(el => {
-    const k = Number(el.dataset.step);
-    el.classList.toggle("active", k === n);
-    el.classList.toggle("done", k < n);
-  });
-}
-
-/* ---------------- step 0: calibration ---------------- */
-let noiseOn = false;
-document.getElementById("btnNoise").addEventListener("click", () => {
-  if (noiseOn) { stopNoise(); noiseOn = false; document.getElementById("btnNoise").textContent = "Tocar barulho"; }
-  else { startNoise(0); noiseOn = true; document.getElementById("btnNoise").textContent = "Parar barulho"; }
-});
-document.getElementById("btnVoice").addEventListener("click", async () => {
-  await speak("Esta é uma frase de teste em português do Brasil.", 0.95);
-});
-document.getElementById("toStep1").addEventListener("click", () => {
-  stopNoise(); noiseOn = false;
-  document.getElementById("btnNoise").textContent = "Tocar barulho";
-  show("s1"); setStep(1); startSIN();
-});
-
-/* ---------------- step 1: speech in noise ---------------- */
-let sinIdx = 0;
-let sinScore = [];       // per-level correct count
-let sinLevelCount = [];
-let sinOrder = [];
-let sinAnswered = false;
-let current = null;
-
-function shuffle(a) {
-  const r = a.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
-}
-
-function startSIN() {
-  sinIdx = 0;
-  sinOrder = shuffle(SENTENCES).slice(0, 10);
-  sinScore = SIN_LEVELS.map(() => 0);
-  sinLevelCount = SIN_LEVELS.map(() => 0);
-  document.getElementById("sinFeedback").textContent = "";
-  renderSINTrial();
-}
-
-function renderSINTrial() {
-  sinAnswered = false;
-  document.getElementById("sinProgress").textContent = "Frase " + (sinIdx + 1) + " de 10";
-  const snr = SIN_LEVELS[sinIdx];
-  document.getElementById("sinSNR").textContent = "SNR " + (snr > 0 ? "+" : "") + snr + " dB";
-  current = sinOrder[sinIdx];
-  const box = document.getElementById("sinOptions");
-  box.innerHTML = "";
-  const opts = shuffle([current.a, ...current.d]);
-  opts.forEach(text => {
-    const b = document.createElement("button");
-    b.className = "opt";
-    b.textContent = text;
-    b.addEventListener("click", () => answerSIN(text, b));
-    box.appendChild(b);
-  });
-  document.getElementById("playSIN").disabled = false;
-  document.getElementById("sinFeedback").textContent = "";
-}
-
-document.getElementById("playSIN").addEventListener("click", async () => {
-  const snr = SIN_LEVELS[sinIdx];
-  startNoise(snr);
-  await new Promise(r => setTimeout(r, 600));
-  await speak(current.s, 0.95);
-  await new Promise(r => setTimeout(r, 350));
-  stopNoise();
-});
-
-function answerSIN(text, btn) {
-  if (sinAnswered) return;
-  sinAnswered = true;
-  const snr = SIN_LEVELS[sinIdx];
-  const correct = text === current.a;
-  sinLevelCount[sinIdx] += 1;
-  if (correct) sinScore[sinIdx] += 1;
-  const fb = document.getElementById("sinFeedback");
-  fb.textContent = correct ? "Acertou." : ("Não foi essa. A resposta era: " + current.a);
-  fb.style.color = correct ? "var(--ok)" : "var(--err)";
-  document.querySelectorAll("#sinOptions button").forEach(b => b.disabled = true);
-  btn.style.borderColor = correct ? "var(--ok)" : "var(--err)";
-  setTimeout(() => {
-    sinIdx += 1;
-    if (sinIdx >= 10) { finishSIN(); } else { renderSINTrial(); }
-  }, 1400);
-}
-
-function estimateSNR50() {
-  // Proportion correct per SNR level; interpolate the 50% crossing.
-  const levels = [...new Set(SIN_LEVELS)].sort((a, b) => b - a); // easy -> hard
-  const prop = {};
-  levels.forEach(l => {
-    let c = 0, n = 0;
-    SIN_LEVELS.forEach((lv, i) => { if (lv === l) { c += sinScore[i]; n += sinLevelCount[i]; } });
-    prop[l] = n ? c / n : 0;
-  });
-  for (let i = 0; i < levels.length; i++) {
-    if (prop[levels[i]] < 0.5) {
-      if (i === 0) return { value: levels[0] + 4, censored: "harder" };
-      const hi = levels[i - 1], lo = levels[i];
-      const phi = prop[hi], plo = prop[lo];
-      const frac = (phi - 0.5) / (phi - plo || 1);
-      return { value: hi + (lo - hi) * frac, censored: null };
-    }
-  }
-  return { value: levels[levels.length - 1] - 4, censored: "easier" };
-}
-
-let sinResult = null;
-function finishSIN() {
-  sinResult = estimateSNR50();
-  show("s2"); setStep(2); startGap();
-}
-
-/* ---------------- step 2: gap detection ---------------- */
-const GAPS = [40, 30, 20, 15, 10, 7, 5, 3];
-let gapIdx = 0;
-let gapTrials = 0;
-let gapCorrectStreak = 0;
-let gapReversals = [];
-let gapLastDir = 0;
-let gapIsTwo = true;
-let gapAnswered = false;
-
-function startGap() {
-  gapIdx = 0; gapTrials = 0; gapCorrectStreak = 0; gapReversals = []; gapLastDir = 0;
-  document.getElementById("gapFeedback").textContent = "";
-  renderGapTrial();
-}
-
-function renderGapTrial() {
-  gapAnswered = false;
-  document.getElementById("gapProgress").textContent = "Tentativa " + (gapTrials + 1);
-  document.getElementById("gapFeedback").textContent = "";
-  // Present a two-tone pair when the gap is audible; single tone as catch trial.
-  gapIsTwo = true;
-}
-
-document.getElementById("playGap").addEventListener("click", () => {
-  playTonePair(GAPS[gapIdx]);
-});
-
-document.getElementById("gapOne").addEventListener("click", () => answerGap(false));
-document.getElementById("gapTwo").addEventListener("click", () => answerGap(true));
-
-function answerGap(saidTwo) {
-  if (gapAnswered) return;
-  gapAnswered = true;
-  gapTrials += 1;
-  const correct = (saidTwo === gapIsTwo);
-  const fb = document.getElementById("gapFeedback");
-  fb.textContent = correct ? "Certo." : "Errado.";
-  fb.style.color = correct ? "var(--ok)" : "var(--err)";
-
-  let dir;
-  if (correct) {
-    gapCorrectStreak += 1;
-    dir = 0;
-    if (gapCorrectStreak >= 2) { dir = 1; gapCorrectStreak = 0; }   // go harder
-  } else {
-    gapCorrectStreak = 0;
-    dir = -1;                                                       // go easier
-  }
-  if (dir !== 0) {
-    if (gapLastDir !== 0 && dir !== gapLastDir) gapReversals.push(GAPS[gapIdx]);
-    gapLastDir = dir;
-    gapIdx = Math.max(0, Math.min(GAPS.length - 1, gapIdx + dir));
-  }
-
-  const done = gapReversals.length >= 6 || gapTrials >= 20;
-  setTimeout(() => {
-    if (done) finishGap(); else renderGapTrial();
-  }, 900);
-}
-
-let gapResult = null;
-function finishGap() {
-  const rev = gapReversals.length ? gapReversals : [GAPS[gapIdx]];
-  // Geometric mean of reversal gaps (standard threshold estimate).
-  const mean = rev.reduce((acc, v) => acc + Math.log(v), 0) / rev.length;
-  gapResult = Math.exp(mean);
-  finishAll();
-}
-
-/* ---------------- results ---------------- */
-function bandSNR(v) {
-  if (v <= 2) return { label: "dentro do esperado para audição normal", cls: "ok" };
-  if (v <= 7) return { label: "redução leve", cls: "warn" };
-  if (v <= 15) return { label: "redução moderada", cls: "warn" };
-  return { label: "redução importante", cls: "err" };
-}
-function bandGap(v) {
-  if (v <= 8) return { label: "boa", cls: "ok" };
-  if (v <= 20) return { label: "moderada", cls: "warn" };
-  return { label: "atenção", cls: "err" };
-}
-
-let summaryText = "";
-function finishAll() {
-  setStep(4); show("s4");
-  const snr = sinResult.value;
-  const bs = bandSNR(snr);
-  const bg = bandGap(gapResult);
-  const el = document.getElementById("results");
-  el.innerHTML = "";
-  const rows = [
-    ["Fala em ruído (estimativa de SNR loss)", (snr > 0 ? "+" : "") + snr.toFixed(1) + " dB", bs.label, bs.cls],
-    ["Resolução temporal (gap)", gapResult.toFixed(1) + " ms", bg.label, bg.cls]
-  ];
-  const card = document.createElement("div");
-  card.className = "card";
-  let html = "<table><thead><tr><th>Medida</th><th>Valor</th><th>Faixa</th></tr></thead><tbody>";
-  rows.forEach(r => {
-    html += "<tr><td>" + r[0] + "</td><td class='num'>" + r[1] + "</td><td>" + r[2] + "</td></tr>";
-  });
-  html += "</tbody></table>";
-  html += "<p style='margin-top:14px;color:var(--muted)'>Referência: SNR loss 0 dB é normal; adultos com perda auditiva costumam ficar entre 2,6 e 10 dB. Gap detection acima de 20 ms sugere dificuldade de resolução temporal.</p>";
-  card.innerHTML = html;
-  el.appendChild(card);
-
-  summaryText =
-    "Resultados do teste auditivo domiciliar: " +
-    "fala em ruído SNR loss ≈ " + (snr > 0 ? "+" : "") + snr.toFixed(1) + " dB (" + bs.label + "); " +
-    "resolução temporal (gap) ≈ " + gapResult.toFixed(1) + " ms (" + bg.label + "). " +
-    "Teste orientativo, não clínico.";
-  document.getElementById("copyResults").disabled = false;
-}
-
-document.getElementById("copyResults").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(summaryText);
-    document.getElementById("copyResults").textContent = "Resultados copiados";
-  } catch (e) {
-    window.prompt("Copie os resultados:", summaryText);
-  }
-  setTimeout(() => { document.getElementById("copyResults").textContent = "Copiar resultados"; }, 2000);
-});
-
-document.getElementById("again").addEventListener("click", () => {
-  stopNoise();
-  show("s0"); setStep(0);
-});
-
-/* ---------------- step 5: personalisation (offline, deterministic) ---------------- */
-const PROFILE_FIELDS = [
-  { id: "hearing_aid", label: "Marca e modelo dos aparelhos", type: "text", value: "" },
-  { id: "hearing_aid_streaming", label: "Os aparelhos já transmitem áudio da TV?", type: "select", options: ["none", "bluetooth", "tv_adapter", "remote_mic", "unknown"], value: "unknown" },
-  { id: "tv_setup", label: "Como é a TV da casa?", type: "select", options: ["smart_tv", "cable_box", "old_tv", "streaming_stick", "unknown"], value: "unknown" },
-  { id: "tv_can_configure", label: "Alguém consegue configurar a TV hoje?", type: "bool", value: true },
-  { id: "favourite_program", label: "Programa favorito", type: "text", value: "" },
-  { id: "favourite_time", label: "Horário em que costuma assistir", type: "text", value: "" },
-  { id: "living", label: "Com quem mora?", type: "select", options: ["alone", "with_family", "care_facility"], value: "with_family" },
-  { id: "caregiver_hours_per_day", label: "Horas por dia com cuidador por perto", type: "number", value: 4 },
-  { id: "top_complaints", label: "Principais queixas (segure Ctrl para várias)", type: "multi", options: ["tv", "noise", "group", "phone", "quick_speech", "female_voice", "fatigue"], value: ["tv"] },
-  { id: "medications_ototoxic", label: "Usa medicamentos que podem afetar audição/equilíbrio?", type: "bool", value: false },
-  { id: "walk_minutes_per_day", label: "Minutos de caminhada por dia", type: "number", value: 20 },
-  { id: "uses_captions", label: "Costuma usar legenda?", type: "bool", value: false },
-  { id: "tinnitus", label: "Tem zumbido?", type: "bool", value: false },
-  { id: "falls_last_year", label: "Quedas no último ano", type: "number", value: 0 },
-  { id: "cognitive_impairment", label: "Diagnóstico de declínio cognitivo?", type: "bool", value: false }
-];
-
-const COMPLAINT_PT = {
-  tv: "TV", noise: "ruído", group: "grupo", phone: "telefone",
-  quick_speech: "fala rápida", female_voice: "voz feminina", fatigue: "cansaço"
-};
-const TV_PT = {
-  news_anchor: "telejornal", interview: "entrevista",
-  soap_opera_with_questions: "novela com perguntas", film_with_music: "filme com música"
-};
-const FOCUS_PT = {
-  "signal + first win": "sinal + primeira vitória",
-  "establish the routine": "estabelecer a rotina",
-  "add difficulty": "aumentar a dificuldade",
-  "first re-test": "primeira reavaliação",
-  "temporal resolution": "resolução temporal",
-  "real-world transfer": "transferência para a vida real",
-  "consolidation": "consolidação",
-  "final re-test and maintenance": "reavaliação final e manutenção"
-};
-const CHECKPOINT_PT = {
-  baseline: "linha de base",
-  interim: "reavaliação intermediária",
-  final: "reavaliação final"
-};
-
-function renderProfileForm() {
-  const box = document.getElementById("profileForm");
-  box.innerHTML = "";
-  PROFILE_FIELDS.forEach(f => {
-    const wrap = document.createElement("div");
-    const lab = document.createElement("label");
-    lab.className = "field";
-    lab.textContent = f.label;
-    lab.htmlFor = "pf_" + f.id;
-    wrap.appendChild(lab);
-    let input;
-    if (f.type === "select") {
-      input = document.createElement("select");
-      input.id = "pf_" + f.id;
-      f.options.forEach(o => {
-        const op = document.createElement("option");
-        op.value = o; op.textContent = o;
-        if (o === f.value) op.selected = true;
-        input.appendChild(op);
-      });
-      input.style.cssText = "width:100%;padding:12px;font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)";
-    } else if (f.type === "multi") {
-      input = document.createElement("select");
-      input.id = "pf_" + f.id;
-      input.multiple = true;
-      f.options.forEach(o => {
-        const op = document.createElement("option");
-        op.value = o; op.textContent = COMPLAINT_PT[o] || o;
-        if (f.value.includes(o)) op.selected = true;
-        input.appendChild(op);
-      });
-      input.style.cssText = "width:100%;padding:12px;font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);min-height:130px";
-    } else if (f.type === "bool") {
-      input = document.createElement("select");
-      input.id = "pf_" + f.id;
-      [["true", "Sim"], ["false", "Não"]].forEach(([v, t]) => {
-        const op = document.createElement("option");
-        op.value = v; op.textContent = t;
-        if ((f.value ? "true" : "false") === v) op.selected = true;
-        input.appendChild(op);
-      });
-      input.style.cssText = "width:100%;padding:12px;font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)";
-    } else {
-      input = document.createElement("input");
-      input.id = "pf_" + f.id;
-      input.type = f.type === "number" ? "number" : "text";
-      input.value = f.value;
-      input.style.cssText = "width:100%;padding:12px;font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)";
-    }
-    wrap.appendChild(input);
-    box.appendChild(wrap);
-  });
-}
-
-document.getElementById("toProfile").addEventListener("click", () => {
-  renderProfileForm();
-  setStep(5); show("s5");
-});
-
-function listBlock(title, items) {
-  if (!items || !items.length) return "";
-  return "<p style='margin:12px 0 4px'><strong>" + title + "</strong></p><ul>" + items.map(i => "<li>" + i + "</li>").join("") + "</ul>";
-}
-
-function readProfile() {
-  const p = {};
-  PROFILE_FIELDS.forEach(f => {
-    const el = document.getElementById("pf_" + f.id);
-    if (f.type === "number") p[f.id] = Number(el.value || 0);
-    else if (f.type === "bool") p[f.id] = el.value === "true";
-    else if (f.type === "multi") p[f.id] = Array.from(el.selectedOptions).map(o => o.value);
-    else p[f.id] = el.value;
-  });
-  return p;
-}
-
-document.getElementById("quickProtocol").addEventListener("click", () => {
-  renderProfileForm();
-  setStep(5); show("s5");
-  document.getElementById("buildProtocol").click();
-});
-
-document.getElementById("buildProtocol").addEventListener("click", () => {
-  const p = readProfile();
-  const out = document.getElementById("protocolOut");
-  if (!p.top_complaints || !p.top_complaints.length) {
-    out.innerHTML = "<div class='card err'>Escolha pelo menos uma queixa.</div>";
-    return;
-  }
-  let protocol;
-  try {
-    protocol = window.SwarmEngine.buildProtocol(p);
-  } catch (e) {
-    out.innerHTML = "<div class='card err'>Não foi possível gerar o protocolo: " + e.message + "</div>";
-    return;
-  }
-  out.innerHTML = "";
-  protocol.agents.forEach(a => {
-    const card = document.createElement("div");
-    card.className = "card";
-    try {
-    let html = "<h2>" + a.agent + "</h2>";
-    html += "<p style='color:var(--muted);margin:0 0 6px'>" + a.objective + "</p>";
-    html += "<p style='color:var(--muted);margin:0 0 10px;font-size:0.9rem'><em>" + a.rationale + "</em></p>";
-
-    const fired = (a.triggers || []).filter(t => t.fired).map(t => t.id).join(", ");
-    html += "<p style='font-size:0.85rem'><span class='badge'>gatilhos ativos: " + (fired || "nenhum") + "</span> <span class='badge'>parada: " + a.stop_criteria + "</span></p>";
-
-    if (a.actions) {
-      a.actions.forEach(act => {
-        html += "<div class='kv'><div><strong>" + act.action + "</strong> <span class='badge'>P" + act.priority + " · " + act.effort + " · custo " + act.cost_band + "</span><br><span style='color:var(--muted)'>" + act.detail + "</span><br><span style='color:var(--accent);font-size:0.85rem'>efeito esperado: " + act.expected_effect + "</span></div></div>";
-      });
-    }
-    if (a.micro_sessions_per_day) {
-      html += "<div class='kv'><span>Sessões por dia</span><span class='num'>" + a.micro_sessions_per_day + "</span></div>";
-      html += "<div class='kv'><span>Minutos por sessão</span><span class='num'>" + a.minutes_per_session + "</span></div>";
-      html += "<div class='kv'><span>Dias por semana</span><span class='num'>" + a.days_per_week + "</span></div>";
-      html += "<div class='kv'><span>Platô esperado</span><span class='num'>" + a.expected_plateau_weeks + " semanas</span></div>";
-      html += listBlock("Estrutura da sessão", a.session_structure);
-      html += listBlock("Progressão", a.progression);
-      html += listBlock("Sinais de fadiga", a.fatigue_signs);
-      html += listBlock("Regras de parada", a.stop_rules);
-      html += "<p style='font-size:0.85rem;color:var(--muted)'>Adesão alvo: " + a.adherence_target + "</p>";
-    }
-    if (a.tv_ladder) {
-      html += "<div class='kv'><span>Escada de TV</span><span>" + a.tv_ladder.map(t => TV_PT[t] || t).join(" → ") + "</span></div>";
-      html += listBlock("Alvos por degrau", a.tv_ladder.map(t => (TV_PT[t] || t) + ": " + (a.tv_targets[t] || "")));
-      html += listBlock("Escada de telefone", a.phone_ladder);
-      html += listBlock("Escada de conversa", a.conversation_ladder);
-      html += "<div class='kv'><span>Música</span><span>" + a.music.minutes_per_session + " min, " + a.music.sessions_per_week + "x/semana</span></div>";
-      html += "<p style='font-size:0.85rem;color:var(--muted)'>" + a.generalisation_check + "</p>";
-    }
-    if (a.do_rules) {
-      html += listBlock("Faça", a.do_rules);
-      html += listBlock("Não faça", a.dont_rules);
-      html += listBlock("Treino do parceiro (20 min)", a.training_session);
-      html += listBlock("Frases de reparo", a.repair_strategies);
-      html += listBlock("Ambiente", a.environment_checklist);
-    }
-    if (a.red_flags) {
-      html += listBlock("Sinais de alerta", a.red_flags.map(f => f.sign + " → " + f.target + " (" + f.urgency + ")"));
-      html += listBlock("Encaminhamentos", a.referral_targets);
-      html += listBlock("Contraindicações", a.contraindications);
-      html += "<p style='font-size:0.85rem;color:var(--muted)'>" + a.ceiling + "</p>";
-    }
-    if (a.evidence_gaps && a.evidence_gaps.length) {
-      html += listBlock("Lacunas de evidência (declaradas)", a.evidence_gaps);
-    }
-    card.innerHTML = html;
-    } catch (err) {
-      card.className = "card err";
-      card.textContent = a.agent + ": falha ao renderizar (" + err.message + ")";
-    }
-    out.appendChild(card);
-  });
-
-  const planCard = document.createElement("div");
-  planCard.className = "card";
-  let ph = "<h2>Plano de 8 semanas</h2><table><thead><tr><th>Semana</th><th>Foco</th><th>Conteúdo de TV</th></tr></thead><tbody>";
-  protocol.plan.forEach(w => {
-    ph += "<tr><td class='num'>" + w.week + "</td><td>" + (FOCUS_PT[w.focus] || w.focus) + "</td><td>" + (TV_PT[w.tv_content] || w.tv_content) + "</td></tr>";
-  });
-  ph += "</tbody></table>";
-  planCard.innerHTML = ph;
-  out.appendChild(planCard);
-
-  const followCard = document.createElement("div");
-  followCard.className = "card";
-  let fh = "<h2>Acompanhamento e medições</h2><p style='color:var(--muted);margin:0 0 10px'>O que medir, quando, o alvo e o que fazer se o alvo não for atingido.</p>";
-  (protocol.followup || []).forEach(s => {
-    fh += "<div class='kv'><div><strong>Semana " + s.week + " — " + (CHECKPOINT_PT[s.checkpoint] || s.checkpoint) + "</strong>";
-    fh += "<br><span style='color:var(--muted)'>medir: " + s.measures.join("; ") + "</span>";
-    fh += "<br><span style='color:var(--accent);font-size:0.85rem'>alvo: " + s.target + "</span>";
-    fh += "<br><span style='color:var(--muted);font-size:0.85rem'>se não atingir: " + s.action_if_not_met + "</span></div></div>";
-  });
-  followCard.innerHTML = fh;
-  out.appendChild(followCard);
-
-  const refCard = document.createElement("div");
-  refCard.className = "card";
-  refCard.innerHTML = "<h2>Referências</h2><p style='color:var(--muted)'>" + protocol.references.length + " fontes no registro de evidências: " + protocol.references.join(", ") + "</p>";
-  out.appendChild(refCard);
-
-  out.scrollIntoView({ behavior: "smooth" });
-});
-
-document.getElementById("foot").textContent =
-  "Base científica: QuickSIN e HHIE-S (referência), Humes 2014 (dosagem), Zheng 2024 (reabilitação), Tye-Murray 2016 (parceiro de comunicação).";
-
-/* Preview hook: ?demo=1 jumps to results with representative values, ?demo=2
-   also opens the personalisation form. Used for manual QA and demos. */
-(function () {
-  const demo = new URLSearchParams(location.search).get("demo");
-  if (!demo) return;
-  sinResult = { value: 6.3, censored: null };
-  gapResult = 12.0;
-  finishAll();
-  if (demo === "2") {
-    renderProfileForm();
-    setStep(5); show("s5");
-  }
-})();
-</script>
+<script src="protocol.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

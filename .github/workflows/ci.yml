@@ -40,10 +40,10 @@ jobs:
       - name: Verificar sintaxe do app (JS)
         run: |
           node --check app/protocol.js
-          python3 -c "import re; h=open('app/index.html',encoding='utf-8').read(); m=re.findall(r'<script>\n(.*?)\n</script>', h, re.S); open('/tmp/_app.js','w',encoding='utf-8').write(m[0])"
-          node --check /tmp/_app.js
+          node --check app/app.js
+          python3 -c "import re,sys; h=open('app/index.html',encoding='utf-8').read(); ids=re.findall(r'id=\"([^\"]+)\"', h); dup=sorted({i for i in ids if ids.count(i)>1}); assert not dup, dup; assert 'protocol.js' in h and 'app.js' in h; print('shell OK')"
 
       - name: Gerar protocolo de exemplo (smoke test)
         run: |
           python -m swarm.cli examples/profile.json --json > /tmp/protocol.json
-          python3 -c "import json; d=json.load(open('/tmp/protocol.json')); assert len(d['agents'])==5; assert len(d['plan'])==8; print('protocolo OK:', len(d['references']), 'referencias')"
+          python3 -c "import json; d=json.load(open('/tmp/protocol.json')); assert len(d['agents'])==5; assert len(d['plan'])==8; assert d['measurement']['primary_outcome']=='hhie_s'; assert len(d['training']['weeks'])==8; assert d['limits']['medical_device'] is False; assert len(d['content']['training_ladder'])==4; assert 'real_life_comprehension' in d['measurement']; print('protocolo OK:', len(d['references']), 'referencias')"

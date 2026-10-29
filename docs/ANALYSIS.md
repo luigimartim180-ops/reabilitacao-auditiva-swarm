@@ -30,16 +30,17 @@ A do Kimi foi lida pelo navegador (o conteúdo é renderizado no cliente).
    está rotulado como orientativo.
 2. **Agentes sem contrato.** "5 agentes" eram personas, sem gatilho, entrada, saída ou
    critério de parada. Corrigido em `docs/SWARM_V3.md` (tabela de contratos).
-3. **Medição sem norma.** O teste do navegador não é calibrado. Corrigido: o resultado é
-   expresso como estimativa de SNR loss (mesma escala do QuickSIN, com faixas normativas)
-   e gap threshold, sempre com aviso de que não é exame clínico.
+3. **Medição sem norma.** O teste do navegador não é calibrado. Corrigido no v4: o
+   resultado é um **SNR relativo** com faixa de medição e `censored`, sem faixas
+   normativas do QuickSIN; o gap é uma tarefa de rajada de duração fixa; o HHIE-S é o
+   desfecho funcional primário. O app sempre avisa que não é exame clínico.
 4. **Ordem errada das alavancas.** Treino e exercício apareciam juntos; o ganho mais
    rápido e barato (transmitir o áudio da TV para o aparelho) não era o passo número 1.
    Corrigido: A1 roda primeiro.
 5. **Promessa de exercício como reabilitação auditiva.** A relação exercício↔audição é
    de coorte, não causal. Corrigido: exercício entra como saúde geral, com grau C.
-6. **Sem testes.** Corrigido: 16 testes (motor, entrada inválida, resolução de citações,
-   paridade Python↔JS).
+6. **Sem testes.** Corrigido: **99 testes** (motor, medição, entrada inválida,
+   contratos, resolução de citações, paridade Python↔JS e contratos estáticos do app).
 
 ## Sobre o pedido de "pensar em chinês"
 
@@ -53,3 +54,20 @@ Isso é marketing. Engenharia de agentes de alto nível, de forma concreta, é: 
 determinística, contratos explícitos por agente, evidência rastreável, evals contínuas,
 tratamento de erro explícito e ausência de decisão clínica no LLM. É exatamente o que
 está implementado aqui, e é verificável rodando `make test`.
+
+
+## O que o v4 mudou (resumo)
+
+- **Medição hierárquica:** HHIE-S (funcional, primário), fala em ruído (tarefa,
+  secundário), formas não treinadas (transferência, exploratório) e gap (temporal,
+  específico da tarefa).
+- **Teste de fala:** 2 prática + 12 medidas, 4 alternativas, escada 2-down/1-up (alvo
+  ≈71%), passo 4 dB, limiar pela média das últimas 4 reversões, faixa de dispersão e
+  `censored`.
+- **Teste de gap:** rajada de duração fixa com/sem pausa, 12 medidas + 4 catch (30%),
+  passos 10/5/2 ms, média geométrica das últimas 4 reversões, falso positivo.
+- **App:** avaliação em três partes, treino de 8 semanas, treino de gap na semana 5,
+  diário, relatório em seis seções, exportação `audioswarm.v1.1`, pausa por evento
+  adverso, acessibilidade e voz com watchdog.
+- **Texto:** "Indicadores de desempenho", não "prova de melhora"; dose 2–3×/semana com
+  teto de 10 min/dia; ACHIEVE com desfecho primário nulo; transferência limitada.

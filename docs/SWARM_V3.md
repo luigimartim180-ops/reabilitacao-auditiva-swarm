@@ -1,4 +1,6 @@
-# SWARM v3 — Arquitetura de Elite
+# SWARM v4 — Arquitetura auditável
+
+> O nome do arquivo ficou por compatibilidade. O conteúdo foi atualizado para o v4.
 
 Reabilitação auditiva de um idoso de 90 anos, orientada a resultado rápido e real.
 
@@ -8,7 +10,7 @@ O material original (Qwen, Fase 2 + protocolo SWARM v1) tinha três problemas s�
 
 1. **A validação era inventada.** O código foi entregue com um "checklist de validação antes do uso clínico" que o próprio modelo não executou. Um agente de elite não afirma ter validado o que não validou.
 2. **O "swarm" era decorativo.** Eram cinco personagens com nomes bonitos, não cinco agentes com gatilhos, entradas, saídas e critérios de parada. Swarm sem contrato de interface é apenas texto.
-3. **O teste não media nada.** A voz sintética e o ruído do navegador não são calibrados, então qualquer número produzido era pseudociência. O certo é declarar isso como triagem orientativa e ancorar as decisões em medidas que já têm norma (QuickSIN, HHIE-S).
+3. **O teste não media nada de forma defensável.** A voz sintética e o ruído do navegador não são calibrados; no v3 o gap usava dois tons (pista de duração) e o teste de fala dava feedback durante a medição. O v4 ancora a decisão em um **HHIE-S** (autorrelato validado) e em duas tarefas com procedimento explícito, e declara o que elas não podem provar. Não chama o teste caseiro de QuickSIN.
 
 A v3 corrige os três: cada recomendação aponta para uma referência verificável, cada agente tem contrato explícito, e o que não é calibrado está rotulado como não calibrado.
 
@@ -44,7 +46,7 @@ Os cinco são instanciados em `build_protocol()` e o resultado é serializável 
 A evidência separa dois relógios diferentes:
 
 - **Dia 1 — engenharia de sinal.** Transmitir o áudio da TV direto para o aparelho auditivo melhora a compreensão em 11–14 pontos percentuais, com efeito grande (Cohen's dz ≈ 1,0), e nem idade nem gravidade moderam o benefício (`tv_streaming_2024`). Em estudo intra-sujeito, todos os participantes melhoraram, de 36% para 81% de acerto (`tv_adapter_2010`). Microfone remoto entrega +11 a +19,5 dB de SNR (`remote_mic_2021`). Isto é ganho visível no primeiro dia.
-- **Semanas 2–8 — plasticidade.** Treino auditivo adaptativo melhora fala-em-ruído (`act_gamified_2025`, `auditory_training_sin_meta`), e a maior parte do ganho de dosagem se completa em 5–7,5 semanas, com 2–3 sessões por semana (`humes_dosage_2014`).
+- **Semanas 2–8 — plasticidade.** Treino auditivo adaptativo melhora a tarefa treinada (`act_gamified_2025`); a maior parte do ganho de dosagem se completa em 5–7,5 semanas, com 2–3 sessões por semana (`humes_dosage_2014`). A generalização para estímulos não treinados é limitada (`transfer_limits_2020`, `humes_specificity_2014`).
 
 A ordem importa: sinal primeiro (ganho imediato e barato), treino depois (consolida). O material original colocava treino e exercício no mesmo plano, o que atrasa a primeira vitória.
 
@@ -78,7 +80,10 @@ perfil validado (schema estrito)
 | Paridade Python↔JS | app não diverge do motor auditável | `tests/test_parity.py` |
 | Resolução de referências | toda citação existe e tem URL | `test_every_reference_resolves_to_evidence` |
 | Rejeição de entrada | perfil incompleto/inválido falha alto | `test_missing_field_is_rejected`, `test_invalid_enum_is_rejected` |
-| Sintaxe de UI | app não quebra no navegador | `node --check` no CI/local |
+| Medição | HHIE-S, escadas, estimadores, censura | `tests/test_measurement.py` |
+| Contratos do app | IDs, abas, claims proibidos, campos do pacote | `tests/test_app_static.py` |
+| Sintaxe de UI | `protocol.js` e `app.js` não quebram | `node --check` no CI/local |
+| Fluxo do app | avaliação, treino, relatório, import/export | `tools/smoke_app.js` (jsdom, opcional) |
 
 Comando único: `make test`.
 

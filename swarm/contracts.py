@@ -45,7 +45,7 @@ AGENT_CONTRACTS: dict[str, dict[str, Any]] = {
         "id": "A2_dosage",
         "name": "DosageAgent",
         "objective": "reach the therapeutic window without inducing auditory fatigue",
-        "rationale": "most dosage gain completes by 5-7.5 weeks; daily training adds no benefit",
+        "rationale": "most dosage gain completes by 5-7.5 weeks; 2x and 3x/week did not differ; a daily arm was not tested",
         "inputs": ["cognitive_impairment", "falls_last_year", "top_complaints"],
         "triggers": [
             {"id": "T2.1", "when": "always", "fires": "base_schedule"},
@@ -55,11 +55,14 @@ AGENT_CONTRACTS: dict[str, dict[str, Any]] = {
         ],
         "outputs": [
             "micro_sessions_per_day, minutes_per_session, days_per_week",
-            "session_structure, progression, fatigue_signs, stop_rules, adherence_target",
+            "session_model, dose_rationale, dose_cap_seconds",
+            "session_structure, progression, progression_note, fatigue_signs, stop_rules, adherence_target",
         ],
         "stop_criteria": "plateau at 5-7.5 weeks, or any fatigue sign -> stop the session immediately",
         "evidence_gaps": [
             "optimal dose for adults over 85 is not separately established",
+            "the 6-minute home session is shorter than the laboratory protocol; equivalence is unknown",
+            "the 10-minute daily cap is a tolerability guard, not an evidence-based dose",
         ],
     },
     "A3_transfer": {
@@ -75,11 +78,12 @@ AGENT_CONTRACTS: dict[str, dict[str, Any]] = {
             {"id": "T3.4", "when": "complaint in {group, noise}", "fires": "conversation_ladder"},
             {"id": "T3.5", "when": "always", "fires": "music_protocol"},
         ],
-        "outputs": ["staged ladders with target accuracy per rung, music protocol, weekly generalisation check"],
+        "outputs": ["staged ladders with target accuracy per rung, music protocol, weekly generalisation check, transfer_note separating on-task from transfer"],
         "stop_criteria": "participant follows the favourite programme without captions for a full episode",
         "evidence_gaps": [
             "transfer to untrained talkers is smaller than on-task gain",
             "music dose in the home is extrapolated from lab and group protocols",
+            "time compression above 1.0x is not established for home use",
         ],
     },
     "A4_partner": {
@@ -112,10 +116,11 @@ AGENT_CONTRACTS: dict[str, dict[str, Any]] = {
             {"id": "T5.3", "when": "tinnitus == true", "fires": "tinnitus_review"},
             {"id": "T5.4", "when": "medications_ototoxic == true", "fires": "medication_referral"},
         ],
-        "outputs": ["red flags with urgency, referral targets, escalation thresholds, ceiling statement, contraindications"],
+        "outputs": ["red flags with urgency, referral targets, escalation thresholds, ceiling statement, contraindications, training stop signs, streaming precautions, cognition note"],
         "stop_criteria": "any red flag routes to medical assessment before training continues",
         "evidence_gaps": [
             "no validated digital screen for sudden sensorineural hearing loss in the home",
+            "no trial evaluates stair walking during hearing-aid streaming; the precaution is conservative",
         ],
     },
 }
