@@ -31,20 +31,32 @@ desempenho em fala-em-ruído (`working_memory_sin_2008`).
 
 ## O que foi construído
 
-### 1. Banco de texto corrido (10 textos, 40 perguntas)
+### 1. Banco de texto corrido (34 textos, 136 perguntas)
 
 Original, escrito no gênero — nada copiado de programa nenhum:
 
-| Nível | Texto | Palavras | Duração aprox. | Uso |
-|---|---|---|---|---|
-| D1 | nota curta (3 frases) | 37–42 | ~20 s | semanas 1–2 |
-| D2 | notícia (4–5 frases) | 67–70 | ~30 s | semanas 3–4 |
-| D3 | reportagem (6 frases) | 109–110 | ~45 s | semanas 5–6 |
-| D4 | entrevista longa (8 frases) | 140–141 | ~60 s | semanas 7–8 |
+| Nível | Texto | Palavras | Duração aprox. | Para treino | Uso |
+|---|---|---|---|---|---|
+| D1 | nota curta (3 frases) | 37–45 | ~20 s | 8 | semanas 1–2 |
+| D2 | notícia (5 frases) | 67–83 | ~30 s | 8 (+2 reservados) | semanas 3–4 |
+| D3 | reportagem (6–7 frases) | 108–118 | ~45 s | 8 | semanas 5–6 |
+| D4 | entrevista longa (7–8 frases) | 125–146 | ~60 s | 8 | semanas 7–8 |
+
+Os dois textos reservados para a avaliação (`d03`, `d04`) nunca entram no
+treino. Sobram **32 textos de treino: 8 por faixa**.
 
 Gêneros: **telejornal**, **entrevista**, **jornal** e **esporte**. Cada texto tem
 4 perguntas de tipos diferentes: ideia principal, detalhe, ordem e inferência.
 Nenhuma pergunta é "qual palavra você ouviu".
+
+**Regra do sorteio** (antes eram 2 textos por faixa e o app repetia logo):
+
+1. nunca repete o texto imediatamente anterior;
+2. primeiro um texto **inédito**, na faixa da semana e depois nas faixas vizinhas;
+3. quando todos já foram ouvidos, usa o **mais antigo** (não o aleatório).
+
+Na prática, nas semanas 1–2 há 8 textos de D1 + 8 de D2 antes de qualquer
+repetição. O cartão mostra "Nesta faixa: 8 textos, N ainda não ouvidos".
 
 ### 2. O áudio toca uma vez — e no treino pode ser repetido
 

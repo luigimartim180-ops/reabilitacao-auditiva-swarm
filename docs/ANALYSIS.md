@@ -39,7 +39,7 @@ A do Kimi foi lida pelo navegador (o conteúdo é renderizado no cliente).
    Corrigido: A1 roda primeiro.
 5. **Promessa de exercício como reabilitação auditiva.** A relação exercício↔audição é
    de coorte, não causal. Corrigido: exercício entra como saúde geral, com grau C.
-6. **Sem testes.** Corrigido: **127 testes** (motor, medição, entrada inválida,
+6. **Sem testes.** Corrigido: **130 testes** (motor, medição, entrada inválida,
    contratos, resolução de citações, paridade Python↔JS e contratos estáticos do app).
 
 ## Sobre o pedido de "pensar em chinês"

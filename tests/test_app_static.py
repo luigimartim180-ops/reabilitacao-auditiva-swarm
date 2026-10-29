@@ -440,13 +440,14 @@ def _discourse_bank():
     start = JS.index("const DISCOURSE = [")
     end = JS.index("\n];", start) + len("\n];")
     script = JS[start:end] + ";process.stdout.write(JSON.stringify(DISCOURSE));"
-    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr[-800:]
     return json.loads(out.stdout)
 
 
 def test_discourse_bank_is_continuous_speech_in_four_tiers():
     bank = _discourse_bank()
-    assert len(bank) == 10
+    assert len(bank) == 34
     tiers = [p["tier"] for p in bank]
     assert set(tiers) == {"D1", "D2", "D3", "D4"}
     genres = {p["genre"] for p in bank}
@@ -471,8 +472,91 @@ def test_discourse_bank_is_continuous_speech_in_four_tiers():
 def test_assessment_passages_never_enter_training():
     assert 'const DISCOURSE_RESERVED = ["d03", "d04"]' in JS
     assert 'DISCOURSE_SET_PASSAGE = { "1": "d03", "2": "d04" }' in JS
-    pool = JS.split("function discoursePassageOfTier")[1].split("function ")[0]
+    pool = JS.split("function discourseTierPool")[1].split("function ")[0]
     assert "DISCOURSE_RESERVED.indexOf(d.id) < 0" in pool
+
+
+def test_every_tier_has_at_least_eight_texts_to_train():
+    """O pai ouviu dois textos e o app passou a repetir: só havia 2 por faixa.
+
+    Ele pediu "pelo menos 10 textos". Agora cada faixa tem 8 e, quando a faixa
+    esgota, o sorteio pega um vizinho — então há sempre 16 disponíveis antes de
+    qualquer repetição.
+    """
+    bank = _discourse_bank()
+    reserved = {"d03", "d04"}
+    training = [p for p in bank if p["id"] not in reserved]
+    for tier in ("D1", "D2", "D3", "D4"):
+        n = len([p for p in training if p["tier"] == tier])
+        assert n >= 8, (tier, n)
+    assert len(training) >= 32
+    assert len({p["id"] for p in bank}) == len(bank)
+
+
+def _run_js(script: str):
+    import json
+    import subprocess
+
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
+    return json.loads(out.stdout)
+
+
+def test_the_draw_never_repeats_and_uses_every_text_before_recycling():
+    start = JS.index("const DISCOURSE = [")
+    end = JS.index("const HHIE_QUESTIONS", start)
+    helper_start = JS.index("function discourseTierPool")
+    helper_end = JS.index("function pickDiscoursePassage", helper_start)
+    script = (
+        JS[start:end]
+        + JS[helper_start:helper_end]
+        + """
+const DISCOURSE_TIERS = ["D1", "D2", "D3", "D4"];
+const DISCOURSE_RESERVED = ["d03", "d04"];
+const pools = ["D1","D2","D3","D4"].map(discourseTierPool);
+const used = [];
+const picks = [];
+for (let i = 0; i < 40; i++) {
+  const p = chooseDiscoursePassage(pools, used);
+  picks.push(p.id);
+  used.push(p.id);
+}
+const tiers = {};
+picks.forEach((id) => {
+  const p = DISCOURSE.find((d) => d.id === id);
+  tiers[id] = p.tier;
+});
+process.stdout.write(JSON.stringify({ picks, tiers }));
+"""
+    )
+    data = _run_js(script)
+    picks = data["picks"]
+    # nenhum texto seguido do mesmo
+    assert all(a != b for a, b in zip(picks, picks[1:])), picks
+    # os 32 primeiros são todos diferentes: usa o banco inteiro antes de reciclar
+    assert len(set(picks[:32])) == 32, picks[:32]
+    # e nenhum deles é um texto reservado para a avaliação
+    assert not ({"d03", "d04"} & set(picks))
+
+
+def test_the_draw_borrows_from_a_neighbouring_tier_instead_of_repeating():
+    start = JS.index("const DISCOURSE = [")
+    end = JS.index("const HHIE_QUESTIONS", start)
+    helper_start = JS.index("function discourseTierPool")
+    helper_end = JS.index("function pickDiscoursePassage", helper_start)
+    script = (
+        JS[start:end]
+        + JS[helper_start:helper_end]
+        + """
+const DISCOURSE_TIERS = ["D1", "D2", "D3", "D4"];
+const DISCOURSE_RESERVED = ["d03", "d04"];
+const pools = [discourseTierPool("D1"), ...discourseNeighborPools("D1")];
+const used = discourseTierPool("D1").map((d) => d.id);
+const pick = chooseDiscoursePassage(pools, used);
+process.stdout.write(JSON.stringify({ tier: pick.tier, id: pick.id }));
+"""
+    )
+    data = _run_js(script)
+    assert data["tier"] == "D2", data
 
 
 def test_the_assessment_has_no_replay_but_training_repeats_as_much_as_wanted():

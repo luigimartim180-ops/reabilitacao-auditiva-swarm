@@ -48,7 +48,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 127 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 130 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -82,7 +82,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            127 testes (pytest) incluindo paridade Python↔JS
+tests/            130 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -191,8 +191,11 @@ Detalhes: [docs/PERSISTENCE.md](docs/PERSISTENCE.md).
 O ponto que mais atrapalha na vida real: entrevista, telejornal e programa de
 esportes chegam **corridos, sem pausa e sem botão de repetir**.
 
-- 10 textos originais (nada copiado de programa), 40 perguntas, gêneros
-  telejornal, entrevista, jornal e esporte;
+- **34 textos originais** (nada copiado de programa), 136 perguntas, gêneros
+  telejornal, entrevista, jornal e esporte — 8 por faixa para treino, mais 2
+  reservados para a avaliação;
+- o sorteio **nunca repete o texto anterior** e usa todos os da faixa antes de
+  reciclar; quando a faixa acaba, pega um da faixa vizinha;
 - o áudio toca uma vez; as perguntas aparecem depois;
 - no treino, **"Ouvir o texto de novo" sem limite** (contado no histórico e no
   tempo do dia); na avaliação **não há** botão de repetir;
@@ -209,7 +212,7 @@ diário — isso o app não mede.
 ### Testes e verificação
 
 ```bash
-make test         # pytest (127 testes)
+make test         # pytest (130 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make serve        # app em http://localhost:12000 COM progresso salvo no servidor

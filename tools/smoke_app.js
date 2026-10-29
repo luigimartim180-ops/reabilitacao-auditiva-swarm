@@ -988,6 +988,10 @@ async function discourseFlow() {
   const card = dom.window.document.querySelector("#discourseCard");
   check("the running-text card exists in the training tab", Boolean(card));
   check("the running-text card explains that the audio does not stop", Boolean(card && card.textContent.includes("não para")));
+  const poolLine = dom.window.document.querySelector("#discoursePool");
+  check("a faixa mostra quantos textos existem e quantos faltam ouvir",
+    Boolean(poolLine && /8 textos, 8 ainda não ouvidos/.test(poolLine.textContent)),
+    poolLine && poolLine.textContent.slice(0, 80));
   check("the running-text level follows the week", Boolean(card && card.textContent.includes("D2")), card && card.textContent.slice(0, 50));
   dom.window.document.querySelector("#btnStartDiscourse").click();
   await sleep(40);
@@ -1029,6 +1033,22 @@ async function discourseFlow() {
   check("running-text record keeps replays and percent", Boolean(rec && typeof rec.percent === "number" && typeof rec.replays === "number"));
   check("as repetições ficam registradas no histórico (2)", Boolean(rec && rec.replays === 2), rec && String(rec.replays));
   check("running-text record is marked non-adaptive", Boolean(rec && rec.adaptive === false));
+
+  /* o segundo texto não pode ser o mesmo do primeiro (queixa do usuário) */
+  const firstId = rec && rec.passageId;
+  dom.window.document.querySelector("#btnDiscourseNext").click();
+  await sleep(60);
+  dom.window.document.querySelector("#btnPlayDiscourse").click();
+  await sleep(260);
+  for (let q = 0; q < 4; q++) {
+    const opts = dom.window.document.querySelectorAll("#discourseOptions button");
+    if (!opts.length) throw new Error("no discourse options at question " + q + " of the second run");
+    opts[0].click();
+    await sleep(700);
+  }
+  const second = state(dom).discourse[1];
+  check("o segundo texto é diferente do primeiro", Boolean(second && second.passageId !== firstId), firstId + " -> " + (second && second.passageId));
+  check("o segundo texto também ficou salvo", Boolean(second && second.scored === 4), second && String(second.scored));
 
   click(dom, "#btnDiscourseClose");
   await sleep(40);

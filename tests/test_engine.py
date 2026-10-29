@@ -312,8 +312,8 @@ def test_discourse_ladder_starts_short_and_ends_with_a_long_interview():
     covered = [week for row in ladder for week in row["weeks"]]
     assert covered == list(range(1, 9))
     assert [row["tier"] for row in ladder] == ["D1", "D2", "D3", "D4"]
-    assert content["material"]["discourse_passages"] == 10
-    assert content["material"]["discourse_questions"] == 40
+    assert content["material"]["discourse_passages"] == 34
+    assert content["material"]["discourse_questions"] == 136
 
 
 def test_real_life_block_is_optional_and_exploratory():
