@@ -1472,7 +1472,7 @@ function renderAssessment() {
     area.innerHTML = "<div class='card'><h2>Como funciona</h2><p>A avaliação tem quatro partes: HHIE-S (10 perguntas), fala em ruído (2 de prática + 12 medidas), <strong>vida real</strong> (4 frases longas do dia a dia, opcional) e gap (2 de prática + 12 com pausa + 4 sem pausa de controle). Não há feedback de acerto nos testes. O volume do aparelho deve ficar fixo do início ao fim.</p><p class='small muted'>A voz sintética e o ruído gerado no navegador não são calibrados. Os números servem para acompanhar a mesma pessoa ao longo do tempo, não para comparar com audiometria ou com QuickSIN.</p><details><summary>Regras do teste</summary><ul>" + MEASUREMENT_RULES_PT.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul></details><p class='small'>Escolha um momento na lista acima para começar.</p></div>";
     return;
   }
-  const steps = ["HHIE-S", "Fala em ruído", "Vida real", "Gap", "Resultados"];
+  const steps = ["HHIE-S", "Fala em ruído", "Compreensão", "Gap", "Resultados"];
   const bar = "<div class='stepbar'>" + steps.map((s, i) => "<span class='" + (i === assessment.step - 1 ? "active" : (i < assessment.step - 1 ? "done" : "")) + "'>" + esc(s) + "</span>").join("") + "</div>";
   if (assessment.step === 1) { area.innerHTML = bar + "<div id='hhieArea'></div>"; renderHHIE(); }
   else if (assessment.step === 2) { area.innerHTML = bar + "<div id='speechArea'></div>"; renderSpeechTest(); }

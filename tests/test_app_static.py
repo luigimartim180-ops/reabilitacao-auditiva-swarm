@@ -293,9 +293,7 @@ def test_diary_never_overwrites_another_week_by_accident():
 
 def test_assessment_has_the_real_life_step_between_speech_and_gap():
     assert "Vida real" in JS
-    assert re.search(r"const STEPS = \[.*?Vida real.*?Gap", JS, re.S) or re.search(
-        r"\[\s*\"HHIE-S\",\s*\"Fala em ruído\",\s*\"Vida real\",\s*\"Gap\",\s*\"Resultados\"\s*\]", JS
-    ), "the real-life step must sit between the speech test and the gap test"
+    assert re.search(r"\[\s*\"HHIE-S\",\s*\"Fala em ruído\",\s*\"Compreensão\",\s*\"Gap\",\s*\"Resultados\"\s*\]", JS), "the comprehension step must sit between the speech test and the gap test"
     assert "assessment.step = 4" in JS, "the real-life step must hand over to the gap step"
     assert 'assessment.step === 3' in JS
 
