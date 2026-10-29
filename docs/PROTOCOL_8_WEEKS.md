@@ -23,6 +23,8 @@ ganho de sinal, não de plasticidade.
 ## Semanas 2–4 — rotina e dificuldade
 
 - **1 sessão curta por dia de treino, 2–3 dias por semana** (não todos os dias).
+  Fazer mais de uma sessão no mesmo dia é **permitido**: o dia conta uma vez para a
+  adesão e o teto de 10 min/dia continua sendo o único bloqueio.
 - 1 aquecimento + 8 itens adaptativos + 1 fechamento garantido em acerto.
 - Semana 2: ruído rosa, fala a 0,90× (mais lenta).
 - Semana 3: ruído de casa, fala a 0,90×.
@@ -59,7 +61,8 @@ descer um degrau à mão, e o áudio toca uma vez só. Ver
 
 ## Dose e teto
 
-- 1 sessão de ~6 min por dia de treino, 2–3 dias por semana.
+- 1 sessão de ~6 min por dia de treino, 2–3 dias por semana (duas no mesmo dia
+  cabem no teto de 10 min se cada uma for curta; a segunda não é bloqueada).
 - Teto de **10 min/dia** no app: é uma **guarda de tolerabilidade**, não uma dose ótima.
 - O estudo randomizado de dose comparou 2×/semana com 3×/semana e **não encontrou
   diferença**; o braço diário **não foi testado**. A sessão de 6 min é mais curta que o

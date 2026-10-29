@@ -56,7 +56,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
 | 13 | Sem exportação/versionamento dos dados | Pacote `audioswarm.v1.1` com schema, limites, contexto, medidas, sessões, aderência, `mods`, `gapStats`, segurança e plano determinístico; exportação em arquivo + cópia; importação por arquivo. |
 | 14 | Sem testes da matemática de medição | `tests/test_measurement.py` (12 testes) + paridade JS↔Python (5 casos de fala, 7 de gap, 3 de SNR, 4 de HHIE-S). |
 | 15 | CI extraía script inline que não existia mais | `make check` e CI agora validam `app/protocol.js` e `app/app.js`; o HTML é checado para IDs duplicados e scripts. |
-| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **136/136**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
+| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **142/142**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
 
 ## O que foi implementado
 
@@ -74,7 +74,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
   diagnóstico, acessibilidade e voz com watchdog.
 - `app/index.html`: shell pt-BR com 7 abas, botões grandes, alto contraste e letra
   ampliável.
-- `tests/`: 106 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
+- `tests/`: 109 testes, incluindo `test_app_static.py` (IDs, abas, claims proibidos,
   campos do pacote, 10 itens do HHIE-S).
 
 ## Rodada de correções (26/10)
@@ -253,6 +253,27 @@ efeito. O caminho para o áudio real continua sendo o trecho de 1–2 min do
 programa dele, assistido uma vez, com perguntas escritas pela família e anotado
 no diário.
 
+## Adendo v6.1 — mais de uma sessão por dia, adesão em dias
+
+O participante pediu para não ser travado depois da primeira sessão do dia. O
+bloqueio existia porque a adesão era contada em **sessões**; com duas sessões no
+mesmo dia, a semana "fechava" sozinha e o app recusava a segunda.
+
+O que mudou:
+
+1. o app **não bloqueia** a segunda sessão do dia; avisa com um toast e segue;
+2. o único bloqueio continua sendo o **teto de 10 min de escuta por dia**
+   (tolerabilidade), com o tempo restante visível no resumo;
+3. a adesão passou a contar **dias com treino** (`trainingDaysThisWeek`), então
+   duas sessões na terça contam como 1 dia e não adiantam a semana;
+4. o relatório e o pacote exportam **dias e sessões separados**
+   (`trainingDaysThisWeek`, `sessionsCompletedThisWeek`), e o texto diz
+   explicitamente que mais de uma sessão no mesmo dia é permitida.
+
+O que **não** mudou: a recomendação de 2–3 dias por semana (o estudo de dose
+comparou 2× e 3×/semana, não treino diário) e o teto de 10 min/dia. A permissão é
+de autonomia, não uma nova dose recomendada.
+
 ## Como verificar
 
 ```bash
@@ -260,10 +281,10 @@ make test                                   # 99 passed
 make check                                  # sintaxe + contratos do HTML
 make demo                                   # protocolo em texto
 python -m swarm.cli examples/profile.json --json > /tmp/p.json
-NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 136/136, requer jsdom
+NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 142/142, requer jsdom
 ```
 
-Estado local desta auditoria: `106 passed`, `make check` exit 0, smoke 136/136. O teste de
+Estado local desta auditoria: `109 passed`, `make check` exit 0, smoke 142/142. O teste de
 smoke é opcional; a CI roda pytest + sintaxe + protocolo de exemplo.
 
 ## Referências principais

@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "6.0.0";
+const APP_VERSION = "6.1.0";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
@@ -1175,6 +1175,16 @@ function sessionsThisWeek() {
   return state.sessions.filter(s => Number(s.week) === Number(state.week)).length;
 }
 
+/* Adesão é contada em DIAS com treino, não em sessões: fazer duas sessões no
+   mesmo dia é permitido e não pode "completar" a semana sozinho. */
+function trainingDaysThisWeek() {
+  const days = {};
+  state.sessions
+    .filter(s => Number(s.week) === Number(state.week))
+    .forEach(s => { days[localDayKey(s.date)] = true; });
+  return Object.keys(days).length;
+}
+
 function sessionsToday() {
   const t = todayKey();
   return state.sessions.filter(s => localDayKey(s.date) === t).length;
@@ -1333,13 +1343,14 @@ function renderHome() {
   if (summary && cfg) {
     const doseMin = Math.floor(doseToday() / 60);
     const planned = cfg.sessions_planned;
-    const done = sessionsThisWeek();
+    const done = trainingDaysThisWeek();
+    const sessionCount = sessionsThisWeek();
     const pct = planned ? Math.min(100, Math.round(done / planned * 100)) : 0;
     const eff = effectiveSettings(cfg);
     summary.innerHTML =
       "<div class='kv'><span>Foco da semana</span><span class='v'>" + esc(focusLabel(cfg.focus)) + "</span></div>" +
-      "<div class='kv'><span>Sessões planejadas</span><span class='v'>" + esc(done) + " / " + esc(planned) + " nesta semana</span></div>" +
-      "<div class='kv'><span>Dose de hoje</span><span class='v'>" + esc(doseMin) + " / 10 min</span></div>" +
+      "<div class='kv'><span>Dias treinados</span><span class='v'>" + esc(done) + " / " + esc(planned) + " nesta semana" + (sessionCount > done ? " · " + esc(sessionCount) + " sessões" : "") + "</span></div>" +
+      "<div class='kv'><span>Dose de hoje</span><span class='v'>" + esc(doseMin) + " / 10 min" + (doseMin >= 10 ? " · teto atingido" : " · restam " + esc(Math.max(0, 10 - doseMin)) + " min") + "</span></div>" +
       "<div class='kv'><span>Sessões salvas</span><span class='v'>" + esc(state.sessions.length) + " no histórico</span></div>" +
       "<div class='kv'><span>Ruído recomendado</span><span class='v'>" + esc(noiseLabel(eff.noise)) + " · nível " + esc(eff.level) + "</span></div>" +
       "<div class='kv'><span>Início de SNR</span><span class='v'>" + esc(snrText(cfg.snr_start_db)) + "</span></div>" +
@@ -1376,7 +1387,7 @@ function renderHome() {
     action.innerHTML = "";
     if (!state.baselineDone) {
       action.innerHTML = "<div class='card warn' style='margin:10px 0'><strong>Primeiro passo:</strong> faça a avaliação inicial (HHIE-S + fala em ruído + gap) antes de treinar. Sem linha de base, não há como interpretar mudança.</div>";
-    } else if (cfg && sessionsThisWeek() >= cfg.sessions_planned) {
+    } else if (cfg && trainingDaysThisWeek() >= cfg.sessions_planned) {
       const isAssessment = state.week === 4 || state.week === 8;
       const done = isAssessment && latestByTimepoint(state.hhie, state.week === 4 ? "week4" : "week8");
       if (isAssessment && !done) {
@@ -2532,11 +2543,15 @@ function startTraining() {
   }
   if (state.paused) { alert("Treino pausado por evento adverso. Procure avaliação e use ‘Liberar retomada’ depois."); return; }
   if (!state.baselineDone) { alert("Faça a avaliação inicial antes de treinar. Sem linha de base não há como interpretar mudança."); setTab("avaliacao"); return; }
-  if (doseToday() >= DOSE_CAP_SECONDS) { alert("Limite de tolerabilidade de 10 min/dia atingido. Volte amanhã."); return; }
-  if (sessionsToday() >= 1) {
-    alert("Você já tem uma sessão salva hoje (veja “Sessões recentes” logo abaixo). O plano é uma sessão por dia de treino. Amanhã o app libera de novo.");
+  if (doseToday() >= DOSE_CAP_SECONDS) {
+    alert("Teto de tolerabilidade de 10 min/dia atingido (você já treinou " + Math.floor(doseToday() / 60) + " min hoje). O treino volta amanhã.");
     return;
   }
+  /* Pode treinar quantas vezes quiser no dia. O que limita é o teto de 10 min
+     de escuta por dia — tolerabilidade, não burocracia de plano. */
+  const previousToday = sessionsToday();
+  if (previousToday === 1) toast("Segunda sessão de hoje. O teto de 10 min/dia continua valendo.");
+  else if (previousToday > 1) toast(previousToday + "ª sessão de hoje. Se cansar, pare: o teto é 10 min/dia.");
   const protocol = protocolFor();
   const cfg = weekConfig(protocol, state.week);
   if (!cfg) { alert("Semana inválida."); return; }
@@ -3341,7 +3356,7 @@ function renderOutcomes(protocol) {
   html += "</tbody></table>";
   const cfg = weekConfig(protocol, state.week);
   if (cfg) {
-    html += "<div class='kv' style='margin-top:10px'><span>Adesão na semana " + esc(state.week) + "</span><span class='v'>" + sessionsThisWeek() + " / " + cfg.sessions_planned + " sessões</span></div>";
+    html += "<div class='kv' style='margin-top:10px'><span>Adesão na semana " + esc(state.week) + "</span><span class='v'>" + trainingDaysThisWeek() + " / " + cfg.sessions_planned + " dias" + (sessionsThisWeek() > trainingDaysThisWeek() ? " · " + sessionsThisWeek() + " sessões" : "") + "</span></div>";
     html += "<div class='kv'><span>Dose de treino hoje</span><span class='v'>" + Math.floor(doseToday() / 60) + " / 10 min</span></div>";
   }
   box.innerHTML = html;
@@ -3470,8 +3485,9 @@ function generateReport() {
   const tv = state.tv[state.week] || null;
   const music = state.music[state.week] || 0;
   const planned = cfg ? cfg.sessions_planned : 0;
-  const done = sessionsThisWeek();
-  const adherence = planned ? Math.round(done / planned * 100) : 0;
+  const done = trainingDaysThisWeek();
+  const sessionCount = sessionsThisWeek();
+  const adherence = planned ? Math.min(100, Math.round(done / planned * 100)) : 0;
   const lines = [];
   const head = (t) => { lines.push(""); lines.push(t); };
 
@@ -3484,7 +3500,7 @@ function generateReport() {
   lines.push("• Idade: " + (state.context.age || "—") + " | Aparelho: " + (state.context.device || "—"));
   lines.push("• Queixa principal: " + (state.context.complaint || "—"));
   lines.push("• Interesses usados no conteúdo: " + (state.context.interests || "—"));
-  lines.push("• Sessões de treino registradas: " + state.sessions.length + " | Semana atual: " + done + "/" + planned + " (" + adherence + "%)");
+  lines.push("• Sessões de treino registradas: " + state.sessions.length + " | Semana atual: " + done + "/" + planned + " dias (" + adherence + "%)");
   lines.push("• Estado de segurança: " + (state.paused ? "treino PAUSADO por evento adverso" : "nenhum evento ativo; treino liberado"));
   if (!baseH) lines.push("• Sem HHIE-S de linha de base: qualquer comparação funcional fica inválida.");
 
@@ -3568,9 +3584,10 @@ function generateReport() {
   lines.push("• Nenhum número aqui autoriza afirmar mudança fisiológica, prevenção de demência ou cura.");
 
   head("4. ADERÊNCIA E DOSE");
-  if (cfg) lines.push("• Semana " + state.week + ": " + done + "/" + planned + " sessões planejadas.");
+  if (cfg) lines.push("• Semana " + state.week + ": " + done + "/" + planned + " dias com treino (" + sessionCount + " sessões).");
   lines.push("• Sessões totais: " + state.sessions.length + " | Dose hoje: " + Math.floor(doseToday() / 60) + "/10 min (teto de tolerabilidade, não dose ótima).");
-  lines.push("• Modelo: 1 sessão curta por dia de treino, 2–3 dias por semana; o estudo de dose testou 2–3×/semana, não todos os dias.");
+  lines.push("• Modelo: sessões curtas em 2–3 dias por semana; o estudo de dose testou 2–3×/semana, não todos os dias.");
+  lines.push("• Mais de uma sessão no mesmo dia é permitida; o dia conta uma vez para a adesão e o teto de 10 min/dia continua valendo.");
   if (state.sessions.length) {
     const last = state.sessions[state.sessions.length - 1];
     lines.push("• Última sessão: " + fmtDay(last.date) + " | acerto no núcleo " + last.accuracy + "% | SNR " + last.startSnr + " → " + last.endSnr + " dB | ruído " + noiseLabel(last.noise) + " nível " + last.level);
@@ -3653,11 +3670,12 @@ function buildPackage() {
       retentionDone: state.retentionDone,
       plannedSessionsThisWeek: cfg ? cfg.sessions_planned : null,
       sessionsCompletedThisWeek: sessionsThisWeek(),
+      trainingDaysThisWeek: trainingDaysThisWeek(),
       sessionsTotal: state.sessions.length,
       doseTodaySeconds: doseToday(),
       minutesPerDay: Math.round(doseToday() / 60 * 10) / 10,
       dailyCapSeconds: DOSE_CAP_SECONDS,
-      adherencePct: cfg && cfg.sessions_planned ? Math.round(sessionsThisWeek() / cfg.sessions_planned * 100) : null
+      adherencePct: cfg && cfg.sessions_planned ? Math.min(100, Math.round(trainingDaysThisWeek() / cfg.sessions_planned * 100)) : null
     },
     planning: protocol ? {
       measurement: protocol.measurement,

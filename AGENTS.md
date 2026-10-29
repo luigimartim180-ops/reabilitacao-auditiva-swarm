@@ -42,6 +42,13 @@ pare: adicione uma entrada em `swarm/evidence.py` e um gatilho determinístico n
   medição, material de frases (`SENTENCES_V5.md`), fala corrida
   (`CONNECTED_SPEECH_V6.md`) e auditoria do v4.
 
+## Regras de adesão (não quebrar)
+
+Adesão semanal é contada em **dias com treino** (`trainingDaysThisWeek`), nunca em
+sessões: o app permite mais de uma sessão no mesmo dia e o único bloqueio é o teto
+de 10 min de escuta por dia (`doseToday()`). O pacote exporta os dois números
+separados (`trainingDaysThisWeek`, `sessionsCompletedThisWeek`).
+
 ## Ordem dos agentes importa
 
 A1 (sinal) vem primeiro porque entrega ganho no dia 1 (streaming de TV, microfone
@@ -50,10 +57,10 @@ remoto). A2–A4 consolidam em 2–8 semanas. Não reordene sem justificativa de
 ## Comandos
 
 ```bash
-make test     # pytest (106 testes)
+make test     # pytest (109 testes)
 make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
-make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 136 checks
+make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 142 checks
 make serve    # app em http://localhost:12000
 make demo     # protocolo a partir de examples/profile.json
 ```

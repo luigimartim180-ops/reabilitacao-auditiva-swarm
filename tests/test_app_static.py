@@ -418,3 +418,33 @@ def test_running_speech_is_persisted_exported_and_reported():
     assert "2.5 Fala corrida" in report
     assert "2.6 Temporal" in report
     assert "2.7 Vida real" in report
+
+
+def test_a_second_session_on_the_same_day_is_not_blocked():
+    # v4 travava a segunda sessão do dia; agora só o teto de 10 min/dia limita.
+    assert "já tem uma sessão salva hoje" not in JS
+    assert "sessionsToday() >= 1" not in JS
+    block = JS.split("function startTraining")[1].split("const protocol = protocolFor()")[0]
+    assert "doseToday() >= DOSE_CAP_SECONDS" in block, "o teto diário continua sendo o único bloqueio"
+    assert "previousToday" in block, "a sessão extra deve avisar, não bloquear"
+    assert "toast(" in block
+
+
+def test_adherence_counts_days_not_sessions():
+    assert "function trainingDaysThisWeek" in JS
+    days = JS.split("function trainingDaysThisWeek")[1].split("function sessionsToday")[0]
+    assert "localDayKey(s.date)" in days
+    assert "trainingDaysThisWeek()" in JS
+    # o gate de avanço e o relatório não podem usar contagem de sessões
+    gate = JS.split("function renderHome")[1].split("function ")[0]
+    assert "trainingDaysThisWeek() >= cfg.sessions_planned" in gate
+    assert "sessionsThisWeek() >= cfg.sessions_planned" not in JS
+    report = JS.split("function generateReport")[1]
+    assert "trainingDaysThisWeek()" in report
+    assert "Mais de uma sessão no mesmo dia é permitida" in report
+
+
+def test_package_reports_days_and_sessions_separately():
+    assert "trainingDaysThisWeek: trainingDaysThisWeek()" in JS
+    assert "sessionsCompletedThisWeek: sessionsThisWeek()" in JS
+    assert "trainingDaysThisWeek() / cfg.sessions_planned" in JS

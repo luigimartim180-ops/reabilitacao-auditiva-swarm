@@ -326,6 +326,45 @@ async function trainingFlow(dom) {
   check("dose recorded", s && s.dose && s.dose.seconds > 0);
 }
 
+async function secondSessionSameDayFlow(dom) {
+  // a primeira sessão já foi salva em trainingFlow; pedir outra no mesmo dia
+  // não pode ser bloqueada, e o dia continua contando uma vez na adesão.
+  click(dom, '[data-tab="treino"]');
+  await sleep(40);
+  const summary = dom.window.document.querySelector("#planSummary").textContent;
+  check("the plan counts training days", summary.includes("Dias treinados"), summary.slice(0, 90));
+  click(dom, "#btnStartSession");
+  await sleep(80);
+  check("a second session on the same day is allowed", Boolean(dom.window.document.querySelector("#btnPlayTraining")));
+  const s = state(dom);
+  check("only the first session is saved so far", s && s.sessions.length === 1, s && String(s.sessions.length));
+  check("the daily cap is still the only limit", s && s.dose && s.dose.seconds < 600,
+    s && String(s.dose && s.dose.seconds));
+}
+
+async function twoSessionsOneDayDoNotAdvanceTheWeek() {
+  const now = new Date().toISOString();
+  const session = (i) => ({
+    id: "s" + i, date: now, week: 2, accuracy: 75, correct: 6, total: 8,
+    startSnr: 8, endSnr: 6, moves: 1, fatigue: 2, durationSec: 200,
+    noise: "rosa", level: 1, rate: 0.9, endedOnSuccess: true,
+  });
+  const seed = {
+    version: 4,
+    week: 2,
+    baselineDone: true,
+    sessions: [session(1), session(2)],
+    hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 22, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
+    createdAt: now,
+  };
+  const dom = makeDom(seed);
+  await sleep(160);
+  const text = dom.window.document.querySelector("#planSummary").textContent;
+  check("two sessions in one day count as one training day", text.includes("1 / 3"), text.slice(0, 90));
+  check("two sessions in one day do not finish the week", !dom.window.document.querySelector("#btnAdvanceWeek"));
+  dom.window.close();
+}
+
 async function reportFlow(dom) {
   click(dom, '[data-tab="relatorio"]');
   await sleep(20);
@@ -656,7 +695,8 @@ async function weekAdvanceFlow() {
     version: 4,
     week: 2,
     baselineDone: true,
-    sessions: [1, 2, 3].map((i) => ({ id: "s" + i, date: now, week: 2, accuracy: 75, correct: 6, total: 8, startSnr: 8, endSnr: 6, moves: 1, fatigue: 2, durationSec: 240, noise: "rosa", level: 1, rate: 0.9, endedOnSuccess: true })),
+    // três DIAS diferentes: a adesão conta dias, não sessões
+    sessions: [0, 1, 2].map((i) => ({ id: "s" + (i + 1), date: new Date(Date.now() - i * 86400000).toISOString(), week: 2, accuracy: 75, correct: 6, total: 8, startSnr: 8, endSnr: 6, moves: 1, fatigue: 2, durationSec: 240, noise: "rosa", level: 1, rate: 0.9, endedOnSuccess: true })),
     hhie: [{ id: "hb", timepoint: "baseline", date: now, score: 22, band: "mild_to_moderate", answers: [2,2,2,2,2,2,2,2,2,2] }],
     createdAt: now,
   };
@@ -844,6 +884,7 @@ async function demoFlow() {
 
   await assessmentFlow(dom);
   await trainingFlow(dom);
+  await secondSessionSameDayFlow(dom);
   await reportFlow(dom);
   await importFlow(dom);
   const afterErrors = errors.slice();
@@ -857,6 +898,7 @@ async function demoFlow() {
   await diaryFlow();
   await diarySurvivesTrainingFlow();
   await weekAdvanceFlow();
+  await twoSessionsOneDayDoNotAdvanceTheWeek();
   await week4AssessmentFlow();
   await realLifeSkipFlow();
   await discourseFlow();

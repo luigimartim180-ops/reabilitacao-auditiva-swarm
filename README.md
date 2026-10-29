@@ -37,7 +37,9 @@ medição que declara o que **não** consegue provar.
   quatro níveis (D1 nota curta ~20 s → D4 entrevista ~60 s), com o áudio tocando uma vez
   e as perguntas vindo depois. Uma repetição só se o interruptor estiver ligado — e ela
   é contada. Detalhes em [docs/CONNECTED_SPEECH_V6.md](docs/CONNECTED_SPEECH_V6.md).
-- **Treino de 8 semanas no próprio navegador.** 1 sessão curta por dia de treino,
+- **Treino de 8 semanas no próprio navegador.** Sessões curtas, 2–3 dias por semana. Mais de
+  uma sessão no mesmo dia é permitida — o app não trava: o que limita é o teto de 10 min de
+  escuta por dia, e a adesão semanal conta **dias** com treino (duas sessões na terça = 1 dia). 1 sessão curta por dia de treino,
   2–3 dias por semana, teto de 10 min/dia. O app lê o plano determinístico, conduz a
   sessão adaptativa, faz o treino de gap da semana 5 e termina sempre em um acerto.
 - **Relatório e pacote de dados.** Relatório em seis seções com nível de confiança,
@@ -45,7 +47,7 @@ medição que declara o que **não** consegue provar.
   aderência, modificações, segurança e o plano determinístico).
 - **Segurança explícita.** Evento adverso pausa o treino; a retomada exige confirmação.
   Aviso de streaming: não usar TV/telefone nos ouvidos em escadas ou na rua.
-- **Testes de verdade.** 106 testes (motor, medição, contratos, paridade Python↔JS,
+- **Testes de verdade.** 109 testes (motor, medição, contratos, paridade Python↔JS,
   contratos estáticos do app). O app também tem um smoke test opcional com jsdom que
   percorre avaliação, treino, relatório, exportação/importação e modo demonstração.
 
@@ -79,7 +81,7 @@ app/
 tools/
   build_browser.py  gera o navegador de arquivos estático (browse.html)
   smoke_app.js      smoke test opcional do app com jsdom
-tests/            106 testes (pytest) incluindo paridade Python↔JS
+tests/            109 testes (pytest) incluindo paridade Python↔JS
 docs/             análise, arquitetura, evidências, protocolo, segurança, medição
 ```
 
@@ -190,7 +192,7 @@ diário — isso o app não mede.
 ### Testes e verificação
 
 ```bash
-make test         # pytest (106 testes)
+make test         # pytest (109 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make smoke        # opcional: fluxo completo no jsdom (requer npm install jsdom)
