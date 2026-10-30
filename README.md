@@ -216,6 +216,7 @@ make test         # pytest (130 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make serve        # app em http://localhost:12000 COM progresso salvo no servidor
+make serve-persist PERSIST_DIR=/home/user/aw-data   # idem, com o estado fora do checkout
 make smoke        # opcional: fluxo completo no jsdom (requer npm install jsdom)
 make e2e-sync     # opcional: app + servidor reais; prova que o progresso volta após queda/URL nova
 ```

@@ -73,6 +73,7 @@ make check    # node --check em protocol.js e app.js + contratos do HTML
 make ci       # test + check (o mesmo que a CI roda)
 make smoke    # opcional: fluxo completo do app no jsdom (npm install jsdom), 170 checks
 make serve    # app em http://localhost:12000 (tools/serve.py, guarda o estado em data/)
+make serve-persist PERSIST_DIR=...  # idem, com AUDIOSWARM_DATA_DIR fora do checkout
 make e2e-sync # ponta a ponta de verdade: app + servidor (precisa de `make serve` e jsdom)
 make demo     # protocolo a partir de examples/profile.json
 ```

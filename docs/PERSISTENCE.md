@@ -115,11 +115,29 @@ o que pega falhas de regra de adoção. Ele zera `data/app-state.json` ao começ
   ou *"Sem cópia no servidor (hospedagem estática)…"*.
 - Ao adotar o servidor: toast *"Progresso recuperado do servidor: semana N · X sessão(ões)"*.
 
+### Onde exatamente o arquivo fica
+
+Por padrão `data/app-state.json`, dentro do projeto, **fora do Git**. A variável
+`AUDIOSWARM_DATA_DIR` muda esse diretório quando o disco do projeto é
+descartável — é o caso da prévia: cada reinício recria o checkout do zero e leva
+junto o que não está versionado.
+
+```bash
+make serve                                    # data/app-state.json
+make serve-persist PERSIST_DIR=/home/user/aw-data   # estado fora do checkout
+```
+
+O servidor também guarda **a versão anterior** de cada save em
+`app-state.bak.json` e volta nela se o arquivo principal sumir ou deixar de ser
+JSON válido. Um save truncado, então, não apaga o histórico. `DELETE /api/state`
+apaga os dois de propósito.
+
 ## Privacidade
 
-O arquivo `data/app-state.json` é local, do seu computador, e está no
-`.gitignore` — não é versionado, não vai para o GitHub e não sai da máquina. Em
-hospedagem estática esse arquivo nem existe.
+O arquivo de estado é local, do seu computador, e **nunca é versionado**: o
+diretório `data/` e o padrão `*.state.json` estão no `.gitignore`. Ele não vai
+para o GitHub e não sai da máquina. Em hospedagem estática esse arquivo nem
+existe.
 
 ## Limites honestos
 
@@ -132,6 +150,12 @@ hospedagem estática esse arquivo nem existe.
   olhar a interface).
 - Duas abas abertas ao mesmo tempo: a que salvar por último vence. O app não tem
   bloqueio de edição concorrente.
+- **A cópia do servidor não sobrevive à destruição da máquina.** Ela protege
+  contra queda do processo, fechar o navegador e troca de URL — não contra o
+  computador/host ser apagado ou recriado. Na prévia deste projeto isso já
+  aconteceu duas vezes: o sandbox foi reiniciado e o `data/app-state.json`
+  desapareceu junto. Se isso importar, o que salva é fora do host: exportar o
+  pacote, gerar o código de retomada, ou rodar o app numa máquina que persiste.
 
 ## Como verificar
 

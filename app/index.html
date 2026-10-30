@@ -232,7 +232,7 @@
     <p class="lead">Treino de fala em ruído e resolução temporal, em português do Brasil, para uso domiciliar acompanhado. <strong>Não é exame clínico e não é dispositivo médico.</strong></p>
     <div class="row">
       <span class="badge">SWARM v4</span>
-      <span class="badge">v6.3 · build 2026-10-29</span>
+      <span class="badge">v6.3.1 · build 2026-10-30</span>
       <span class="badge" id="storageBadge">armazenamento</span>
       <span class="badge" id="saveStatus">ainda não salvo</span>
       <span class="badge" id="voiceBadge">voz</span>
@@ -591,13 +591,13 @@
 
     <div class="card">
       <h2>Privacidade e limites</h2>
-      <p>Todo o processamento acontece no aparelho. Quando o app é servido pelo servidor local do projeto (<span class="mono">tools/serve.py</span>), uma cópia do progresso é gravada em <span class="mono">data/app-state.json</span> na sua máquina, para sobreviver à queda do servidor — fora do Git e sem sair do seu computador. Em hospedagem estática não há cópia nenhuma. O app é um protótipo experimental de apoio; não é dispositivo médico, não diagnostica, não prescreve e não substitui avaliação audiológica.</p>
+      <p>Todo o processamento acontece no aparelho. Quando o app é servido pelo servidor local do projeto (<span class="mono">tools/serve.py</span>), uma cópia do progresso é gravada em <span class="mono">data/app-state.json</span> (ou no diretório indicado por <span class="mono">AUDIOSWARM_DATA_DIR</span>) na sua máquina, para sobreviver à queda do servidor — fora do Git e sem sair do seu computador. Em hospedagem estática não há cópia nenhuma. O app é um protótipo experimental de apoio; não é dispositivo médico, não diagnostica, não prescreve e não substitui avaliação audiológica.</p>
     </div>
   </section>
 
   <p class="foot" id="foot"></p>
 </main>
-<script src="protocol.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="protocol.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

@@ -32,8 +32,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_DIR = ROOT / "app"
-DATA_DIR = ROOT / "data"
+# Onde o estado fica. Padrão: data/ dentro do repositório (ignorado pelo Git).
+# AUDIOSWARM_DATA_DIR permite apontar para fora quando o disco de dentro é
+# descartável (é o caso da prévia: cada reinício apaga o diretório do projeto).
+DATA_DIR = Path(os.environ.get("AUDIOSWARM_DATA_DIR") or (ROOT / "data")).expanduser()
 STATE_FILE = DATA_DIR / "app-state.json"
+BACKUP_FILE = DATA_DIR / "app-state.bak.json"
 MAX_BODY = 8 * 1024 * 1024  # 8 MB: o pacote completo cabe com folga
 
 
@@ -48,19 +52,38 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def read_state() -> dict | None:
+def _read_json(path: Path) -> dict | None:
     try:
-        with STATE_FILE.open("r", encoding="utf-8") as fh:
-            return json.load(fh)
-    except FileNotFoundError:
-        return None
+        with path.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        return data if isinstance(data, dict) else None
     except (OSError, ValueError):
         return None
+
+
+def read_state() -> dict | None:
+    """Lê o estado; se o principal sumiu/quebrou, usa a cópia anterior."""
+    data = _read_json(STATE_FILE)
+    if data is None:
+        data = _read_json(BACKUP_FILE)
+        if data is not None:
+            # restaura o principal com o que sobrou, para a próxima leitura ser direta
+            try:
+                STATE_FILE.write_bytes(BACKUP_FILE.read_bytes())
+            except OSError:
+                pass
+    return data
 
 
 def write_state(payload: dict) -> None:
     """Escrita atômica: nunca deixa um arquivo pela metade se o servidor cair."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    # guarda a versão anterior: um save ruim não apaga o histórico de vez
+    try:
+        if STATE_FILE.exists():
+            BACKUP_FILE.write_bytes(STATE_FILE.read_bytes())
+    except OSError:
+        pass
     fd, tmp = tempfile.mkstemp(dir=str(DATA_DIR), prefix=".state-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
@@ -118,6 +141,8 @@ class Handler(SimpleHTTPRequestHandler):
                 "ok": True,
                 "storage": "file",
                 "file": _display_path(STATE_FILE),
+                "dir": _display_path(DATA_DIR),
+                "backup": _display_path(BACKUP_FILE),
                 "hasState": data is not None,
                 "updatedAt": (data or {}).get("savedAt"),
                 "serverTime": _now(),
@@ -184,8 +209,9 @@ class Handler(SimpleHTTPRequestHandler):
             self._json(404, {"ok": False, "error": "rota desconhecida"})
             return
         try:
-            if STATE_FILE.exists():
-                STATE_FILE.unlink()
+            for path in (STATE_FILE, BACKUP_FILE):
+                if path.exists():
+                    path.unlink()
         except OSError as exc:
             self._json(500, {"ok": False, "error": str(exc)})
             return
@@ -214,13 +240,15 @@ def main() -> int:
         print("app/index.html não encontrado.", file=sys.stderr)
         return 2
 
-    if args.reset and STATE_FILE.exists():
-        STATE_FILE.unlink()
-        print("estado do servidor apagado:", STATE_FILE)
+    if args.reset:
+        for path in (STATE_FILE, BACKUP_FILE):
+            if path.exists():
+                path.unlink()
+                print("estado do servidor apagado:", path)
 
     existing = read_state()
     print(f"servindo {APP_DIR} em http://{args.host}:{args.port}/")
-    print(f"estado no servidor: {STATE_FILE}"
+    print(f"estado no servidor: {STATE_FILE} (diretório {DATA_DIR})"
           + (f" (último save {existing.get('savedAt')})" if existing else " (vazio ainda)"))
 
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)

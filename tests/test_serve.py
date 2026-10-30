@@ -29,6 +29,7 @@ def _load_server_module(tmp_path, monkeypatch):
     spec.loader.exec_module(module)
     monkeypatch.setattr(module, "DATA_DIR", tmp_path)
     monkeypatch.setattr(module, "STATE_FILE", tmp_path / "app-state.json")
+    monkeypatch.setattr(module, "BACKUP_FILE", tmp_path / "app-state.bak.json")
     return module
 
 
@@ -170,3 +171,61 @@ def test_delete_only_accepts_the_state_route(live_server):
     with pytest.raises(urllib.error.HTTPError) as exc:
         urllib.request.urlopen(req, timeout=5)
     assert exc.value.code == 404
+
+
+def test_the_previous_save_is_kept_and_used_if_the_main_file_breaks(live_server):
+    """Um save ruim (ou um arquivo truncado) não pode apagar o histórico.
+
+    O servidor guarda a versão anterior antes de sobrescrever e volta nela se o
+    arquivo principal sumir ou deixar de ser JSON válido.
+    """
+    module, base = live_server
+    _post(base + "/api/state", {"state": {"week": 3, "sessions": [{"id": "a"}]}})
+    _post(base + "/api/state", {"state": {"week": 4, "sessions": [{"id": "a"}, {"id": "b"}]}})
+    assert module.BACKUP_FILE.exists()
+    # o backup é a versão imediatamente anterior
+    backup = json.loads(module.BACKUP_FILE.read_text(encoding="utf-8"))
+    assert backup["state"]["week"] == 3
+
+    # corrompe o principal: a leitura precisa cair no backup e restaurar
+    module.STATE_FILE.write_text("{ isto não é json", encoding="utf-8")
+    status, raw = _get(base + "/api/state")
+    assert status == 200
+    assert json.loads(raw.decode("utf-8"))["state"]["week"] == 3
+    # e o principal voltou a ser JSON válido
+    assert json.loads(module.STATE_FILE.read_text(encoding="utf-8"))["state"]["week"] == 3
+
+
+def test_delete_removes_the_backup_too(live_server):
+    module, base = live_server
+    _post(base + "/api/state", {"state": {"week": 5}})
+    _post(base + "/api/state", {"state": {"week": 6}})
+    assert module.BACKUP_FILE.exists()
+    req = urllib.request.Request(base + "/api/state", method="DELETE")
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 200
+    assert module.STATE_FILE.exists() is False
+    assert module.BACKUP_FILE.exists() is False
+    assert module.read_state() is None
+
+
+def test_the_data_directory_can_live_outside_the_repository():
+    """Na prévia o diretório do projeto é descartável: o dado precisa poder ficar fora."""
+    import os
+    import subprocess
+    import sys
+
+    code = (
+        "import importlib.util, os;"
+        "spec=importlib.util.spec_from_file_location('s','tools/serve.py');"
+        "m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);"
+        "print(m.DATA_DIR);print(m.STATE_FILE)"
+    )
+    env = dict(os.environ, AUDIOSWARM_DATA_DIR="/tmp/aw-data-test")
+    out = subprocess.run(
+        [sys.executable, "-c", code], cwd=str(ROOT), capture_output=True, text=True, env=env
+    )
+    assert out.returncode == 0, out.stderr
+    lines = out.stdout.strip().splitlines()
+    assert lines[0] == "/tmp/aw-data-test"
+    assert lines[1] == "/tmp/aw-data-test/app-state.json"

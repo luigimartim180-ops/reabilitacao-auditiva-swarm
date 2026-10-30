@@ -1,4 +1,4 @@
-.PHONY: test smoke serve demo check clean browse ci serve-static e2e-sync
+.PHONY: test smoke serve serve-persist demo check clean browse ci serve-static e2e-sync
 
 test:
 	python3 -m pytest tests/ -q
@@ -20,6 +20,14 @@ browse:
 
 serve: browse
 	python3 tools/serve.py --port 12000
+
+# Igual ao `serve`, mas guarda o estado FORA do checkout do Git (PERSIST_DIR).
+# Serve para prévia/sandbox, onde o diretório do projeto é recriado a cada
+# reinício: o dado fica numa pasta que não é apagada junto com o repositório.
+PERSIST_DIR ?= /home/user/aw-data
+serve-persist: browse
+	@mkdir -p $(PERSIST_DIR)
+	AUDIOSWARM_DATA_DIR=$(PERSIST_DIR) python3 tools/serve.py --port 12000 --host 0.0.0.0
 
 serve-static: browse
 	cd app && python3 -m http.server 12000

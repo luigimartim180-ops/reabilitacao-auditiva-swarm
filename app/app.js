@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "6.3.0";
+const APP_VERSION = "6.3.1";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
