@@ -191,6 +191,8 @@ Detalhes: [docs/PERSISTENCE.md](docs/PERSISTENCE.md).
 O ponto que mais atrapalha na vida real: entrevista, telejornal e programa de
 esportes chegam **corridos, sem pausa e sem botão de repetir**.
 
+- **Lembrete de backup.** Se o progresso tem 7 dias ou mais sem exportação, a tela inicial
+  avisa e oferece exportar o pacote na hora (é a única cópia que sai da máquina).
 - **34 textos originais** (nada copiado de programa), 136 perguntas, gêneros
   telejornal, entrevista, jornal e esporte — 8 por faixa para treino, mais 2
   reservados para a avaliação;
@@ -216,7 +218,7 @@ make test         # pytest (130 testes)
 make check        # node --check em protocol.js e app.js + contratos do HTML
 make ci           # test + check (o mesmo que a CI roda)
 make serve        # app em http://localhost:12000 COM progresso salvo no servidor
-make serve-persist PERSIST_DIR=/home/user/aw-data   # idem, com o estado fora do checkout
+make serve-persist PERSIST_DIR=...   # estado fora do checkout (protege re-clone, não host recriado)
 make smoke        # opcional: fluxo completo no jsdom (requer npm install jsdom)
 make e2e-sync     # opcional: app + servidor reais; prova que o progresso volta após queda/URL nova
 ```

@@ -510,6 +510,54 @@ async function emptyStateNeverOverwritesServerFlow() {
   domC.window.close();
 }
 
+async function backupReminderFlow() {
+  const now = new Date().toISOString();
+  const old = new Date(Date.now() - 20 * 86400000).toISOString();
+  const seed = {
+    version: 4, week: 2, baselineDone: true, createdAt: old,
+    sessions: [{ id: "s1", date: now, week: 2, accuracy: 70, total: 8, correct: 6 }],
+  };
+  // 1) nunca exportou: precisa lembrar
+  const dom = makeDom(seed);
+  await sleep(200);
+  const box = dom.window.document.querySelector("#backupNotice");
+  check("quem nunca exportou recebe o lembrete de backup", Boolean(box && box.textContent.includes("Faça um backup hoje")), box && box.textContent.slice(0, 60));
+  check("o lembrete diz que nunca foi exportado", Boolean(box && box.textContent.includes("nunca foi exportado")));
+  check("o lembrete tem botão para exportar agora", Boolean(dom.window.document.querySelector("#btnBackupNow")));
+
+  // 2) "lembrar depois" silencia por 3 dias
+  dom.window.document.querySelector("#btnBackupLater").click();
+  await sleep(120);
+  const s1 = state(dom);
+  check("adiar registra a data do adiamento", Boolean(s1 && s1.backup && s1.backup.promptHiddenAt), JSON.stringify(s1 && s1.backup));
+  check("depois de adiar, o aviso some da tela", !dom.window.document.querySelector("#backupNotice").textContent.trim());
+
+  // 3) exportar marca a data e o aviso desaparece
+  click(dom, '[data-tab="ajustes"]');
+  await sleep(80);
+  dom.window.document.querySelector("#btnExportBackup").click();
+  await sleep(200);
+  const s2 = state(dom);
+  check("exportar grava a data do backup", Boolean(s2 && s2.backup && s2.backup.lastExportAt), JSON.stringify(s2 && s2.backup));
+  click(dom, '[data-tab="inicio"]');
+  await sleep(120);
+  check("com backup de hoje, o lembrete não incomoda", !dom.window.document.querySelector("#backupNotice").textContent.trim());
+  dom.window.close();
+
+  // 4) backup antigo (20 dias) volta a lembrar
+  const dom2 = makeDom(Object.assign({}, seed, { backup: { lastExportAt: old, promptHiddenAt: null } }));
+  await sleep(200);
+  const box2 = dom2.window.document.querySelector("#backupNotice");
+  check("backup de 20 dias atrás faz o app lembrar de novo", Boolean(box2 && /há 20 dia/.test(box2.textContent)), box2 && box2.textContent.slice(0, 80));
+  dom2.window.close();
+
+  // 5) app vazio não cobra backup de quem não fez nada
+  const dom3 = makeDom({ version: 4, week: 1, sessions: [], createdAt: now });
+  await sleep(200);
+  check("sem nenhum progresso, não cobra backup", !dom3.window.document.querySelector("#backupNotice").textContent.trim());
+  dom3.window.close();
+}
+
 async function staticHostDoesNotFakeSyncFlow() {
   // Netlify/SPA devolve index.html (HTML) com 200 em /api/state: não é API.
   const htmlMock = async () => ({ ok: true, status: 200, async json() { throw new Error("HTML"); }, async text() { return "<!doctype html>"; } });
@@ -1136,6 +1184,7 @@ async function demoFlow() {
   await resumeCodeFlow();
   await staticHostDoesNotFakeSyncFlow();
   await emptyStateNeverOverwritesServerFlow();
+  await backupReminderFlow();
   await demoFlow();
 
   const failed = results.filter((r) => !r.ok);

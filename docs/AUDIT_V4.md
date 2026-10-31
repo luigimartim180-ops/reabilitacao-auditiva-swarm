@@ -56,7 +56,7 @@ calibração acústica ou revisão clínica dos itens em português. Isso está 
 | 13 | Sem exportação/versionamento dos dados | Pacote `audioswarm.v1.1` com schema, limites, contexto, medidas, sessões, aderência, `mods`, `gapStats`, segurança e plano determinístico; exportação em arquivo + cópia; importação por arquivo. |
 | 14 | Sem testes da matemática de medição | `tests/test_measurement.py` (12 testes) + paridade JS↔Python (5 casos de fala, 7 de gap, 3 de SNR, 4 de HHIE-S). |
 | 15 | CI extraía script inline que não existia mais | `make check` e CI agora validam `app/protocol.js` e `app/app.js`; o HTML é checado para IDs duplicados e scripts. |
-| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **170/170**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
+| 16 | Sem teste de UI sem navegador | `tools/smoke_app.js` (opcional, jsdom) percorre avaliação, treino, treino de gap, relatório, exportação/importação, avanço de semana, avaliação da semana 4 e modo demonstração. Resultado local: **179/179**. O harness também confere rótulos em pt-BR, a direção das mudanças, a regra do treino de gap, a recuperação do diário após desligar, a separação do diário por semana, o bloco de vida real (inclusive o caminho de pular) e o texto corrido (sem repetição na avaliação, com repetição contada no treino). |
 
 ## O que foi implementado
 
@@ -351,7 +351,7 @@ python -m swarm.cli examples/profile.json --json > /tmp/p.json
 NODE_PATH=/caminho/node_modules node tools/smoke_app.js   # 167/167, requer jsdom
 ```
 
-Estado local desta auditoria: `130 passed`, `make check` exit 0, smoke 170/170. O teste de
+Estado local desta auditoria: `130 passed`, `make check` exit 0, smoke 179/179. O teste de
 smoke é opcional; a CI roda pytest + sintaxe + protocolo de exemplo.
 
 ## Referências principais

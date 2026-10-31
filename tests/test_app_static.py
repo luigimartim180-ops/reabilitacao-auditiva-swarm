@@ -206,6 +206,27 @@ def test_reset_clears_the_mirror_so_it_cannot_come_back():
     assert "DRAFT_KEY" in reset
 
 
+def test_the_app_reminds_to_export_the_only_copy_that_leaves_the_machine():
+    """Neste ambiente o sandbox apaga tudo que não está no Git.
+
+    O servidor local e o localStorage protegem contra falhas do app, não contra
+    a máquina ser recriada. A exportação do pacote é a única cópia que sai do
+    computador — então o app precisa lembrar dela.
+    """
+    assert "const BACKUP_REMIND_DAYS = 7;" in JS
+    assert "function backupReminderDue" in JS
+    due = JS.split("function backupReminderDue()")[1].split("function renderBackupNotice")[0]
+    assert "hasActivity(state)" in due          # sem progresso, sem cobrança
+    assert "BACKUP_REMIND_DAYS" in due
+    assert "promptHiddenAt" in due              # dá para adiar
+    export = JS.split("function exportPackage()")[1].split("function readJSONFile")[0]
+    assert "state.backup.lastExportAt" in export
+    assert "renderBackupNotice()" in export
+    assert 'id="backupNotice"' in HTML
+    home = JS.split("function renderHome()")[1].split("function ")[0]
+    assert "renderBackupNotice()" in home
+
+
 def test_change_table_states_the_direction():
     # Lower HHIE-S, lower SNR threshold and lower gap are better; without an
     # explicit direction the sign is easy to read backwards.

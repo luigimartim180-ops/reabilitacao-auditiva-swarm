@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const APP_VERSION = "6.3.1";
+const APP_VERSION = "6.4.0";
 const BUILD = "2026-10-29";
 const STORAGE_KEY = "audioswarm.v4.state";
 const LEGACY_KEY = "protocolo_swarm_v31";
@@ -392,6 +392,8 @@ const DEFAULT_STATE = {
   paused: false,
   ui: { large: false, contrast: false },
   settings: { voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 },
+  /* última vez que o pai exportou o pacote (a única cópia que sai da máquina) */
+  backup: { lastExportAt: null, promptHiddenAt: null },
   dose: { date: "", seconds: 0 },
   recentItems: [],
   legacyObjectives: []
@@ -410,6 +412,7 @@ function migrateState(raw) {
   out.profile = Object.assign(deepCopy(DEFAULT_PROFILE), raw.profile || {});
   out.context = Object.assign(deepCopy(DEFAULT_CONTEXT), raw.context || {});
   out.ui = Object.assign({ large: false, contrast: false }, raw.ui || {});
+  out.backup = Object.assign({ lastExportAt: null, promptHiddenAt: null }, raw.backup || {});
   out.settings = Object.assign({ voiceIndex: null, noise: "rosa", level: 1, rate: 0.9 }, raw.settings || {});
   if (!["auto", "D1", "D2", "D3", "D4"].includes(out.discourseLevel)) out.discourseLevel = "auto";
   out.dose = Object.assign({ date: "", seconds: 0 }, raw.dose || {});
@@ -1500,6 +1503,56 @@ function renderHeader() {
   Voice.renderStatus();
 }
 
+/* --------------------------------- backup --------------------------------- */
+/* Aqui a única cópia que sobrevive a trocar de computador é a que o pai exporta.
+   O servidor local protege contra queda do app, não contra a máquina sumir.
+   Depois de 7 dias sem exportar, o app lembra; o aviso pode ser adiado. */
+
+const BACKUP_REMIND_DAYS = 7;
+
+function backupAgeDays() {
+  const at = state.backup && state.backup.lastExportAt;
+  if (!at) return null;
+  const ms = Date.now() - new Date(at).getTime();
+  if (!isFinite(ms) || ms < 0) return 0;
+  return Math.floor(ms / 86400000);
+}
+
+function backupReminderDue() {
+  if (DEMO_MODE) return false;
+  if (!hasActivity(state)) return false;                 /* nada para perder ainda */
+  const age = backupAgeDays();
+  if (age !== null && age < BACKUP_REMIND_DAYS) return false;
+  const hiddenAt = state.backup && state.backup.promptHiddenAt;
+  if (hiddenAt) {
+    const since = Date.now() - new Date(hiddenAt).getTime();
+    if (isFinite(since) && since >= 0 && since < 3 * 86400000) return false;  /* adiado por 3 dias */
+  }
+  return true;
+}
+
+function renderBackupNotice() {
+  const box = $("#backupNotice");
+  if (!box) return;
+  if (!backupReminderDue()) { box.innerHTML = ""; return; }
+  const age = backupAgeDays();
+  const quando = age === null ? "nunca foi exportado" : "última exportação há " + age + " dia(s)";
+  box.innerHTML = "<div class='card warn' style='margin:10px 0'><strong>Faça um backup hoje.</strong> " +
+    "O progresso está salvo neste aparelho e no servidor local, mas os dois podem sumir se o computador for trocado ou o app mudar de endereço. " +
+    "<span class='small muted'>(" + esc(quando) + ")</span>" +
+    "<button id='btnBackupNow' class='primary big'>Exportar o pacote agora</button>" +
+    "<button id='btnBackupLater' class='ghost small'>Lembrar depois</button></div>";
+  const go = $("#btnBackupNow");
+  if (go) go.addEventListener("click", () => { setTab("ajustes"); exportPackage(); });
+  const later = $("#btnBackupLater");
+  if (later) later.addEventListener("click", () => {
+    state.backup = Object.assign({ lastExportAt: null, promptHiddenAt: null }, state.backup || {});
+    state.backup.promptHiddenAt = new Date().toISOString();
+    save();
+    renderBackupNotice();
+  });
+}
+
 function renderStorageBanner() {
   const banner = $("#storageBanner");
   if (!banner) return;
@@ -1565,6 +1618,7 @@ function renderStops() {
 
 function renderHome() {
   renderHeader();
+  renderBackupNotice();
   const protocol = protocolFor();
   const cfg = weekConfig(protocol, state.week);
   const sel = $("#weekSelect");
@@ -4166,6 +4220,10 @@ function exportPackage() {
     copy.onclick = () => copyText(text).then(ok => toast(ok ? "Pacote copiado." : "Selecione e copie manualmente."));
   }
   const stamp = todayKey();
+  state.backup = Object.assign({ lastExportAt: null, promptHiddenAt: null }, state.backup || {});
+  state.backup.lastExportAt = new Date().toISOString();
+  save();
+  renderBackupNotice();
   const downloaded = downloadText("audioswarm-" + stamp + ".json", text);
   toast(downloaded ? "Pacote exportado como arquivo JSON e disponível para copiar." : "Pacote gerado. Copie o texto.");
 }

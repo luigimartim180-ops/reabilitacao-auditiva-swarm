@@ -110,6 +110,10 @@ o que pega falhas de regra de adoção. Ele zera `data/app-state.json` ao começ
 
 ## O que o app mostra sobre isso
 
+- **Aviso de backup na tela inicial**: quando há progresso e o último pacote
+  exportado tem 7 dias ou mais (ou nunca existiu), aparece *"Faça um backup
+  hoje"* com botão para exportar na hora e opção de adiar por 3 dias.
+  A data do último backup fica em `state.backup.lastExportAt` e entra no pacote.
 - **Ajustes → Backup e dados**: linha de status —
   *"Cópia no servidor ativa: se o servidor cair ou a URL mudar, o app recupera o progresso daqui."*
   ou *"Sem cópia no servidor (hospedagem estática)…"*.
@@ -118,14 +122,19 @@ o que pega falhas de regra de adoção. Ele zera `data/app-state.json` ao começ
 ### Onde exatamente o arquivo fica
 
 Por padrão `data/app-state.json`, dentro do projeto, **fora do Git**. A variável
-`AUDIOSWARM_DATA_DIR` muda esse diretório quando o disco do projeto é
-descartável — é o caso da prévia: cada reinício recria o checkout do zero e leva
-junto o que não está versionado.
+`AUDIOSWARM_DATA_DIR` muda esse diretório — útil quando o checkout do projeto é
+recriado (re-clone) mas a máquina continua a mesma:
 
 ```bash
-make serve                                    # data/app-state.json
+make serve                                          # data/app-state.json
 make serve-persist PERSIST_DIR=/home/user/aw-data   # estado fora do checkout
 ```
+
+**Teste feito e resultado:** na prévia deste projeto, um marcador gravado em
+`/home/user/aw-data` **não** sobreviveu ao reinício do sandbox. Ou seja, aqui o
+ambiente não é só re-clonado: ele é recriado, e **tudo que não está no Git
+desaparece**, inclusive fora do diretório do projeto. `AUDIOSWARM_DATA_DIR` não
+resolve esse caso; ele só resolve re-clone em máquina que persiste.
 
 O servidor também guarda **a versão anterior** de cada save em
 `app-state.bak.json` e volta nela se o arquivo principal sumir ou deixar de ser
@@ -152,10 +161,14 @@ existe.
   bloqueio de edição concorrente.
 - **A cópia do servidor não sobrevive à destruição da máquina.** Ela protege
   contra queda do processo, fechar o navegador e troca de URL — não contra o
-  computador/host ser apagado ou recriado. Na prévia deste projeto isso já
-  aconteceu duas vezes: o sandbox foi reiniciado e o `data/app-state.json`
-  desapareceu junto. Se isso importar, o que salva é fora do host: exportar o
-  pacote, gerar o código de retomada, ou rodar o app numa máquina que persiste.
+  computador/host ser apagado ou recriado. Na prévia deste projeto isso
+  aconteceu **três vezes** (sandbox recriado, `data/` desaparecido), e a última
+  vez foi medida: um marcador fora do repositório também se perdeu. Só o que
+  está no Git sobrevive ali.
+- **A única cópia que sai da máquina é a que você exporta.** Por isso existe o
+  aviso de backup na tela inicial. Exportar o pacote (ou gerar o código de
+  retomada) é o que protege o histórico de verdade; o resto protege contra
+  acidentes do dia a dia.
 
 ## Como verificar
 
